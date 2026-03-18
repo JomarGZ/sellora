@@ -6,8 +6,9 @@ import { SidebarFilters } from '../components/shop/SidebarFilters'
 import { MobileFilterDrawer } from '../components/shop/MobileFilterDrawer'
 import { ProductGrid } from '../components/product/ProductGrid'
 import { Pagination } from '../components/product/Pagination'
-import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorBoundary, type FallbackProps } from 'react-error-boundary'
 
+import { ProductGridFallback } from '@/components/product/ProductGridFallback'
 const PAGE_SIZE = 20
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'newest' | 'rating'
 
@@ -169,10 +170,17 @@ export function ShopPage() {
               </div>
             ) : (
               <>
-               <ErrorBoundary fallback={<div>Something went wrong</div>}>
+               <ErrorBoundary 
+                  FallbackComponent={({error, resetErrorBoundary}: FallbackProps) => 
+                  (<ProductGridFallback resetErrorBoundary={resetErrorBoundary} 
+                  error={error}/>)}
+                  onReset={() => {
+                    //Refetch data
+                  }}
+                  >
                 <ProductGrid
                     products={paginatedProducts}
-                    isLoading={true}
+                    isLoading={false}
                     showBestSellerBadge
                   />
                </ErrorBoundary>
