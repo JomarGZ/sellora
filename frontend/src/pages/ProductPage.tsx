@@ -43,7 +43,7 @@ export function ProductPage() {
             ${product.price.toFixed(2)}
           </p>
           <p className="mt-4 text-gray-600">
-            {product.description ?? 'Premium tech product from TechStore.'}
+            {product.description ?? 'Premium tech product from Sellora.'}
           </p>
           <p className="mt-2 text-sm text-gray-500">Category: {product.category}</p>
           <div className="mt-8 flex gap-4">

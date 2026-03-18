@@ -9,7 +9,7 @@ export function NewArrivalsSection() {
         New Arrivals
       </h2>
       <ErrorBoundary fallback={<div>Something went wrong</div>}>
-        <ProductGrid products={newArrivals} isLoading={false} showBestSellerBadge={false} />
+        <ProductGrid products={newArrivals} isLoading={false} showBestSellerBadge={false}/>
       </ErrorBoundary>
     </section>
   )

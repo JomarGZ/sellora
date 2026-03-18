@@ -14,7 +14,7 @@ export function LoginPage() {
     <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
       <div className="rounded-xl border border-gray-100 bg-white p-8 shadow-soft">
         <h1 className="text-2xl font-semibold text-gray-900">Login</h1>
-        <p className="mt-1 text-sm text-gray-500">Welcome back to TechStore</p>
+        <p className="mt-1 text-sm text-gray-500">Welcome back to Sellora</p>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
