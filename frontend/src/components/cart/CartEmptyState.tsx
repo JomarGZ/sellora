@@ -15,9 +15,9 @@ const CartEmptyState = () => {
         asChild
         variant="outline"
         size="lg"
-        className="text-accent border-accent hover:bg-accent hover:text-accent-foreground"
+        className="text-gray-900 border-gray-400 hover:bg-accent hover:text-accent-foreground"
       >
-        <a href="/">Continue Shopping</a>
+        <a href="/shop">Continue Shopping</a>
       </Button>
     </div>
   );
