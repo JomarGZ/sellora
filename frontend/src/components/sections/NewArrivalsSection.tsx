@@ -1,5 +1,6 @@
 import { ProductGrid } from '../product/ProductGrid'
 import { newArrivals } from '../../data/products'
+import { ErrorBoundary } from 'react-error-boundary'
 
 export function NewArrivalsSection() {
   return (
@@ -7,7 +8,9 @@ export function NewArrivalsSection() {
       <h2 className="mb-8 text-2xl font-semibold text-gray-900 sm:text-3xl">
         New Arrivals
       </h2>
-      <ProductGrid products={newArrivals} />
+      <ErrorBoundary fallback={<div>Something went wrong</div>}>
+        <ProductGrid products={newArrivals} isLoading={false} showBestSellerBadge={false} />
+      </ErrorBoundary>
     </section>
   )
 }

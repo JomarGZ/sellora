@@ -6,6 +6,7 @@ import { SidebarFilters } from '../components/shop/SidebarFilters'
 import { MobileFilterDrawer } from '../components/shop/MobileFilterDrawer'
 import { ProductGrid } from '../components/product/ProductGrid'
 import { Pagination } from '../components/product/Pagination'
+import { ErrorBoundary } from 'react-error-boundary'
 
 const PAGE_SIZE = 20
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'newest' | 'rating'
@@ -168,10 +169,14 @@ export function ShopPage() {
               </div>
             ) : (
               <>
+               <ErrorBoundary fallback={<div>Something went wrong</div>}>
                 <ProductGrid
-                  products={paginatedProducts}
-                  showBestSellerBadge
-                />
+                    products={paginatedProducts}
+                    isLoading={true}
+                    showBestSellerBadge
+                  />
+               </ErrorBoundary>
+                
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
