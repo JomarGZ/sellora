@@ -3,6 +3,7 @@ import {
   createRoute,
   createRouter,
   Outlet,
+  redirect,
 } from "@tanstack/react-router";
 import { MainLayout } from "../components/layout/MainLayout";
 import { HomePage } from "../pages/HomePage";
@@ -11,6 +12,7 @@ import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import { ProductPage } from "../pages/ProductPage";
 import CartPage from "@/pages/CartPage";
+import CheckoutPage from "@/pages/CheckoutPage";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -61,6 +63,12 @@ const cartRoute = createRoute({
   component: CartPage,
 });
 
+const checkoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checkout",
+  component: CheckoutPage,
+});
+
 rootRoute.addChildren([
   indexRoute,
   shopRoute,
@@ -68,6 +76,7 @@ rootRoute.addChildren([
   registerRoute,
   productRoute,
   cartRoute,
+  checkoutRoute,
 ]);
 
 export const router = createRouter({ routeTree: rootRoute });

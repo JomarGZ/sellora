@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { INITIAL_CART_ITEMS, type CartItemData } from "@/data/cartData";
-import CartHeader from "@/components/cart/CartHeader";
+
 import CartContent from "@/components/cart/CartContent";
 import CartEmptyState from "@/components/cart/CartEmptyState";
 
