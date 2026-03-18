@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useState } from "react";
 
 export function NewsletterForm() {
-  const [email, setEmail] = useState('')
-  const [submitted, setSubmitted] = useState(false)
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (email.trim()) setSubmitted(true)
+    e.preventDefault();
+    if (email.trim()) setSubmitted(true);
   }
 
   if (submitted) {
@@ -14,7 +14,7 @@ export function NewsletterForm() {
       <p className="text-sm text-gray-400">
         Thanks for subscribing! Check your inbox for updates.
       </p>
-    )
+    );
   }
 
   return (
@@ -29,10 +29,10 @@ export function NewsletterForm() {
       />
       <button
         type="submit"
-        className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+        className="rounded-lg bg-gray-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
       >
         Subscribe
       </button>
     </form>
-  )
+  );
 }
