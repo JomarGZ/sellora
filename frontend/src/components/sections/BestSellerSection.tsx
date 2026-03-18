@@ -1,5 +1,7 @@
-import { ProductGrid } from '../product/ProductGrid'
-import { bestSellers } from '../../data/products'
+import { ProductGrid } from "../product/ProductGrid";
+import { bestSellers } from "../../data/products";
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { ProductGridFallback } from "../product/ProductGridFallback";
 
 export function BestSellerSection() {
   return (
@@ -8,8 +10,20 @@ export function BestSellerSection() {
         <h2 className="mb-8 text-2xl font-semibold text-gray-900 sm:text-3xl">
           Best Sellers
         </h2>
-        <ProductGrid products={bestSellers} showBestSellerBadge />
+        <ErrorBoundary
+          FallbackComponent={({ error, resetErrorBoundary }: FallbackProps) => (
+            <ProductGridFallback
+              resetErrorBoundary={resetErrorBoundary}
+              error={error}
+            />
+          )}
+          onReset={() => {
+            //Refetch data
+          }}
+        >
+          <ProductGrid products={bestSellers} showBestSellerBadge />
+        </ErrorBoundary>
       </div>
     </section>
-  )
+  );
 }

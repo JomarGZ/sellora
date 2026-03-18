@@ -1,6 +1,7 @@
-import { ProductGrid } from '../product/ProductGrid'
-import { newArrivals } from '../../data/products'
-import { ErrorBoundary } from 'react-error-boundary'
+import { ProductGrid } from "../product/ProductGrid";
+import { newArrivals } from "../../data/products";
+import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
+import { ProductGridFallback } from "../product/ProductGridFallback";
 
 export function NewArrivalsSection() {
   return (
@@ -8,9 +9,23 @@ export function NewArrivalsSection() {
       <h2 className="mb-8 text-2xl font-semibold text-gray-900 sm:text-3xl">
         New Arrivals
       </h2>
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
-        <ProductGrid products={newArrivals} isLoading={false} showBestSellerBadge={false}/>
+      <ErrorBoundary
+        FallbackComponent={({ error, resetErrorBoundary }: FallbackProps) => (
+          <ProductGridFallback
+            resetErrorBoundary={resetErrorBoundary}
+            error={error}
+          />
+        )}
+        onReset={() => {
+          //Refetch data
+        }}
+      >
+        <ProductGrid
+          products={newArrivals}
+          isLoading={false}
+          showBestSellerBadge={false}
+        />
       </ErrorBoundary>
     </section>
-  )
+  );
 }

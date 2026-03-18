@@ -29,9 +29,6 @@ export function ProductGrid({
     return (
       <div className="col-span-full flex flex-col items-center justify-center py-16 text-center">
         <p className="text-lg font-medium text-gray-900">No products found</p>
-        <p className="text-sm text-gray-500">
-          Try adjusting your filters or search.
-        </p>
       </div>
     );
   }
