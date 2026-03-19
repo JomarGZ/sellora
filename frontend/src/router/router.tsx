@@ -3,16 +3,15 @@ import {
   createRoute,
   createRouter,
   Outlet,
-  redirect,
 } from "@tanstack/react-router";
 import { MainLayout } from "../components/layout/MainLayout";
 import { HomePage } from "../pages/HomePage";
 import { ShopPage } from "../pages/ShopPage";
 import { LoginPage } from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
-import { ProductPage } from "../pages/ProductPage";
 import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
+import ProductPage from "@/pages/ProductPage";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
