@@ -1,7 +1,7 @@
 import { ProductGrid } from "../product/ProductGrid";
 import { bestSellers } from "../../data/products";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import { ProductGridFallback } from "../product/ProductGridFallback";
+import { EntityFallback } from "../ui/EntityFallback";
 
 export function BestSellerSection() {
   return (
@@ -12,8 +12,9 @@ export function BestSellerSection() {
         </h2>
         <ErrorBoundary
           FallbackComponent={({ error, resetErrorBoundary }: FallbackProps) => (
-            <ProductGridFallback
+            <EntityFallback
               resetErrorBoundary={resetErrorBoundary}
+              title="Unable to load best seller products."
               error={error}
             />
           )}

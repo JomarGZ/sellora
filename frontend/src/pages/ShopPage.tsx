@@ -8,7 +8,7 @@ import { ProductGrid } from "../components/product/ProductGrid";
 import { Pagination } from "../components/product/Pagination";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 
-import { ProductGridFallback } from "@/components/product/ProductGridFallback";
+import { EntityFallback } from "@/components/ui/EntityFallback";
 const PAGE_SIZE = 20;
 type SortOption = "default" | "price-asc" | "price-desc" | "newest" | "rating";
 
@@ -182,8 +182,9 @@ export function ShopPage() {
                     error,
                     resetErrorBoundary,
                   }: FallbackProps) => (
-                    <ProductGridFallback
+                    <EntityFallback
                       resetErrorBoundary={resetErrorBoundary}
+                      title="Unable to load products."
                       error={error}
                     />
                   )}

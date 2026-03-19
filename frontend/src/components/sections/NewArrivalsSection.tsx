@@ -1,7 +1,7 @@
 import { ProductGrid } from "../product/ProductGrid";
 import { newArrivals } from "../../data/products";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import { ProductGridFallback } from "../product/ProductGridFallback";
+import { EntityFallback } from "../ui/EntityFallback";
 
 export function NewArrivalsSection() {
   return (
@@ -11,8 +11,9 @@ export function NewArrivalsSection() {
       </h2>
       <ErrorBoundary
         FallbackComponent={({ error, resetErrorBoundary }: FallbackProps) => (
-          <ProductGridFallback
+          <EntityFallback
             resetErrorBoundary={resetErrorBoundary}
+            title="Unable to load new arrival products."
             error={error}
           />
         )}

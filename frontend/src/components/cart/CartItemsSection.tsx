@@ -2,7 +2,7 @@ import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { type CartItemData } from "@/data/cartData";
 import CartItemSkeletonList from "./CartItemSkeletonList";
 import CartItemsList from "./CartItemsList";
-import CartErrorFallback from "./CartErrorFallback";
+import { EntityFallback } from "../ui/EntityFallback";
 
 interface CartItemsSectionProps {
   isLoading: boolean;
@@ -13,7 +13,7 @@ interface CartItemsSectionProps {
 }
 
 const CartItemsSection = ({
-  isLoading,
+  isLoading = true,
   items,
   onUpdateQuantity,
   onRemove,
@@ -26,9 +26,10 @@ const CartItemsSection = ({
   return (
     <ErrorBoundary
       FallbackComponent={({ error, resetErrorBoundary }: FallbackProps) => (
-        <CartErrorFallback
+        <EntityFallback
           error={error}
           resetErrorBoundary={resetErrorBoundary}
+          title="Unable to load cart items"
         />
       )}
       onReset={onErrorReset}
