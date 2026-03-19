@@ -41,6 +41,14 @@ export function NavigationMenu({
       >
         Cart
       </Link>
+      <Link
+        to="/orders"
+        onClick={onNavigate}
+        className="px-6 py-2 text-gray-600 transition-colors hover:text-sky-600 md:px-0"
+        activeProps={{ className: "text-sky-600 font-medium" }}
+      >
+        orders
+      </Link>
     </nav>
   );
 }
