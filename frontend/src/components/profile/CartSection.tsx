@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { CartItemList } from "./CartItemList";
-import { CartSummary } from "./CartSummary";
 import Skeleton from "react-loading-skeleton";
 import { useCart } from "@/hooks/useCart";
+import { CartSummary } from "./CartSummary";
 
 export function CartSection() {
   const { items, updateQuantity, removeItem, subtotal, shipping, total } =
