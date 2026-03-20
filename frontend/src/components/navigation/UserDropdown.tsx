@@ -1,40 +1,34 @@
-import { useState, useRef, useEffect } from 'react'
-import { Link } from '@tanstack/react-router'
+import { useState, useRef, useEffect } from "react";
+import { Link } from "@tanstack/react-router";
 
 interface UserDropdownProps {
-  onLogout?: () => void
+  onLogout?: () => void;
 }
 
 export function UserDropdown({ onLogout }: UserDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (ref.current && !ref.current.contains(event.target as Node)) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-light text-accent transition-all hover:ring-2 hover:ring-accent"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-300 text-accent transition-all hover:ring-2 hover:ring-accent"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-          <path
-            fillRule="evenodd"
-            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-            clipRule="evenodd"
-          />
-        </svg>
+        JD
       </button>
 
       {isOpen && (
@@ -48,21 +42,13 @@ export function UserDropdown({ onLogout }: UserDropdownProps) {
             className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-accent"
             role="menuitem"
           >
-            Profile
-          </Link>
-          <Link
-            to="/orders"
-            onClick={() => setIsOpen(false)}
-            className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-accent"
-            role="menuitem"
-          >
-            Orders
+            Dashboard
           </Link>
           <button
             type="button"
             onClick={() => {
-              setIsOpen(false)
-              onLogout?.()
+              setIsOpen(false);
+              onLogout?.();
             }}
             className="block w-full px-4 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-red-600"
             role="menuitem"
@@ -72,5 +58,5 @@ export function UserDropdown({ onLogout }: UserDropdownProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

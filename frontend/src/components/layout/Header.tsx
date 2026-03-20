@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import { Logo } from '../navigation/Logo'
-import { NavigationMenu } from '../navigation/NavigationMenu'
-import { AuthButtons } from '../navigation/AuthButtons'
-import { UserDropdown } from '../navigation/UserDropdown'
+import { useState } from "react";
+import { Logo } from "../navigation/Logo";
+import { NavigationMenu } from "../navigation/NavigationMenu";
+import { AuthButtons } from "../navigation/AuthButtons";
+import { UserDropdown } from "../navigation/UserDropdown";
 
 interface HeaderProps {
-  isLoggedIn?: boolean
-  onLogout?: () => void
+  isLoggedIn?: boolean;
+  onLogout?: () => void;
 }
 
 export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleNavigate = () => setMobileMenuOpen(false)
+  const handleNavigate = () => setMobileMenuOpen(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/95 shadow-soft backdrop-blur supports-[backdrop-filter]:bg-white/80">
@@ -27,12 +27,32 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             ) : (
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             )}
           </button>
@@ -64,5 +84,5 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
         )}
       </div>
     </header>
-  )
+  );
 }
