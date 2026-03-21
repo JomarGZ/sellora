@@ -1,13 +1,6 @@
-import {
-  mockAddresses,
-  mockCustomer,
-  mockOrders,
-  mockWishlist,
-  type Address,
-  type Customer,
-  type Order,
-  type WishlistItem,
-} from "@/data/mockProfile";
+import { mockAddresses, mockOrders, mockWishlist } from "@/data";
+import { mockCustomer, type Customer } from "@/data/mockProfile";
+import type { Address, Order, WishlistItem } from "@/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Utility to simulate network delay

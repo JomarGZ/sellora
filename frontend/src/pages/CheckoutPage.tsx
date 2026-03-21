@@ -1,12 +1,12 @@
 import { ErrorBoundary } from "react-error-boundary";
 import { CheckoutContent } from "@/components/checkout/CheckoutContent";
 import { ErrorFallback } from "@/components/checkout/ErrorFallback";
-import { INITIAL_CART_ITEMS } from "@/data/cartData";
 import { useState } from "react";
 import type { CheckoutItem } from "@/types/checkout";
+import { mockCartItems } from "@/data";
 
 export default function CheckoutPage() {
-  const [items, setItems] = useState<CheckoutItem[]>(INITIAL_CART_ITEMS);
+  const [items, setItems] = useState<CheckoutItem[]>(mockCartItems);
   return (
     <ErrorBoundary
       fallbackRender={({ resetErrorBoundary }) => (

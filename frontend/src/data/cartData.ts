@@ -7,7 +7,7 @@ export interface CartItemData {
   image: string;
 }
 
-export const INITIAL_CART_ITEMS: CartItemData[] = [
+export const mockCartItems: CartItemData[] = [
   {
     id: "1",
     name: "Classic White Sneakers",

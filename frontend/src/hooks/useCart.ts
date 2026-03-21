@@ -1,4 +1,5 @@
-import { mockCartItems, type CartItem } from "@/data/mockProfile";
+import { mockCartItems } from "@/data";
+import type { CartItem } from "@/types";
 import { useState, useEffect } from "react";
 
 const CART_STORAGE_KEY = "cart-items";
