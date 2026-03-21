@@ -7,7 +7,7 @@ import {
 import { MainLayout } from "../components/layout/MainLayout";
 import { HomePage } from "../pages/HomePage";
 import { ShopPage } from "../pages/ShopPage";
-import { LoginPage } from "../pages/LoginPage";
+import LoginPage from "../pages/LoginPage";
 import { RegisterPage } from "../pages/RegisterPage";
 import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
@@ -21,7 +21,7 @@ const rootRoute = createRootRoute({
 
 function RootLayout() {
   return (
-    <MainLayout isLoggedIn={true}>
+    <MainLayout isLoggedIn={false}>
       <Outlet />
     </MainLayout>
   );
