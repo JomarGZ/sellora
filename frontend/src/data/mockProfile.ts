@@ -45,10 +45,10 @@ export interface WishlistItem {
 export interface CartItem {
   id: string;
   name: string;
-  image: string;
+  variant: string;
   price: number;
   quantity: number;
-  variant: string;
+  image: string;
 }
 
 export const mockCustomer: Customer = {
@@ -221,30 +221,39 @@ export const mockWishlist: WishlistItem[] = [
 
 export const mockCartItems: CartItem[] = [
   {
-    id: "C-1",
-    name: "Premium Leather Sneakers",
-    price: 129.99,
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
+    id: "1",
+    name: "Classic White Sneakers",
+    variant: "Size 10 · White",
+    price: 89.99,
     quantity: 1,
-    variant: "White / 42",
+    image:
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop",
   },
   {
-    id: "C-2",
-    name: "Minimalist Backpack",
-    price: 89.0,
-    image:
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
-    quantity: 1,
-    variant: "Black",
-  },
-  {
-    id: "C-3",
-    name: "Wireless Earbuds Pro",
-    price: 79.95,
-    image:
-      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=400&fit=crop",
+    id: "2",
+    name: "Essential Cotton T-Shirt",
+    variant: "Size M · Navy",
+    price: 34.99,
     quantity: 2,
-    variant: "White",
+    image:
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&auto=format&fit=crop",
+  },
+  {
+    id: "3",
+    name: "Leather Crossbody Bag",
+    variant: "Black",
+    price: 129.99,
+    quantity: 1,
+    image:
+      "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&auto=format&fit=crop",
+  },
+  {
+    id: "4",
+    name: "Silver Wristwatch",
+    variant: "41mm · Stainless Steel",
+    price: 249.99,
+    quantity: 1,
+    image:
+      "https://images.unsplash.com/photo-1519741497674-611481863552?w=400&auto=format&fit=crop",
   },
 ];

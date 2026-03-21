@@ -1,7 +1,7 @@
 import type { Order, OrderCallbacks, OrderItem } from "@/types";
-import OrderCard from "./OrderCard";
-import EmptyState from "./EmptyState";
 import OrderListSkeleton from "./OrderCardSkeleton";
+import EmptyState from "./EmptyState";
+import OrderCard from "./OrderCard";
 
 interface OrderListProps {
   orders: Order[];

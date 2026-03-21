@@ -9,10 +9,8 @@ import { HomePage } from "../pages/HomePage";
 import { ShopPage } from "../pages/ShopPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
-import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import ProductPage from "@/pages/ProductPage";
-import OrderPage from "@/pages/OrderPage";
 import ProfilePage from "@/pages/ProfilePage";
 
 const rootRoute = createRootRoute({
@@ -21,7 +19,7 @@ const rootRoute = createRootRoute({
 
 function RootLayout() {
   return (
-    <MainLayout isLoggedIn={false}>
+    <MainLayout isLoggedIn={true}>
       <Outlet />
     </MainLayout>
   );
@@ -58,22 +56,12 @@ const productRoute = createRoute({
   component: ProductPage,
 });
 
-const cartRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/cart",
-  component: CartPage,
-});
-
 const checkoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/checkout",
   component: CheckoutPage,
 });
-const orderRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/orders",
-  component: OrderPage,
-});
+
 const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/profile",
@@ -86,9 +74,7 @@ rootRoute.addChildren([
   loginRoute,
   registerRoute,
   productRoute,
-  cartRoute,
   checkoutRoute,
-  orderRoute,
   profileRoute,
 ]);
 

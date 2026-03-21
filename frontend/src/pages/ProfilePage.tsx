@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { useCart } from "@/hooks/useCart";
 import { ProfileOverviewCard } from "@/components/profile/ProfileOverviewCard";
-import { OrderHistorySection } from "@/components/profile/OrderHistorySection";
+import OrderHistorySection from "@/components/profile/OrderHistorySection";
 import { CartSection } from "@/components/profile/CartSection";
 import { AddressSection } from "@/components/profile/AddressSection";
 import { WishlistSection } from "@/components/profile/WishlistSection";
