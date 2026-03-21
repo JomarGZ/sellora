@@ -1,75 +1,66 @@
-import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import ExtraLinks from "@/components/register/ExtraLinks";
+import HeroSection from "@/components/register/HeroSection";
+import RegisterForm from "@/components/register/RegisterForm";
+import SocialRegisterButtons from "@/components/register/SocialRegisterButtons";
+import TrustSection from "@/components/register/TrustSection";
 
-export function RegisterPage() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    // Placeholder - would integrate with auth
-  }
-
-  return (
-    <div className="mx-auto max-w-md px-4 py-16 sm:px-6 lg:px-8">
-      <div className="rounded-xl border border-gray-100 bg-white p-8 shadow-soft">
-        <h1 className="text-2xl font-semibold text-gray-900">Create account</h1>
-        <p className="mt-1 text-sm text-gray-500">Join Sellora to start shopping</p>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-accent py-2.5 font-medium text-white transition-all hover:bg-accent-hover hover:shadow-glow"
+const RegisterPage = () => (
+  <div className="flex min-h-screen">
+    {/* Left — Form Side */}
+    <div className="flex w-full flex-col justify-between bg-linear-to-b from-[hsl(var(--login-gradient-from))] to-[hsl(var(--login-gradient-to))] px-6 py-8 lg:w-1/2 lg:px-16 xl:px-24">
+      <div className="mx-auto w-full max-w-md">
+        {/* Heading */}
+        <div
+          className="mb-8 animate-fade-up"
+          style={{ animationDelay: "0.05s" }}
+        >
+          <h1
+            className="text-2xl font-bold tracking-tight text-foreground"
+            style={{ lineHeight: "1.2" }}
           >
-            Create account
-          </button>
-        </form>
-        <p className="mt-6 text-center text-sm text-gray-500">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-accent hover:text-accent-hover">
-            Login
-          </Link>
-        </p>
+            Create your account
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+            Join us and start shopping your favorite products today
+          </p>
+        </div>
+
+        {/* Form */}
+        <div className="animate-fade-up" style={{ animationDelay: "0.15s" }}>
+          <RegisterForm />
+        </div>
+
+        {/* Social */}
+        <div
+          className="mt-6 animate-fade-up"
+          style={{ animationDelay: "0.25s" }}
+        >
+          <SocialRegisterButtons />
+        </div>
+
+        {/* Extra links */}
+        <div
+          className="mt-8 animate-fade-up"
+          style={{ animationDelay: "0.3s" }}
+        >
+          <ExtraLinks />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div
+        className="mx-auto mt-12 w-full max-w-md space-y-4 animate-fade-in"
+        style={{ animationDelay: "0.4s" }}
+      >
+        <TrustSection />
       </div>
     </div>
-  )
-}
+
+    {/* Right — Hero Image */}
+    <div className="hidden lg:block lg:w-1/2">
+      <HeroSection />
+    </div>
+  </div>
+);
+
+export default RegisterPage;
