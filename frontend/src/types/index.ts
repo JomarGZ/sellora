@@ -1,4 +1,6 @@
 export * from "./cart";
+export * from "./address";
+export * from "./wishlist";
 export interface Brand {
   id: number;
   name: string;
