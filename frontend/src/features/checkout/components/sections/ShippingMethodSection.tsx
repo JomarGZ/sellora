@@ -1,7 +1,7 @@
 import type { ShippingMethod } from "@/types/checkout";
-import { ShippingMethodCard } from "./ShippingMethodCard";
-import { ErrorFallback } from "./ErrorFallback";
-import { ShippingSkeleton } from "./ShippingSkeleton";
+import { ShippingMethodCard } from "../ui/ShippingMethodCard";
+import { ErrorFallback } from "../states/ErrorFallback";
+import { ShippingSkeleton } from "../states/ShippingSkeleton";
 
 interface ShippingMethodSectionProps {
   methods: ShippingMethod[];

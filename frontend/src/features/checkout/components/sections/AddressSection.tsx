@@ -1,8 +1,8 @@
 import type { Address } from "@/types/checkout";
-import { AddressCard } from "./AddressCard";
-import { AddressSkeleton } from "./AddressSkeleton";
-import { EmptyAddressState } from "./EmptyAddressState";
-import { ErrorFallback } from "./ErrorFallback";
+import { AddressCard } from "../ui/AddressCard";
+import { AddressSkeleton } from "../states/AddressSkeleton";
+import { EmptyAddressState } from "../states/EmptyAddressState";
+import { ErrorFallback } from "../states/ErrorFallback";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 

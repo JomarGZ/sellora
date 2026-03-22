@@ -1,6 +1,6 @@
 import type { CheckoutItem, ShippingMethod } from "@/types/checkout";
 import { Separator } from "@/components/ui/separator";
-import { PlaceOrderButton } from "./PlaceOrderButton";
+import { PlaceOrderButton } from "../ui/PlaceOrderButton";
 
 interface OrderSummarySectionProps {
   items: CheckoutItem[];

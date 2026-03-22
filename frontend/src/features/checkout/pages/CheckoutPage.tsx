@@ -1,9 +1,9 @@
 import { ErrorBoundary } from "react-error-boundary";
-import { CheckoutContent } from "@/components/checkout/CheckoutContent";
-import { ErrorFallback } from "@/components/checkout/ErrorFallback";
+import { CheckoutContent } from "@/features/checkout/components/sections/CheckoutContent";
+import { ErrorFallback } from "@/features/checkout/components/states/ErrorFallback";
 import { useState } from "react";
-import type { CheckoutItem } from "@/types/checkout";
 import { mockCartItems } from "@/data";
+import type { CheckoutItem } from "../types";
 
 export default function CheckoutPage() {
   const [items, setItems] = useState<CheckoutItem[]>(mockCartItems);

@@ -1,6 +1,6 @@
 import type { CheckoutItem } from "@/types/checkout";
-import { OrderItemCard } from "./OrderItemCard";
-import { OrderItemsSkeleton } from "./OrderItemsSkeleton";
+import { OrderItemCard } from "../ui/OrderItemCard";
+import { OrderItemsSkeleton } from "../states/OrderItemsSkeleton";
 import { Package } from "lucide-react";
 
 interface OrderItemsSectionProps {

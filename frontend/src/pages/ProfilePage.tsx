@@ -17,7 +17,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileOverviewCard } from "@/components/profile/ProfileOverviewCard";
 import OrderHistorySection from "@/features/order/components/sections/OrderHistorySection";
 import { AddressSection } from "@/components/profile/AddressSection";
-import { WishlistSection } from "@/components/profile/WishlistSection";
+import { WishlistSection } from "@/features/wishlist/components/sections/WishlistSection";
 import { SettingsSection } from "@/components/profile/SettingsSection";
 import { useCartUI } from "@/features/cart/hooks/useCartUI";
 import { CartSection } from "@/features/cart/components/sections/CartSection";

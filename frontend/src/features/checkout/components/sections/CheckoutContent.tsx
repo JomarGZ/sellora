@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import type { CheckoutItem } from "@/types/checkout";
-import { useAddresses } from "@/hooks/useAddresses";
-import { useShippingMethods } from "@/hooks/useShippingMethods";
-import { useCheckout } from "@/hooks/useCheckout";
+import { useAddresses } from "@/features/checkout/hooks/useAddresses";
+import { useShippingMethods } from "@/features/checkout/hooks/useShippingMethods";
+import { useCheckout } from "@/features/checkout/hooks/useCheckout";
 import { AddressSection } from "./AddressSection";
 import { ShippingMethodSection } from "./ShippingMethodSection";
 import { OrderItemsSection } from "./OrderItemsSection";
 import { OrderSummarySection } from "./OrderSummarySection";
+import type { CheckoutItem } from "../../types";
 
 interface CheckoutContentProps {
   items: CheckoutItem[];
