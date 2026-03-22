@@ -4,7 +4,7 @@ import {
   useAddresses,
   useOrders,
   useRemoveFromWishlist,
-} from "@/hooks/useProfile";
+} from "../../api/account.queries";
 
 export function ProfileOverviewCard() {
   const { data: orders, isLoading: ordersLoading } = useOrders();

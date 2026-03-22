@@ -3,9 +3,12 @@ import Skeleton from "react-loading-skeleton";
 import { format } from "date-fns";
 import { Edit2, Mail, Phone, Calendar } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { EditProfileModal } from "./EditProfileModal";
-import { AvatarUploadModal } from "./AvatarUploadModal";
-import { useCustomerProfile, useUpdateCustomer } from "@/hooks/useProfile";
+import { EditProfileModal } from "../modal/EditProfileModal";
+import { AvatarUploadModal } from "../modal/AvatarUploadModal";
+import {
+  useCustomerProfile,
+  useUpdateCustomer,
+} from "../../api/account.queries";
 
 export function ProfileHeader() {
   const { data: customer, isLoading, isError } = useCustomerProfile();

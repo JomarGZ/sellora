@@ -2,8 +2,11 @@ import Skeleton from "react-loading-skeleton";
 import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
-import { useRemoveFromWishlist, useWishlist } from "@/hooks/useProfile";
 import { useCartUI } from "@/features/cart/hooks/useCartUI";
+import {
+  useRemoveFromWishlist,
+  useWishlist,
+} from "@/features/account/api/account.queries";
 
 export function WishlistSection() {
   const { data: wishlist, isLoading } = useWishlist();
