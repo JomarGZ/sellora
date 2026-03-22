@@ -9,13 +9,13 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { MOCK_PRODUCTS, MOCK_PRODUCT_ITEMS } from "@/data/mock-data";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { ProductDetail, ProductItem } from "@/types";
-import { ProductGallery } from "@/components/product/ProductGallery";
-import { ProductInfo } from "@/components/product/ProductInfo";
-import { ProductOptions } from "@/components/product/ProductOptions";
-import { PurchaseActions } from "@/components/product/PurchaseActions";
-import { ProductReviews } from "@/components/product/ProductReviews";
+import { ProductGallery } from "@/features/product/components/sections/ProductGallery";
+import { ProductInfo } from "@/features/product/components/sections/ProductInfo";
+import { ProductOptions } from "@/features/product/components/sections/ProductOptions";
+import { PurchaseActions } from "@/features/product/components/sections/PurchaseActions";
+import { ProductReviews } from "@/features/product/components/sections/ProductReviews";
 import { useSearch } from "@tanstack/react-router";
+import type { ProductDetail, ProductItem } from "../types";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (

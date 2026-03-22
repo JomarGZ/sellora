@@ -1,8 +1,8 @@
-import type { ProductDetail, ProductItem } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { subDays } from "date-fns";
 import { ChevronRight } from "lucide-react";
+import type { ProductDetail, ProductItem } from "../../types";
 
 interface ProductInfoProps {
   product: ProductDetail;

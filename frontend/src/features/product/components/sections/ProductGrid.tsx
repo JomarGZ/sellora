@@ -1,6 +1,6 @@
-import type { Product } from "../../data/products";
-import { ProductCard } from "./ProductCard";
-import { ProductCardSkeleton } from "./ProductCardSkeleton";
+import type { Product } from "../../../../data/products";
+import { ProductCard } from "../ui/ProductCard";
+import { ProductCardSkeleton } from "../../states/ProductCardSkeleton";
 
 interface ProductGridProps {
   products: Product[];

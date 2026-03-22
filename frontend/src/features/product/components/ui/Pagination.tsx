@@ -1,18 +1,25 @@
 interface PaginationProps {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
-  const showPages = 5
-  let start = Math.max(1, currentPage - Math.floor(showPages / 2))
-  const end = Math.min(totalPages, start + showPages - 1)
-  if (end - start + 1 < showPages) start = Math.max(1, end - showPages + 1)
-  const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i)
+export function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) {
+  const showPages = 5;
+  let start = Math.max(1, currentPage - Math.floor(showPages / 2));
+  const end = Math.min(totalPages, start + showPages - 1);
+  if (end - start + 1 < showPages) start = Math.max(1, end - showPages + 1);
+  const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
 
   return (
-    <nav className="flex items-center justify-center gap-1 py-8" aria-label="Pagination">
+    <nav
+      className="flex items-center justify-center gap-1 py-8"
+      aria-label="Pagination"
+    >
       <button
         type="button"
         onClick={() => onPageChange(currentPage - 1)}
@@ -41,8 +48,8 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
             onClick={() => onPageChange(page)}
             className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
               page === currentPage
-                ? 'border-sky-500 bg-sky-500 text-white'
-                : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                ? "border-sky-500 bg-sky-500 text-white"
+                : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
             }`}
           >
             {page}
@@ -50,7 +57,9 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         ))}
         {end < totalPages && (
           <>
-            {end < totalPages - 1 && <span className="px-1 text-gray-400">…</span>}
+            {end < totalPages - 1 && (
+              <span className="px-1 text-gray-400">…</span>
+            )}
             <button
               type="button"
               onClick={() => onPageChange(totalPages)}
@@ -70,5 +79,5 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
         Next
       </button>
     </nav>
-  )
+  );
 }

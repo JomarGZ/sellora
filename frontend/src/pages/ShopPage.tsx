@@ -4,8 +4,8 @@ import type { Product } from "../data/products";
 import { FilterBar } from "../components/shop/FilterBar";
 import { SidebarFilters } from "../components/shop/SidebarFilters";
 import { MobileFilterDrawer } from "../components/shop/MobileFilterDrawer";
-import { ProductGrid } from "../components/product/ProductGrid";
-import { Pagination } from "../components/product/Pagination";
+import { ProductGrid } from "../features/product/components/sections/ProductGrid";
+import { Pagination } from "../features/product/components/ui/Pagination";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 
 import { EntityFallback } from "@/components/ui/EntityFallback";

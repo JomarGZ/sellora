@@ -1,13 +1,13 @@
 import { useState } from "react";
-import type { Review, ReviewsResponse } from "@/types";
 import { MOCK_REVIEWS } from "@/data/mock-data";
 import { format } from "date-fns";
 import { Star, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ReviewModal } from "./ReviewModal";
-import { EmptyState } from "./EmptyState";
+import { ReviewModal } from "../../../../components/product/ReviewModal";
+import { EmptyState } from "../../states/EmptyState";
+import type { Review, ReviewsResponse } from "../../types";
 
 interface ProductReviewsProps {
   productId: number;

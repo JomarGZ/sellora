@@ -1,5 +1,5 @@
-import type { ProductDetail, ProductItem } from "@/types";
 import { cn } from "@/lib/utils";
+import type { ProductDetail, ProductItem } from "../../types";
 
 interface ProductOptionsProps {
   product: ProductDetail;

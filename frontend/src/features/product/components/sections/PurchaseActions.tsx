@@ -1,8 +1,8 @@
 import { useState } from "react";
-import type { ProductItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Heart, ShoppingCart, Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ProductItem } from "../../types";
 
 interface PurchaseActionsProps {
   productId: number;
@@ -119,7 +119,7 @@ export function PurchaseActions({
           variant="outline"
           size="icon"
           className={cn(
-            "h-14 w-14 rounded-xl flex-shrink-0 border-border/80 transition-all duration-300 hover:border-rose-200 hover:bg-rose-50",
+            "h-14 w-14 rounded-xl shrink-0 border-border/80 transition-all duration-300 hover:border-rose-200 hover:bg-rose-50",
             wishlisted && "border-rose-200 bg-rose-50",
           )}
           onClick={handleToggleWishlist}

@@ -1,4 +1,4 @@
-import { AppSkeleton } from "../ui/AppSkeleton";
+import { AppSkeleton } from "../../../components/ui/AppSkeleton";
 
 export function ProductCardSkeleton() {
   return (
@@ -36,5 +36,5 @@ export function ProductCardSkeleton() {
         </div>
       </div>
     </article>
-  )
+  );
 }

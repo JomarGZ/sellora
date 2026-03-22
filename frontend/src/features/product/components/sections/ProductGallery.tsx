@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import type { ProductImage } from "@/types";
+import type { ProductImage } from "../../types";
 
 interface ProductGalleryProps {
   images: ProductImage[];
@@ -52,7 +52,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               key={img.id}
               onClick={() => setActiveIndex(idx)}
               className={cn(
-                "relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden snap-start transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                "relative shrink-0 w-20 h-20 rounded-xl overflow-hidden snap-start transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                 activeIndex === idx
                   ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-95"
                   : "border border-border/50 hover:border-primary/50 opacity-70 hover:opacity-100",

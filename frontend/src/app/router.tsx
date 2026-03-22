@@ -10,7 +10,7 @@ import { ShopPage } from "../pages/ShopPage";
 import LoginPage from "../features/auth/pages/LoginPage";
 import RegisterPage from "../features/auth/pages/RegisterPage";
 import CheckoutPage from "@/features/checkout/pages/CheckoutPage";
-import ProductPage from "@/pages/ProductPage";
+import ProductPage from "@/features/product/pages/ProductPage";
 import ProfilePage from "@/pages/ProfilePage";
 
 const rootRoute = createRootRoute({
