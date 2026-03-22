@@ -14,13 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { useCart } from "@/hooks/useCart";
 import { ProfileOverviewCard } from "@/components/profile/ProfileOverviewCard";
-import OrderHistorySection from "@/components/profile/OrderHistorySection";
-import { CartSection } from "@/components/profile/CartSection";
+import OrderHistorySection from "@/features/order/components/sections/OrderHistorySection";
 import { AddressSection } from "@/components/profile/AddressSection";
 import { WishlistSection } from "@/components/profile/WishlistSection";
 import { SettingsSection } from "@/components/profile/SettingsSection";
+import { useCartUI } from "@/features/cart/hooks/useCartUI";
+import { CartSection } from "@/features/cart/components/sections/CartSection";
 
 type Tab =
   | "overview"
@@ -53,7 +53,7 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
-  const { items } = useCart();
+  const { items } = useCartUI();
   const cartItemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   const renderContent = () => {

@@ -2,13 +2,13 @@ import Skeleton from "react-loading-skeleton";
 import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useCart } from "@/hooks/useCart";
 import { useRemoveFromWishlist, useWishlist } from "@/hooks/useProfile";
+import { useCartUI } from "@/features/cart/hooks/useCartUI";
 
 export function WishlistSection() {
   const { data: wishlist, isLoading } = useWishlist();
   const removeMutation = useRemoveFromWishlist();
-  const { addItem } = useCart();
+  const { addItem } = useCartUI();
 
   const handleRemove = (id: string, name: string) => {
     removeMutation.mutate(id, {

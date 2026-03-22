@@ -1,9 +1,9 @@
-import type { Order, OrderCallbacks, OrderItem } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
-import OrderStatusBadge from "./OrderStatusBadge";
-import OrderItemsList from "./OrderItemsList";
-import OrderActions from "./OrderActions";
 import { format, parseISO } from "date-fns";
+import OrderStatusBadge from "./OrderStatusBadge";
+import OrderItemsList from "../sections/OrderItemsList";
+import OrderActions from "./OrderActions";
+import type { Order, OrderCallbacks, OrderItem } from "../../types";
 
 interface OrderCardProps {
   order: Order;

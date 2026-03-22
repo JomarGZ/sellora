@@ -1,5 +1,5 @@
-import { type OrderItem, OrderStatus, type OrderCallbacks } from "@/types";
-import OrderItemCard from "./OrderItemCard";
+import type { OrderCallbacks, OrderItem, OrderStatus } from "../../types";
+import OrderItemCard from "../ui/OrderItemCard";
 
 interface OrderItemsListProps {
   items: OrderItem[];

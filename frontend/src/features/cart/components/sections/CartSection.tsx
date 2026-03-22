@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { CartItemList } from "./CartItemList";
 import Skeleton from "react-loading-skeleton";
-import { useCart } from "@/hooks/useCart";
-import { CartSummary } from "./CartSummary";
+import { useCartUI } from "../../hooks/useCartUI";
+import { CartItemList } from "../list/CartItemList";
+import { CartSummary } from "../ui/CartSummary";
 
 export function CartSection() {
   const { items, updateQuantity, removeItem, subtotal, shipping, total } =
-    useCart();
+    useCartUI();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
-import { CartItemCard } from "./CartItemCard";
+import { CartItemCard } from "../item/CartItemCard";
 import { ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { CartItem } from "@/data/mockProfile";
+import type { CartItem } from "../../types";
 
 interface CartItemListProps {
   items: CartItem[];

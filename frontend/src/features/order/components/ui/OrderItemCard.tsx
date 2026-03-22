@@ -1,12 +1,12 @@
-import {
-  type OrderItem,
-  REVIEWABLE_STATUSES,
-  OrderStatus,
-  type OrderCallbacks,
-} from "@/types";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  REVIEWABLE_STATUSES,
+  type OrderCallbacks,
+  type OrderItem,
+  type OrderStatus,
+} from "../../types";
 
 interface OrderItemCardProps {
   item: OrderItem;
@@ -31,7 +31,7 @@ const OrderItemCard = ({
       <img
         src={item.image}
         alt={item.name}
-        className="h-14 w-14 rounded-md object-cover bg-secondary flex-shrink-0"
+        className="h-14 w-14 rounded-md object-cover bg-secondary shrink-0"
         loading="lazy"
       />
       <div className="flex-1 min-w-0">

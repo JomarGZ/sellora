@@ -1,11 +1,11 @@
-import {
-  type Order,
-  type OrderCallbacks,
-  RECEIVABLE_STATUSES,
-  CANCELLABLE_STATUSES,
-} from "@/types";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, X, PackageCheck } from "lucide-react";
+import {
+  CANCELLABLE_STATUSES,
+  RECEIVABLE_STATUSES,
+  type Order,
+  type OrderCallbacks,
+} from "../../types";
 
 interface OrderActionsProps {
   order: Order;

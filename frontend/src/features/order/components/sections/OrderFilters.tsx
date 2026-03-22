@@ -1,11 +1,4 @@
 import {
-  type OrderFiltersState,
-  ORDER_STATUS_OPTIONS,
-  PAYMENT_STATUS_OPTIONS,
-  OrderStatus,
-  PaymentStatus,
-} from "@/types";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -14,6 +7,13 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import {
+  ORDER_STATUS_OPTIONS,
+  PAYMENT_STATUS_OPTIONS,
+  PaymentStatus,
+  type OrderFiltersState,
+  type OrderStatus,
+} from "../../types";
 
 interface OrderFiltersProps {
   filters: OrderFiltersState;

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 const CART_STORAGE_KEY = "cart-items";
 
-export function useCart() {
+export function useCartUI() {
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);

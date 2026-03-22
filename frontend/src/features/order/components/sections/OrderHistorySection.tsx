@@ -1,18 +1,18 @@
 import { useCallback, useMemo, useState } from "react";
-import type {
-  Order,
-  OrderFiltersState,
-  OrderCallbacks,
-  OrderItem,
-} from "@/types";
 import { mockOrders } from "@/data";
 import { ErrorBoundary } from "react-error-boundary";
 import { toast } from "sonner";
-import OrderFilters from "@/components/profile/OrderFilters";
-import OrderList from "@/components/profile/OrderList";
-import OrderPagination from "@/components/profile/OrderPagination";
+import OrderFilters from "@/features/order/components/sections/OrderFilters";
+import OrderList from "@/features/order/components/sections/OrderList";
+import OrderPagination from "@/features/order/components/sections/OrderPagination";
 import ReviewModal from "@/components/profile/ReviewModal";
-import ErrorFallback from "@/components/profile/ErrorFallback";
+import ErrorFallback from "@/features/order/components/states/ErrorFallback";
+import type {
+  Order,
+  OrderCallbacks,
+  OrderFiltersState,
+  OrderItem,
+} from "../../types";
 
 const ORDERS_PER_PAGE = 5;
 

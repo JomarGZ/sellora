@@ -19,7 +19,7 @@ const rootRoute = createRootRoute({
 
 function RootLayout() {
   return (
-    <MainLayout isLoggedIn={false}>
+    <MainLayout isLoggedIn={true}>
       <Outlet />
     </MainLayout>
   );
