@@ -1,4 +1,4 @@
-import { AppSkeleton } from "../../../shared/components/ui/AppSkeleton";
+import { AppSkeleton } from "../../../shared/components/feedback/AppSkeleton";
 
 export function ProductCardSkeleton() {
   return (

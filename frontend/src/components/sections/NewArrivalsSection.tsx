@@ -1,7 +1,7 @@
 import { ProductGrid } from "../../features/product/components/sections/ProductGrid";
 import { newArrivals } from "../../data/products";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import { EntityFallback } from "../../shared/components/ui/EntityFallback";
+import { EntityFallback } from "../../shared/components/feedback/EntityFallback";
 
 export function NewArrivalsSection() {
   return (

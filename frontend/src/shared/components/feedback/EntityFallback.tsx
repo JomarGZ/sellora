@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { AlertCircle, RefreshCw } from "lucide-react";
-import { Button } from "./button";
+import { Button } from "../ui/button";
 import { getErrorMessage, type FallbackProps } from "react-error-boundary";
 import type React from "react";
 
