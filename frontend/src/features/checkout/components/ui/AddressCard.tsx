@@ -1,5 +1,5 @@
 import { Check, MapPin, Trash2 } from "lucide-react";
-import { cn } from "@/shared/components/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import type { Address } from "@/types/checkout";
 
 interface AddressCardProps {

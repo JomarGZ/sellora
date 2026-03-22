@@ -1,4 +1,4 @@
-import type { Order, OrderCallbacks, OrderItem } from "@/types";
+import type { Order, OrderCallbacks, OrderItem } from "@/shared/types";
 import OrderListSkeleton from "../states/OrderCardSkeleton";
 import EmptyState from "../states/EmptyState";
 import OrderCard from "../ui/OrderCard";

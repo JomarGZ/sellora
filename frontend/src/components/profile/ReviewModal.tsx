@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { OrderItem } from "@/types";
+import type { OrderItem } from "@/shared/types";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Star } from "lucide-react";
-import { cn } from "@/shared/components/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 interface ReviewModalProps {
   orderId: string | null;

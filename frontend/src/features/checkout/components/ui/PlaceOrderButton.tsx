@@ -1,6 +1,6 @@
 import { Button } from "@/shared/components/ui/button";
 import { Loader2, ShieldCheck } from "lucide-react";
-import { cn } from "@/shared/components/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 interface PlaceOrderButtonProps {
   disabled: boolean;

@@ -1,5 +1,5 @@
 import { mockCartItems } from "@/data";
-import type { CartItem } from "@/types";
+import type { CartItem } from "@/shared/types";
 import { useState, useEffect } from "react";
 
 const CART_STORAGE_KEY = "cart-items";

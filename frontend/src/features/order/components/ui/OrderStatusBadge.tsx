@@ -1,5 +1,5 @@
 import { Badge } from "@/shared/components/ui/badge";
-import { cn } from "@/shared/components/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import { OrderStatus } from "../../types";
 
 interface OrderStatusBadgeProps {

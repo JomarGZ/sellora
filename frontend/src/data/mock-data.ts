@@ -1,4 +1,8 @@
-import type { ProductDetail, ProductItem, ReviewsResponse } from "@/types";
+import type {
+  ProductDetail,
+  ProductItem,
+  ReviewsResponse,
+} from "@/shared/types";
 import type { Address, CartItem, ShippingMethod } from "@/types/checkout";
 
 export const MOCK_CART_ITEMS: CartItem[] = [

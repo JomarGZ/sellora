@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Heart, ShoppingCart, Minus, Plus } from "lucide-react";
-import { cn } from "@/shared/components/lib/utils";
+import { cn } from "@/shared/lib/utils";
 import type { ProductItem } from "../../types";
 
 interface PurchaseActionsProps {

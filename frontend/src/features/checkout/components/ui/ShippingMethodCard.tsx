@@ -1,6 +1,6 @@
 import type { ShippingMethod } from "@/types/checkout";
 import { Check, Truck } from "lucide-react";
-import { cn } from "@/shared/components/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 interface ShippingMethodCardProps {
   method: ShippingMethod;

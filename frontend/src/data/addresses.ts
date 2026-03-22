@@ -1,4 +1,4 @@
-import type { Address } from "@/types";
+import type { Address } from "@/shared/types";
 
 export const mockAddresses: Address[] = [
   {
