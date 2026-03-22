@@ -1,12 +1,6 @@
 import { ArrowLeft } from "lucide-react";
+import type { ExtraLinksProps } from "../../types";
 
-interface ExtraLinksProps {
-  questionText: string;
-  linkText: string;
-  linkHref: string;
-  backText?: string;
-  backHref?: string;
-}
 const ExtraLinks = ({
   questionText,
   linkText,

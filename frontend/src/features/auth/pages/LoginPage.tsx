@@ -1,4 +1,3 @@
-import FooterLinks from "@/features/auth/components/layout/FooterLinks";
 import LoginForm from "@/features/auth/components/form/LoginForm";
 import SocialLoginButtons from "@/features/auth/components/form/SocialLoginButtons";
 import TrustSection from "@/features/auth/components/layout/TrustSection";
@@ -58,7 +57,6 @@ const LoginPage = () => (
         style={{ animationDelay: "0.4s" }}
       >
         <TrustSection />
-        <FooterLinks />
       </div>
     </div>
 
