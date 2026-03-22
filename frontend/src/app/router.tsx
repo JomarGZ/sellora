@@ -7,8 +7,8 @@ import {
 import { MainLayout } from "../components/layout/MainLayout";
 import { HomePage } from "../pages/HomePage";
 import { ShopPage } from "../pages/ShopPage";
-import LoginPage from "../pages/LoginPage";
-import RegisterPage from "../pages/RegisterPage";
+import LoginPage from "../features/auth/pages/LoginPage";
+import RegisterPage from "../features/auth/pages/RegisterPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import ProductPage from "@/pages/ProductPage";
 import ProfilePage from "@/pages/ProfilePage";
@@ -19,7 +19,7 @@ const rootRoute = createRootRoute({
 
 function RootLayout() {
   return (
-    <MainLayout isLoggedIn={true}>
+    <MainLayout isLoggedIn={false}>
       <Outlet />
     </MainLayout>
   );

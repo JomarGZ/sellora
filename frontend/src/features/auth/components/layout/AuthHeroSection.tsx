@@ -1,4 +1,4 @@
-const HeroSection = () => (
+const AuthHeroSection = () => (
   <div className="relative hidden h-full min-h-screen flex-col justify-between overflow-hidden lg:flex">
     <img
       src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80"
@@ -42,4 +42,4 @@ const HeroSection = () => (
   </div>
 );
 
-export default HeroSection;
+export default AuthHeroSection;

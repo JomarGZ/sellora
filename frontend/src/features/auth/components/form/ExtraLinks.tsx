@@ -1,23 +1,36 @@
 import { ArrowLeft } from "lucide-react";
 
-const ExtraLinks = () => (
+interface ExtraLinksProps {
+  questionText: string;
+  linkText: string;
+  linkHref: string;
+  backText?: string;
+  backHref?: string;
+}
+const ExtraLinks = ({
+  questionText,
+  linkText,
+  linkHref,
+  backText = "Back to store",
+  backHref = "/shop",
+}: ExtraLinksProps) => (
   <div className="space-y-3 text-center text-sm">
     <p className="text-muted-foreground">
-      Already have an account?{" "}
+      {questionText}{" "}
       <a
-        href="#"
+        href={linkHref}
         className="font-semibold text-primary hover:underline underline-offset-4"
       >
-        Sign in
+        {linkText}
       </a>
     </p>
 
     <a
-      href="#"
+      href={backHref}
       className="inline-flex items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground"
     >
       <ArrowLeft className="h-3.5 w-3.5" />
-      Back to store
+      {backText}
     </a>
   </div>
 );
