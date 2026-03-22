@@ -5,13 +5,13 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import { MainLayout } from "../shared/components/layout/MainLayout";
-import { HomePage } from "../features/home/components/pages/HomePage";
+import { HomePage } from "../features/home/pages/HomePage";
 import LoginPage from "../features/auth/pages/LoginPage";
 import RegisterPage from "../features/auth/pages/RegisterPage";
 import CheckoutPage from "@/features/checkout/pages/CheckoutPage";
 import ProductPage from "@/features/product/pages/ProductPage";
 import ProfilePage from "@/pages/ProfilePage";
-import { ShopPage } from "@/features/shop/components/pages/ShopPage";
+import { ShopPage } from "@/features/shop/pages/ShopPage";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
