@@ -1,4 +1,4 @@
-import { type Order, OrderStatus, PaymentStatus } from "@/types";
+import { OrderStatus, PaymentStatus, type Order } from "@/features/order/types";
 
 export const mockOrders: Order[] = [
   {
