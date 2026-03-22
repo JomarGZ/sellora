@@ -1,13 +1,13 @@
 import Skeleton from "react-loading-skeleton";
 import { MapPin, Plus, MoreVertical, Trash2, Edit2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/components/ui/dropdown-menu";
 import { useAddresses, useDeleteAddress } from "@/hooks/useProfile";
 
 export function AddressSection() {

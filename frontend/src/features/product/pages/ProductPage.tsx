@@ -7,8 +7,13 @@ import {
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { MOCK_PRODUCTS, MOCK_PRODUCT_ITEMS } from "@/data/mock-data";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 import { ProductGallery } from "@/features/product/components/sections/ProductGallery";
 import { ProductInfo } from "@/features/product/components/sections/ProductInfo";
 import { ProductOptions } from "@/features/product/components/sections/ProductOptions";

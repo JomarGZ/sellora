@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { ShoppingCart, X, PackageCheck } from "lucide-react";
 import {
   CANCELLABLE_STATUSES,

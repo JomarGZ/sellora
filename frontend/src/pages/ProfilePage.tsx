@@ -10,8 +10,8 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
 
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileOverviewCard } from "@/components/profile/ProfileOverviewCard";

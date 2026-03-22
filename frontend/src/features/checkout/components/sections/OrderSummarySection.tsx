@@ -1,5 +1,5 @@
 import type { CheckoutItem, ShippingMethod } from "@/types/checkout";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/shared/components/ui/separator";
 import { PlaceOrderButton } from "../ui/PlaceOrderButton";
 
 interface OrderSummarySectionProps {

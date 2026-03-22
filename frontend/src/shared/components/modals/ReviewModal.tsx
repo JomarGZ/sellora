@@ -12,21 +12,24 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/shared/components/ui/dialog";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import {
+  InputGroup,
+  InputGroupTextarea,
+} from "@/shared/components/ui/input-group";
 
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
+} from "@/shared/components/ui/field";
 
 import { Star } from "lucide-react";
-import type { Review } from "@/types";
+import type { Review } from "@/features/product/types";
 
 // ✅ Schema
 const reviewSchema = z.object({

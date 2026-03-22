@@ -1,6 +1,6 @@
 import { CartItemCard } from "../item/CartItemCard";
 import { ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import type { CartItem } from "../../types";
 
 interface CartItemListProps {

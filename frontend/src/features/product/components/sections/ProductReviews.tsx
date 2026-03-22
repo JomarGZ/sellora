@@ -2,10 +2,10 @@ import { useState } from "react";
 import { MOCK_REVIEWS } from "@/data/mock-data";
 import { format } from "date-fns";
 import { Star, MessageSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { ReviewModal } from "../../../../components/product/ReviewModal";
+import { Button } from "@/shared/components/ui/button";
+import { Progress } from "@/shared/components/ui/progress";
+import { Separator } from "@/shared/components/ui/separator";
+import { ReviewModal } from "../../../../shared/components/modals/ReviewModal";
 import { EmptyState } from "../../states/EmptyState";
 import type { Review, ReviewsResponse } from "../../types";
 

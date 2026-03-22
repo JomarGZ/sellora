@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import type { FallbackProps } from "react-error-boundary";
 
 interface ErrorFallbackProps extends FallbackProps {}

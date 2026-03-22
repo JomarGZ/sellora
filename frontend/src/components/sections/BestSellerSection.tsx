@@ -1,7 +1,7 @@
 import { ProductGrid } from "../../features/product/components/sections/ProductGrid";
 import { bestSellers } from "../../data/products";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import { EntityFallback } from "../ui/EntityFallback";
+import { EntityFallback } from "../../shared/components/ui/EntityFallback";
 
 export function BestSellerSection() {
   return (

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { CartItem } from "@/data/mockProfile";

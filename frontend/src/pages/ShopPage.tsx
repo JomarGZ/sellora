@@ -8,7 +8,7 @@ import { ProductGrid } from "../features/product/components/sections/ProductGrid
 import { Pagination } from "../features/product/components/ui/Pagination";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 
-import { EntityFallback } from "@/components/ui/EntityFallback";
+import { EntityFallback } from "@/shared/components/ui/EntityFallback";
 const PAGE_SIZE = 20;
 type SortOption = "default" | "price-asc" | "price-desc" | "newest" | "rating";
 

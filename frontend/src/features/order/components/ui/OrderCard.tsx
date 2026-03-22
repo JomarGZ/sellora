@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/shared/components/ui/card";
 import { format, parseISO } from "date-fns";
 import OrderStatusBadge from "./OrderStatusBadge";
 import OrderItemsList from "../sections/OrderItemsList";

@@ -4,8 +4,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+} from "@/shared/components/ui/select";
+import { Input } from "@/shared/components/ui/input";
 import { Search } from "lucide-react";
 import {
   ORDER_STATUS_OPTIONS,

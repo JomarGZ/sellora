@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { Heart, ShoppingCart, Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ProductItem } from "../../types";

@@ -2,7 +2,7 @@ import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { format } from "date-fns";
 import { Edit2, Mail, Phone, Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/components/ui/button";
 import { EditProfileModal } from "./EditProfileModal";
 import { AvatarUploadModal } from "./AvatarUploadModal";
 import { useCustomerProfile, useUpdateCustomer } from "@/hooks/useProfile";
