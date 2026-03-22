@@ -5,7 +5,7 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import { MainLayout } from "../shared/components/layout/MainLayout";
-import { HomePage } from "../pages/HomePage";
+import { HomePage } from "../features/home/components/pages/HomePage";
 import LoginPage from "../features/auth/pages/LoginPage";
 import RegisterPage from "../features/auth/pages/RegisterPage";
 import CheckoutPage from "@/features/checkout/pages/CheckoutPage";
