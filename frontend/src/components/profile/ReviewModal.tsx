@@ -10,7 +10,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/components/lib/utils";
 
 interface ReviewModalProps {
   orderId: string | null;
