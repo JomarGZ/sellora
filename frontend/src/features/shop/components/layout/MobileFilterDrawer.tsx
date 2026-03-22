@@ -1,20 +1,20 @@
-import { useEffect } from 'react'
-import { SidebarFilters } from './SidebarFilters'
+import { useEffect } from "react";
+import { SidebarFilters } from "./SidebarFilters";
 
 interface MobileFilterDrawerProps {
-  isOpen: boolean
-  onClose: () => void
-  minPrice: string
-  maxPrice: string
-  onMinPriceChange: (v: string) => void
-  onMaxPriceChange: (v: string) => void
-  categories: string[]
-  selectedCategories: string[]
-  onCategoriesChange: (v: string[]) => void
-  brands: string[]
-  selectedBrands: string[]
-  onBrandsChange: (v: string[]) => void
-  onClearFilters: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  minPrice: string;
+  maxPrice: string;
+  onMinPriceChange: (v: string) => void;
+  onMaxPriceChange: (v: string) => void;
+  categories: string[];
+  selectedCategories: string[];
+  onCategoriesChange: (v: string[]) => void;
+  brands: string[];
+  selectedBrands: string[];
+  onBrandsChange: (v: string[]) => void;
+  onClearFilters: () => void;
 }
 
 export function MobileFilterDrawer({
@@ -34,16 +34,16 @@ export function MobileFilterDrawer({
 }: MobileFilterDrawerProps) {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden'
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <>
@@ -54,7 +54,7 @@ export function MobileFilterDrawer({
       />
       <div
         className="fixed inset-y-0 left-0 z-50 w-full max-w-sm overflow-y-auto bg-white shadow-xl transition-transform duration-300 ease-out lg:hidden"
-        style={{ transform: isOpen ? 'translateX(0)' : 'translateX(-100%)' }}
+        style={{ transform: isOpen ? "translateX(0)" : "translateX(-100%)" }}
         role="dialog"
         aria-modal="true"
         aria-label="Filters"
@@ -67,8 +67,18 @@ export function MobileFilterDrawer({
             className="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
             aria-label="Close filters"
           >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -89,5 +99,5 @@ export function MobileFilterDrawer({
         </div>
       </div>
     </>
-  )
+  );
 }

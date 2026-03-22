@@ -1,19 +1,19 @@
-import { PriceRangeFilter } from './PriceRangeFilter'
-import { CategoryFilter } from './CategoryFilter'
-import { BrandFilter } from './BrandFilter'
+import { PriceRangeFilter } from "../filters/PriceRangeFilter";
+import { CategoryFilter } from "../filters/CategoryFilter";
+import { BrandFilter } from "../filters/BrandFilter";
 
 interface SidebarFiltersProps {
-  minPrice: string
-  maxPrice: string
-  onMinPriceChange: (v: string) => void
-  onMaxPriceChange: (v: string) => void
-  categories: string[]
-  selectedCategories: string[]
-  onCategoriesChange: (v: string[]) => void
-  brands: string[]
-  selectedBrands: string[]
-  onBrandsChange: (v: string[]) => void
-  onClearFilters: () => void
+  minPrice: string;
+  maxPrice: string;
+  onMinPriceChange: (v: string) => void;
+  onMaxPriceChange: (v: string) => void;
+  categories: string[];
+  selectedCategories: string[];
+  onCategoriesChange: (v: string[]) => void;
+  brands: string[];
+  selectedBrands: string[];
+  onBrandsChange: (v: string[]) => void;
+  onClearFilters: () => void;
 }
 
 export function SidebarFilters({
@@ -30,10 +30,10 @@ export function SidebarFilters({
   onClearFilters,
 }: SidebarFiltersProps) {
   const hasActiveFilters =
-    minPrice !== '' ||
-    maxPrice !== '' ||
+    minPrice !== "" ||
+    maxPrice !== "" ||
     selectedCategories.length > 0 ||
-    selectedBrands.length > 0
+    selectedBrands.length > 0;
 
   return (
     <aside className="flex w-full flex-col gap-6 lg:w-64 lg:flex-shrink-0">
@@ -68,5 +68,5 @@ export function SidebarFilters({
         />
       </div>
     </aside>
-  )
+  );
 }

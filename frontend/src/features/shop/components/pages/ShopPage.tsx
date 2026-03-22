@@ -1,11 +1,15 @@
 import { useMemo, useState } from "react";
-import { products, getCategories, getBrands } from "../data/products";
-import type { Product } from "../data/products";
-import { FilterBar } from "../components/shop/FilterBar";
-import { SidebarFilters } from "../components/shop/SidebarFilters";
-import { MobileFilterDrawer } from "../components/shop/MobileFilterDrawer";
-import { ProductGrid } from "../features/product/components/sections/ProductGrid";
-import { Pagination } from "../features/product/components/ui/Pagination";
+import {
+  products,
+  getCategories,
+  getBrands,
+  type Product,
+} from "@/data/products";
+import { FilterBar } from "@/features/shop/components/ui/FilterBar";
+import { SidebarFilters } from "@/features/shop/components/layout/SidebarFilters";
+import { MobileFilterDrawer } from "@/features/shop/components/layout/MobileFilterDrawer";
+import { ProductGrid } from "@/features/product/components/sections/ProductGrid";
+import { Pagination } from "@/features/product/components/ui/Pagination";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 
 import { EntityFallback } from "@/shared/components/feedback/EntityFallback";
