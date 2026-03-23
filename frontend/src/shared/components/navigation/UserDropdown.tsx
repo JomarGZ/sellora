@@ -37,7 +37,7 @@ export function UserDropdown({ onLogout }: UserDropdownProps) {
           role="menu"
         >
           <Link
-            to="/profile"
+            to="/account/overview"
             onClick={() => setIsOpen(false)}
             className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-accent"
             role="menuitem"
