@@ -1,24 +1,30 @@
 // account/components/layout/AccountSidebar.tsx
-import { LogOut } from "lucide-react";
+import {
+  Heart,
+  LayoutDashboard,
+  LogOut,
+  MapPin,
+  Settings,
+  ShoppingBag,
+  ShoppingCart,
+} from "lucide-react";
 import { AccountNavLink } from "../navigation/AccountNavlink";
 
 const links = [
-  { label: "overview", to: "/account/overview" },
-  { label: "Orders", to: "/account/orders" },
-  { label: "Cart", to: "/account/cart" },
-  { label: "Addresses", to: "/account/addresses" },
-  { label: "Wishlist", to: "/account/wishlist" },
-  { label: "Settings", to: "/account/settings" },
+  { label: "Overview", to: "/account/overview", icon: LayoutDashboard },
+  { label: "Orders", to: "/account/orders", icon: ShoppingBag },
+  { label: "Cart", to: "/account/cart", icon: ShoppingCart },
+  { label: "Addresses", to: "/account/addresses", icon: MapPin },
+  { label: "Wishlist", to: "/account/wishlist", icon: Heart },
+  { label: "Settings", to: "/account/settings", icon: Settings },
 ];
 
 const AccountSidebar = () => {
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-white border-r border-border p-6">
-      <h2 className="text-xl font-bold mb-6">My Account</h2>
-
+    <aside className="hidden lg:flex flex-col w-64 bg-white border-r border border-border/50 p-4 sticky top-8 rounded-2xl">
       <nav className="flex flex-col gap-1">
         {links.map((link) => (
-          <AccountNavLink key={link.to} to={link.to}>
+          <AccountNavLink key={link.to} to={link.to} icon={link.icon}>
             {link.label}
           </AccountNavLink>
         ))}

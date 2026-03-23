@@ -1,34 +1,38 @@
-// account/components/layout/AccountMobileNav.tsx
-import { useState } from "react";
-import { Menu } from "lucide-react";
+// account/components/navigation/AccountMobileNav.tsx
+import {
+  Heart,
+  LayoutDashboard,
+  MapPin,
+  Settings,
+  ShoppingBag,
+  ShoppingCart,
+} from "lucide-react";
 import { AccountNavLink } from "./AccountNavlink";
 
 const links = [
-  { label: "Profile", to: "/account/profile" },
-  { label: "Orders", to: "/account/orders" },
-  { label: "Cart", to: "/account/cart" },
-  { label: "Addresses", to: "/account/addresses" },
-  { label: "Wishlist", to: "/account/wishlist" },
-  { label: "Settings", to: "/account/settings" },
+  { label: "Overview", to: "/account/overview", icon: LayoutDashboard },
+  { label: "Orders", to: "/account/orders", icon: ShoppingBag },
+  { label: "Cart", to: "/account/cart", icon: ShoppingCart },
+  { label: "Addresses", to: "/account/addresses", icon: MapPin },
+  { label: "Wishlist", to: "/account/wishlist", icon: Heart },
+  { label: "Settings", to: "/account/settings", icon: Settings },
 ];
 
 const AccountMobileNav = () => {
-  const [open, setOpen] = useState(false);
   return (
-    <div className="lg:hidden p-4 border-b border-border flex justify-between items-center">
-      <span className="font-bold">My Account</span>
-      <button onClick={() => setOpen(!open)}>
-        <Menu className="w-6 h-6" />
-      </button>
-      {open && (
-        <div className="absolute top-16 left-0 right-0 bg-white border-t border-border p-4 flex flex-col space-y-2">
-          {links.map((link) => (
-            <AccountNavLink key={link.to} to={link.to}>
-              {link.label}
-            </AccountNavLink>
-          ))}
-        </div>
-      )}
+    <div className="lg:hidden -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto no-scrollbar mb-4">
+      <div className="flex gap-2 w-max">
+        {links.map((link) => (
+          <AccountNavLink
+            key={link.to}
+            to={link.to}
+            icon={link.icon}
+            variant="pill"
+          >
+            {link.label}
+          </AccountNavLink>
+        ))}
+      </div>
     </div>
   );
 };

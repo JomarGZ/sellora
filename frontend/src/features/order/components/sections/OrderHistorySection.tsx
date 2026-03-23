@@ -129,6 +129,7 @@ const OrderHistorySection = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <h2 className="text-2xl font-semibold sm:text-4xl">Order History</h2>
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
         <OrderFilters filters={filters} onFiltersChange={handleFiltersChange} />
 

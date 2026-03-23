@@ -1,6 +1,6 @@
 import OrderHistorySection from "@/features/order/components/sections/OrderHistorySection";
-import { ProfileOverviewCard } from "@/features/profile/components/sections/ProfileOverviewCard";
 import { Button } from "@/shared/components/ui/button";
+import { ProfileOverviewCard } from "../components/sections/ProfileOverviewCard";
 
 export function AccountOverviewPage() {
   return (

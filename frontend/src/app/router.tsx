@@ -10,12 +10,14 @@ import LoginPage from "../features/auth/pages/LoginPage";
 import RegisterPage from "../features/auth/pages/RegisterPage";
 import CheckoutPage from "@/features/checkout/pages/CheckoutPage";
 import ProductPage from "@/features/product/pages/ProductPage";
-// import ProfilePage from "@/features/profile/pages/ProfilePage";
 import { ShopPage } from "@/features/shop/pages/ShopPage";
 import { AccountLayout } from "@/features/account/components/layout/AccountLayout";
-import ProfilePage from "@/features/profile/pages/ProfilePage";
 import OrdersPage from "@/features/account/pages/OrdersPage ";
 import { AccountOverviewPage } from "@/features/account/pages/AccountOverviewPage";
+import { AddressesPage } from "@/features/account/pages/AddressesPage";
+import { CartPage } from "@/features/account/pages/CartPage";
+import { WishlistPage } from "@/features/account/pages/WishlistPage";
+import { SettingPage } from "@/features/account/pages/SettingPage";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -66,16 +68,16 @@ const checkoutRoute = createRoute({
   component: CheckoutPage,
 });
 
-const profileRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/profile",
-  component: ProfilePage,
-});
-
 const accountRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/account",
   component: AccountLayout,
+});
+
+const accountOverviewRoute = createRoute({
+  getParentRoute: () => accountRoute,
+  path: "overview",
+  component: AccountOverviewPage,
 });
 
 const accountOrdersRoute = createRoute({
@@ -83,12 +85,28 @@ const accountOrdersRoute = createRoute({
   path: "orders",
   component: OrdersPage,
 });
-const accountOverviewRoute = createRoute({
+
+const accountAddressRoute = createRoute({
   getParentRoute: () => accountRoute,
-  path: "overview",
-  component: AccountOverviewPage,
+  path: "addresses",
+  component: AddressesPage,
 });
 
+const accountCartRoute = createRoute({
+  getParentRoute: () => accountRoute,
+  path: "cart",
+  component: CartPage,
+});
+const accountWishlistRoute = createRoute({
+  getParentRoute: () => accountRoute,
+  path: "wishlist",
+  component: WishlistPage,
+});
+const accountSettingRoute = createRoute({
+  getParentRoute: () => accountRoute,
+  path: "settings",
+  component: SettingPage,
+});
 rootRoute.addChildren([
   indexRoute,
   shopRoute,
@@ -96,11 +114,14 @@ rootRoute.addChildren([
   registerRoute,
   productRoute,
   checkoutRoute,
-  profileRoute,
 
   accountRoute.addChildren({
     accountOverviewRoute,
     accountOrdersRoute,
+    accountAddressRoute,
+    accountCartRoute,
+    accountWishlistRoute,
+    accountSettingRoute,
   }),
 ]);
 

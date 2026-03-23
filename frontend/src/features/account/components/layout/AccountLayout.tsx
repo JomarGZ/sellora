@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 import AccountSidebar from "./AccountSidebar";
 import { Button } from "@/shared/components/ui/button";
-import { ProfileHeader } from "@/features/profile/components/ui/ProfileHeader";
+import { ProfileHeader } from "@/features/account/components/ui/ProfileHeader";
 import AccountMobileNav from "../navigation/AccountMobileNav ";
 
 function ErrorFallback({ error, resetErrorBoundary }: any) {

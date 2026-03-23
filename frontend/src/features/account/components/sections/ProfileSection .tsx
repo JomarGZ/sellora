@@ -1,5 +1,5 @@
 // account/components/sections/ProfileSection.tsx
-import { ProfileHeader } from "@/features/profile/components/ui/ProfileHeader";
+import { ProfileHeader } from "@/features/account/components/ui/ProfileHeader";
 import { ProfileOverviewCard } from "@/features/profile/components/sections/ProfileOverviewCard";
 
 const ProfileSection = () => {
