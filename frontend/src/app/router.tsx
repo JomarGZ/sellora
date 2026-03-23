@@ -2,6 +2,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  HeadContent,
   Outlet,
 } from "@tanstack/react-router";
 import { MainLayout } from "../shared/components/layout/MainLayout";
@@ -25,9 +26,12 @@ const rootRoute = createRootRoute({
 
 function RootLayout() {
   return (
-    <MainLayout isLoggedIn={true}>
-      <Outlet />
-    </MainLayout>
+    <>
+      <HeadContent />
+      <MainLayout isLoggedIn={true}>
+        <Outlet />
+      </MainLayout>
+    </>
   );
 }
 
@@ -36,36 +40,54 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: HomePage,
+  head: () => ({
+    meta: [{ title: "Sellora | Home" }],
+  }),
 });
 
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/login",
   component: LoginPage,
+  head: () => ({
+    meta: [{ title: "Sellora | Login" }],
+  }),
 });
 
 const registerRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/register",
   component: RegisterPage,
+  head: () => ({
+    meta: [{ title: "Sellora | register" }],
+  }),
 });
 
 const shopRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/shop",
   component: ShopPage,
+  head: () => ({
+    meta: [{ title: "Sellora | Shop" }],
+  }),
 });
 
 const productRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/product/$productId",
   component: ProductPage,
+  head: () => ({
+    meta: [{ title: "Sellora | product" }],
+  }),
 });
 
 const checkoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/checkout",
   component: CheckoutPage,
+  head: () => ({
+    meta: [{ title: "Sellora | Checkout" }],
+  }),
 });
 
 const accountRoute = createRoute({
@@ -78,6 +100,9 @@ const accountOverviewRoute = createRoute({
   path: "overview",
   component: AccountOverviewPage,
   context: () => ({ pageTitle: "My Account" }),
+  head: () => ({
+    meta: [{ title: "Sellora | My Account" }],
+  }),
 });
 
 const accountOrdersRoute = createRoute({
@@ -85,6 +110,9 @@ const accountOrdersRoute = createRoute({
   path: "orders",
   component: OrdersPage,
   context: () => ({ pageTitle: "My Orders" }),
+  head: () => ({
+    meta: [{ title: "Sellora | My Orders" }],
+  }),
 });
 
 const accountAddressRoute = createRoute({
@@ -92,6 +120,9 @@ const accountAddressRoute = createRoute({
   path: "addresses",
   component: AddressesPage,
   context: () => ({ pageTitle: "My Addresses" }),
+  head: () => ({
+    meta: [{ title: "Sellora | My Address" }],
+  }),
 });
 
 const accountCartRoute = createRoute({
@@ -99,6 +130,9 @@ const accountCartRoute = createRoute({
   path: "cart",
   component: CartPage,
   context: () => ({ pageTitle: "My Cart" }),
+  head: () => ({
+    meta: [{ title: "Sellora | My Cart" }],
+  }),
 });
 
 const accountWishlistRoute = createRoute({
@@ -106,6 +140,9 @@ const accountWishlistRoute = createRoute({
   path: "wishlist",
   component: WishlistPage,
   context: () => ({ pageTitle: "My Wishlist" }),
+  head: () => ({
+    meta: [{ title: "Sellora | My Wishlist" }],
+  }),
 });
 
 const accountSettingRoute = createRoute({
@@ -113,6 +150,9 @@ const accountSettingRoute = createRoute({
   path: "settings",
   component: SettingPage,
   context: () => ({ pageTitle: "Account Settings" }),
+  head: () => ({
+    meta: [{ title: "Sellora | Account Settings" }],
+  }),
 });
 rootRoute.addChildren([
   indexRoute,
