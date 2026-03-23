@@ -54,9 +54,6 @@ export function CartSection() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1">
-        <h2 className="text-2xl font-display font-bold text-foreground mb-6">
-          Shopping Cart
-        </h2>
         <CartItemList
           items={items}
           onUpdateQuantity={handleUpdateQuantity}
