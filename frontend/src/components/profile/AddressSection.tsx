@@ -11,7 +11,7 @@ import {
 import {
   useAddresses,
   useDeleteAddress,
-} from "@/features/account/api/account.queries";
+} from "@/features/profile/api/account.queries";
 
 export function AddressSection() {
   const { data: addresses, isLoading } = useAddresses();

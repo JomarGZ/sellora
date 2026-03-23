@@ -6,7 +6,7 @@ import { useCartUI } from "@/features/cart/hooks/useCartUI";
 import {
   useRemoveFromWishlist,
   useWishlist,
-} from "@/features/account/api/account.queries";
+} from "@/features/profile/api/account.queries";
 
 export function WishlistSection() {
   const { data: wishlist, isLoading } = useWishlist();

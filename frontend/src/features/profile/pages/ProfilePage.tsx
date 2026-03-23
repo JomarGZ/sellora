@@ -13,12 +13,12 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 
-import { ProfileHeader } from "@/features/account/components/ui/ProfileHeader";
-import { ProfileOverviewCard } from "@/features/account/components/sections/ProfileOverviewCard";
+import { ProfileHeader } from "@/features/profile/components/ui/ProfileHeader";
+import { ProfileOverviewCard } from "@/features/profile/components/sections/ProfileOverviewCard";
 import OrderHistorySection from "@/features/order/components/sections/OrderHistorySection";
 import { AddressSection } from "@/components/profile/AddressSection";
 import { WishlistSection } from "@/features/wishlist/components/sections/WishlistSection";
-import { SettingsSection } from "@/features/account/components/sections/SettingsSection";
+import { SettingsSection } from "@/features/profile/components/sections/SettingsSection";
 import { useCartUI } from "@/features/cart/hooks/useCartUI";
 import { CartSection } from "@/features/cart/components/sections/CartSection";
 
