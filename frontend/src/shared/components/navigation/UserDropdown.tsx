@@ -3,9 +3,10 @@ import { Link } from "@tanstack/react-router";
 
 interface UserDropdownProps {
   onLogout?: () => void;
+  hasNewActivity?: boolean; // optional prop for dot
 }
 
-export function UserDropdown({ onLogout }: UserDropdownProps) {
+export function UserDropdown({ onLogout, hasNewActivity }: UserDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -21,16 +22,22 @@ export function UserDropdown({ onLogout }: UserDropdownProps) {
 
   return (
     <div className="relative" ref={ref}>
+      {/* Avatar Button */}
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-300 text-accent transition-all hover:ring-2 hover:ring-accent"
+        className="relative flex h-9 w-9 items-center justify-center rounded-full bg-yellow-300 text-accent transition-all hover:ring-2 hover:ring-accent"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
         JD
+        {/* Notification Dot */}
+        {hasNewActivity && (
+          <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-black ring-2 ring-white" />
+        )}
       </button>
 
+      {/* Dropdown Menu */}
       {isOpen && (
         <div
           className="absolute right-0 top-full z-50 mt-2 w-48 animate-slide-down rounded-lg bg-white py-1 shadow-elevated"

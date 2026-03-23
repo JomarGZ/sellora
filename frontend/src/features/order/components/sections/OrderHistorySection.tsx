@@ -5,14 +5,15 @@ import { toast } from "sonner";
 import OrderFilters from "@/features/order/components/sections/OrderFilters";
 import OrderList from "@/features/order/components/sections/OrderList";
 import OrderPagination from "@/features/order/components/sections/OrderPagination";
-import ReviewModal from "@/components/profile/ReviewModal";
 import ErrorFallback from "@/features/order/components/states/ErrorFallback";
 import type {
+  CreateReviewPayload,
   Order,
   OrderCallbacks,
   OrderFiltersState,
   OrderItem,
 } from "../../types";
+import { ReviewModal } from "../modal/ReviewModal";
 
 const ORDERS_PER_PAGE = 5;
 
@@ -83,29 +84,22 @@ const OrderHistorySection = () => {
   const handleBuyAgain = useCallback((item: OrderItem) => {
     toast.success(`${item.name} added to cart!`);
   }, []);
+  const handleReviewSubmit = useCallback((data: CreateReviewPayload) => {
+    const { orderItemId, rating, comment } = data;
 
-  const handleReviewSubmit = useCallback(
-    (orderId: string, itemId: string, rating: number, comment: string) => {
-      // Mark item as reviewed in local state
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId
-            ? {
-                ...o,
-                items: o.items.map((i) =>
-                  i.id === itemId ? { ...i, reviewed: true } : i,
-                ),
-              }
-            : o,
+    setOrders((prev) =>
+      prev.map((o) => ({
+        ...o,
+        items: o.items.map((i) =>
+          i.id === orderItemId ? { ...i, reviewed: true } : i,
         ),
-      );
-      toast.success(
-        `Review submitted (${rating}★)${comment ? " with comment" : ""}!`,
-      );
-    },
-    [],
-  );
+      })),
+    );
 
+    toast.success(
+      `Review submitted (${rating}★)${comment ? " with comment" : ""}!`,
+    );
+  }, []);
   const callbacks: OrderCallbacks = useMemo(
     () => ({
       onCancel: handleCancel,
@@ -129,7 +123,6 @@ const OrderHistorySection = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <h2 className="text-2xl font-semibold sm:text-4xl">Order History</h2>
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
         <OrderFilters filters={filters} onFiltersChange={handleFiltersChange} />
 
@@ -152,9 +145,11 @@ const OrderHistorySection = () => {
         />
 
         <ReviewModal
-          orderId={reviewTarget?.orderId ?? null}
-          item={reviewTarget?.item ?? null}
-          open={!!reviewTarget}
+          orderItemId={reviewTarget?.item.id ?? ""}
+          productName={reviewTarget?.item.name ?? ""}
+          productImage={reviewTarget?.item.image ?? ""}
+          existingReview={reviewTarget?.item.review ?? null}
+          isOpen={!!reviewTarget}
           onClose={() => setReviewTarget(null)}
           onSubmit={handleReviewSubmit}
         />

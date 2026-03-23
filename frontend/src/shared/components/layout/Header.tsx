@@ -64,7 +64,7 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
 
         <div className="hidden items-center gap-4 md:flex md:flex-initial">
           {isLoggedIn ? (
-            <UserDropdown onLogout={onLogout} />
+            <UserDropdown onLogout={onLogout} hasNewActivity={true} />
           ) : (
             <AuthButtons onNavigate={handleNavigate} />
           )}
@@ -76,7 +76,7 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
         {mobileMenuOpen && (
           <div className="border-t border-gray-100 px-4 py-4">
             {isLoggedIn ? (
-              <UserDropdown onLogout={onLogout} />
+              <UserDropdown onLogout={onLogout} hasNewActivity={true} />
             ) : (
               <AuthButtons onNavigate={handleNavigate} />
             )}

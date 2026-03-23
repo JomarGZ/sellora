@@ -5,7 +5,7 @@ import { Star, MessageSquare } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
 import { Separator } from "@/shared/components/ui/separator";
-import { ReviewModal } from "../../../../shared/components/modals/ReviewModal";
+import { ReviewModal } from "../../../order/components/modal/ReviewModal";
 import { EmptyState } from "../../states/EmptyState";
 import type { Review, ReviewsResponse } from "../../types";
 
@@ -72,12 +72,6 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
           <p className="text-muted-foreground text-sm mb-6">
             Based on {totalReviews} review{totalReviews !== 1 && "s"}
           </p>
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            className="w-full rounded-xl"
-          >
-            Write a Review
-          </Button>
         </div>
 
         {/* Rating Distribution */}
@@ -168,13 +162,6 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
           </div>
         )}
       </div>
-
-      <ReviewModal
-        productId={productId}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleReviewSubmit}
-      />
     </div>
   );
 }

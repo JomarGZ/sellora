@@ -3,10 +3,7 @@ import { Heart, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { useCartUI } from "@/features/cart/hooks/useCartUI";
-import {
-  useRemoveFromWishlist,
-  useWishlist,
-} from "@/features/account/api/account.queries";
+import { useRemoveFromWishlist, useWishlist } from "../../api/wishlist.queries";
 
 export function WishlistSection() {
   const { data: wishlist, isLoading } = useWishlist();

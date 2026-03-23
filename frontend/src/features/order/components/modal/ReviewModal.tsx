@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
@@ -15,7 +13,6 @@ import {
 } from "@/shared/components/ui/dialog";
 
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
 import {
   InputGroup,
   InputGroupTextarea,
@@ -29,11 +26,9 @@ import {
 } from "@/shared/components/ui/field";
 
 import { Star } from "lucide-react";
-import type { Review } from "@/features/product/types";
+import type { CreateReviewPayload } from "../../types";
 
-// ✅ Schema
 const reviewSchema = z.object({
-  userName: z.string().min(2, "Name must be at least 2 characters"),
   rating: z.number().min(1, "Please select a rating").max(5),
   comment: z.string().optional(),
 });
@@ -41,14 +36,23 @@ const reviewSchema = z.object({
 type ReviewFormValues = z.infer<typeof reviewSchema>;
 
 interface ReviewModalProps {
-  productId: number;
+  orderItemId: string;
+  productName: string;
+  productImage: string;
+  existingReview?: {
+    rating: number;
+    comment?: string | null;
+  } | null;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (review: Review) => void;
+  onSubmit: (data: CreateReviewPayload) => void;
 }
 
 export function ReviewModal({
-  productId: _productId,
+  orderItemId,
+  productName,
+  productImage,
+  existingReview,
   isOpen,
   onClose,
   onSubmit,
@@ -59,9 +63,8 @@ export function ReviewModal({
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
-      userName: "",
-      rating: 0,
-      comment: "",
+      rating: existingReview?.rating ?? 0,
+      comment: existingReview?.comment ?? "",
     },
   });
 
@@ -70,16 +73,12 @@ export function ReviewModal({
     try {
       await new Promise((r) => setTimeout(r, 400));
 
-      const newReview: Review = {
-        id: Date.now(),
-        userName: data.userName,
+      await onSubmit({
+        orderItemId,
         rating: data.rating,
-        comment: data.comment ?? null,
-        createdAt: new Date().toISOString(),
-        verified: false,
-      };
+        comment: data.comment,
+      });
 
-      onSubmit(newReview);
       form.reset();
       onClose();
     } finally {
@@ -91,11 +90,26 @@ export function ReviewModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Write a Review</DialogTitle>
+          <DialogTitle>
+            {existingReview ? "Edit Review" : "Write a Review"}
+          </DialogTitle>
           <DialogDescription>
-            Share your thoughts about this product.
+            Share your experience with this product.
           </DialogDescription>
         </DialogHeader>
+
+        {/* Product Info */}
+        <div className="flex items-center gap-3 border rounded-xl p-3 bg-muted/40">
+          <img
+            src={productImage}
+            alt={productName}
+            className="w-14 h-14 object-cover rounded-lg"
+          />
+          <div>
+            <p className="font-medium">{productName}</p>
+            <p className="text-sm text-muted-foreground">Purchased item</p>
+          </div>
+        </div>
 
         <form
           id="review-form"
@@ -103,7 +117,7 @@ export function ReviewModal({
           className="space-y-6"
         >
           <FieldGroup>
-            {/* ⭐ Rating */}
+            {/* Rating */}
             <Controller
               name="rating"
               control={form.control}
@@ -139,28 +153,7 @@ export function ReviewModal({
               )}
             />
 
-            {/* 👤 Name */}
-            <Controller
-              name="userName"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Your Name</FieldLabel>
-
-                  <Input
-                    {...field}
-                    placeholder="John Doe"
-                    aria-invalid={fieldState.invalid}
-                  />
-
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            {/* 💬 Comment */}
+            {/* Comment */}
             <Controller
               name="comment"
               control={form.control}

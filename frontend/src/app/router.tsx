@@ -73,39 +73,46 @@ const accountRoute = createRoute({
   path: "/account",
   component: AccountLayout,
 });
-
 const accountOverviewRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "overview",
   component: AccountOverviewPage,
+  context: () => ({ pageTitle: "My Account" }),
 });
 
 const accountOrdersRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "orders",
   component: OrdersPage,
+  context: () => ({ pageTitle: "My Orders" }),
 });
 
 const accountAddressRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "addresses",
   component: AddressesPage,
+  context: () => ({ pageTitle: "My Addresses" }),
 });
 
 const accountCartRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "cart",
   component: CartPage,
+  context: () => ({ pageTitle: "My Cart" }),
 });
+
 const accountWishlistRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "wishlist",
   component: WishlistPage,
+  context: () => ({ pageTitle: "My Wishlist" }),
 });
+
 const accountSettingRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "settings",
   component: SettingPage,
+  context: () => ({ pageTitle: "Account Settings" }),
 });
 rootRoute.addChildren([
   indexRoute,

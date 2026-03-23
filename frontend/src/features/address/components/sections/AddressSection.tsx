@@ -8,10 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import {
-  useAddresses,
-  useDeleteAddress,
-} from "@/features/account/api/account.queries";
+import { useAddresses, useDeleteAddress } from "../../api/address.queries";
 
 export function AddressSection() {
   const { data: addresses, isLoading } = useAddresses();
@@ -44,9 +41,6 @@ export function AddressSection() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-display font-bold text-foreground">
-          Saved Addresses
-        </h3>
         <Button className="rounded-xl shadow-sm hover-elevate">
           <Plus className="w-4 h-4 mr-2" /> Add New
         </Button>

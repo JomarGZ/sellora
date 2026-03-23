@@ -1,12 +1,12 @@
 // features/account/components/layout/AccountLayout.tsx
-import { Outlet } from "@tanstack/react-router";
+import { Outlet, useMatches } from "@tanstack/react-router";
 import { ErrorBoundary } from "react-error-boundary";
 import { motion } from "framer-motion";
 
 import AccountSidebar from "./AccountSidebar";
 import { Button } from "@/shared/components/ui/button";
 import { ProfileHeader } from "@/features/account/components/ui/ProfileHeader";
-import AccountMobileNav from "../navigation/AccountMobileNav ";
+import AccountMobileNav from "../navigation/AccountMobileNav";
 
 function ErrorFallback({ error, resetErrorBoundary }: any) {
   return (
@@ -21,6 +21,9 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 }
 
 export function AccountLayout() {
+  const matches = useMatches();
+  const lastMatch = matches[matches.length - 1];
+  const pageTitle = lastMatch.context?.pageTitle;
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -30,7 +33,7 @@ export function AccountLayout() {
             <ProfileHeader />
           </ErrorBoundary>
         </div>
-
+        {true && <h1 className="text-2xl font-bold mb-6">{pageTitle}</h1>}
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <AccountSidebar />
