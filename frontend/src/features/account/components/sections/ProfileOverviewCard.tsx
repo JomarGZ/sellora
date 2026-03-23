@@ -1,10 +1,10 @@
 import Skeleton from "react-loading-skeleton";
 import { Package, Heart, MapPin, CreditCard } from "lucide-react";
 import {
-  useAddresses,
   useOrders,
   useRemoveFromWishlist,
 } from "../../../account/api/account.queries";
+import { useAddresses } from "@/features/address/api/address.queries";
 
 export function ProfileOverviewCard() {
   const { data: orders, isLoading: ordersLoading } = useOrders();

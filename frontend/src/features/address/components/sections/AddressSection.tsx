@@ -8,10 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import {
-  useAddresses,
-  useDeleteAddress,
-} from "@/features/account/api/account.queries";
+import { useAddresses, useDeleteAddress } from "../../api/address.queries";
 
 export function AddressSection() {
   const { data: addresses, isLoading } = useAddresses();

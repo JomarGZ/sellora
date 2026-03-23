@@ -1,8 +1,7 @@
-import { mockAddresses, mockOrders, mockWishlist } from "@/data";
+import { mockOrders, mockWishlist } from "@/data";
 import { mockCustomer, type Customer } from "@/data/mockProfile";
 import type { Order } from "@/features/order/types";
 import type { WishlistItem } from "@/features/wishlist/types";
-import type { Address } from "@/shared/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Utility to simulate network delay
@@ -28,16 +27,6 @@ export function useOrders() {
   });
 }
 
-export function useAddresses() {
-  return useQuery({
-    queryKey: ["profile", "addresses"],
-    queryFn: async (): Promise<Address[]> => {
-      await delay(1000);
-      return mockAddresses;
-    },
-  });
-}
-
 export function useWishlist() {
   return useQuery({
     queryKey: ["profile", "wishlist"],
@@ -58,19 +47,6 @@ export function useUpdateCustomer() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profile", "customer"] });
-    },
-  });
-}
-
-export function useDeleteAddress() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      await delay(600);
-      return id;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["profile", "addresses"] });
     },
   });
 }

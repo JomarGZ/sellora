@@ -6,6 +6,11 @@ export interface Order {
   total: number;
   items: OrderItem[];
 }
+export interface CreateReviewPayload {
+  orderItemId: string;
+  rating: number;
+  comment?: string;
+}
 
 export interface OrderFiltersState {
   orderStatus: OrderStatus | "all";
