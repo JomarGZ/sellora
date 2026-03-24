@@ -1,175 +1,166 @@
 import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
+
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Checkbox } from "@/shared/components/ui/checkbox";
-import { Label } from "@/shared/components/ui/label";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/components/ui/field";
+
+import {
+  registerSchema,
+  type RegisterFormValues,
+} from "../../validation/register.schema";
+
+import { useAppToast } from "@/shared/components/feedback/AppToast";
 
 const RegisterForm = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [agree, setAgree] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const { showToast } = useAppToast();
 
-  const [errors, setErrors] = useState<{
-    name?: string;
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-    agree?: string;
-  }>({});
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      agree: false,
+    },
+  });
 
-  const [submitted, setSubmitted] = useState(false);
+  const handleSubmit = async (data: RegisterFormValues) => {
+    setIsPending(true);
+    try {
+      await new Promise((r) => setTimeout(r, 500));
 
-  const validate = () => {
-    const newErrors: typeof errors = {};
+      console.log("Register:", data);
 
-    if (!name) newErrors.name = "Full name is required";
+      showToast({
+        severity: "success",
+        summary: "Account created",
+        detail: "Welcome! Your account has been created.",
+      });
 
-    if (!email) newErrors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      newErrors.email = "Enter a valid email";
-
-    if (!password) newErrors.password = "Password is required";
-    else if (password.length < 6)
-      newErrors.password = "Must be at least 6 characters";
-
-    if (!confirmPassword) newErrors.confirmPassword = "Confirm your password";
-    else if (confirmPassword !== password)
-      newErrors.confirmPassword = "Passwords do not match";
-
-    if (!agree) newErrors.agree = "You must agree to the terms";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-
-    if (validate()) {
-      console.log("Register:", { name, email });
+      form.reset();
+    } finally {
+      setIsPending(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-      {/* Name */}
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Full name</Label>
-        <div className="relative">
-          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="John Doe"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (submitted) validate();
-            }}
-            className="h-12 pl-10"
-          />
-        </div>
-        {errors.name && (
-          <p className="text-xs text-destructive">{errors.name}</p>
-        )}
-      </div>
-
-      {/* Email */}
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Email address</Label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (submitted) validate();
-            }}
-            className="h-12 pl-10"
-          />
-        </div>
-        {errors.email && (
-          <p className="text-xs text-destructive">{errors.email}</p>
-        )}
-      </div>
-
-      {/* Password */}
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Password</Label>
-        <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type={showPassword ? "text" : "password"}
-            placeholder="••••••••"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              if (submitted) validate();
-            }}
-            className="h-12 pl-10 pr-11"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-          >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-        {errors.password && (
-          <p className="text-xs text-destructive">{errors.password}</p>
-        )}
-      </div>
-
-      {/* Confirm Password */}
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium">Confirm password</Label>
-        <Input
-          type="password"
-          placeholder="••••••••"
-          value={confirmPassword}
-          onChange={(e) => {
-            setConfirmPassword(e.target.value);
-            if (submitted) validate();
-          }}
-          className="h-12"
+    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+      <FieldGroup>
+        {/* Name */}
+        <Controller
+          name="name"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Full name</FieldLabel>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  {...field}
+                  className="h-12 pl-10"
+                  placeholder="John Doe"
+                />
+              </div>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
         />
-        {errors.confirmPassword && (
-          <p className="text-xs text-destructive">{errors.confirmPassword}</p>
-        )}
-      </div>
 
-      {/* Terms */}
-      <div className="flex items-start gap-2">
-        <Checkbox
-          checked={agree}
-          onCheckedChange={(v) => setAgree(v === true)}
+        {/* Email */}
+        <Controller
+          name="email"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Email address</FieldLabel>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input {...field} type="email" className="h-12 pl-10" />
+              </div>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
         />
-        <p className="text-sm text-muted-foreground">
-          I agree to the{" "}
-          <span className="text-primary underline cursor-pointer">
-            Terms & Conditions
-          </span>
-        </p>
-      </div>
-      {errors.agree && (
-        <p className="text-xs text-destructive">{errors.agree}</p>
-      )}
 
-      {/* Submit */}
-      <Button type="submit" size="lg" className="w-full group">
-        Create account
-        <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+        {/* Password */}
+        <Controller
+          name="password"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Password</FieldLabel>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  {...field}
+                  type={showPassword ? "text" : "password"}
+                  className="h-12 pl-10 pr-11"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        {/* Confirm Password */}
+        <Controller
+          name="confirmPassword"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel>Confirm password</FieldLabel>
+              <Input {...field} type="password" className="h-12" />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        {/* Agree */}
+        <Controller
+          name="agree"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+                <p className="text-sm text-muted-foreground">
+                  I agree to the{" "}
+                  <span className="text-primary underline cursor-pointer">
+                    Terms & Conditions
+                  </span>
+                </p>
+              </div>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </FieldGroup>
+
+      <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+        {isPending ? "Creating account..." : "Create account"}
+        <ArrowRight className="h-4 w-4 ml-2" />
       </Button>
     </form>
   );
