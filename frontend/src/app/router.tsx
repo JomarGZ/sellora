@@ -28,7 +28,7 @@ function RootLayout() {
   return (
     <>
       <HeadContent />
-      <MainLayout isLoggedIn={true}>
+      <MainLayout isLoggedIn={false}>
         <Outlet />
       </MainLayout>
     </>
