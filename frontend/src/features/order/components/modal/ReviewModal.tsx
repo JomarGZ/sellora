@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -27,13 +26,11 @@ import {
 
 import { Star } from "lucide-react";
 import type { CreateReviewPayload } from "../../types";
-
-const reviewSchema = z.object({
-  rating: z.number().min(1, "Please select a rating").max(5),
-  comment: z.string().optional(),
-});
-
-type ReviewFormValues = z.infer<typeof reviewSchema>;
+import {
+  reviewSchema,
+  type ReviewFormValues,
+} from "../../validation/review.schema";
+import { useAppToast } from "@/shared/components/feedback/AppToast";
 
 interface ReviewModalProps {
   orderItemId: string;
@@ -59,7 +56,7 @@ export function ReviewModal({
 }: ReviewModalProps) {
   const [hoveredStar, setHoveredStar] = useState(0);
   const [isPending, setIsPending] = useState(false);
-
+  const { showToast } = useAppToast();
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
@@ -78,7 +75,11 @@ export function ReviewModal({
         rating: data.rating,
         comment: data.comment,
       });
-
+      showToast({
+        severity: "success",
+        summary: "Review submitted",
+        detail: "Thank you for your feedback",
+      });
       form.reset();
       onClose();
     } finally {
@@ -165,7 +166,7 @@ export function ReviewModal({
                     <InputGroupTextarea
                       {...field}
                       placeholder="What did you like or dislike?"
-                      className="min-h-[100px] resize-none"
+                      className="min-h-25 resize-none"
                       aria-invalid={fieldState.invalid}
                     />
                   </InputGroup>

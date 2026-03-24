@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { mockOrders } from "@/data";
 import { ErrorBoundary } from "react-error-boundary";
-import { toast } from "sonner";
+import { Button } from "primereact/button";
+import { Toast } from "primereact/toast";
 import OrderFilters from "@/features/order/components/sections/OrderFilters";
 import OrderList from "@/features/order/components/sections/OrderList";
 import OrderPagination from "@/features/order/components/sections/OrderPagination";
@@ -14,16 +15,19 @@ import type {
   OrderItem,
 } from "../../types";
 import { ReviewModal } from "../modal/ReviewModal";
+import { useAppToast } from "@/shared/components/feedback/AppToast";
 
 const ORDERS_PER_PAGE = 5;
 
 const OrderHistorySection = () => {
+  const { showToast } = useAppToast();
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [filters, setFilters] = useState<OrderFiltersState>({
     orderStatus: "all",
     paymentStatus: "all",
     search: "",
   });
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading] = useState(false);
 
@@ -67,22 +71,22 @@ const OrderHistorySection = () => {
 
   // --- Callbacks ---
   const handleCancel = useCallback((orderId: string) => {
-    toast.info(`Cancellation requested for ${orderId}`);
+    // toast.info(`Cancellation requested for ${orderId}`);
   }, []);
 
   const handleReceive = useCallback((orderId: string) => {
-    toast.success(`${orderId} marked as received!`);
+    // toast.success(`${orderId} marked as received!`);
   }, []);
 
   const handleOrderAgain = useCallback((order: Order) => {
     const inStockItems = order.items.filter((i) => i.inStock);
-    toast.success(
-      `${inStockItems.length} item(s) from ${order.id} added to cart!`,
-    );
+    // toast.success(
+    //   `${inStockItems.length} item(s) from ${order.id} added to cart!`,
+    // );
   }, []);
 
   const handleBuyAgain = useCallback((item: OrderItem) => {
-    toast.success(`${item.name} added to cart!`);
+    // toast.success(`${item.name} added to cart!`);
   }, []);
   const handleReviewSubmit = useCallback((data: CreateReviewPayload) => {
     const { orderItemId, rating, comment } = data;
@@ -96,9 +100,9 @@ const OrderHistorySection = () => {
       })),
     );
 
-    toast.success(
-      `Review submitted (${rating}★)${comment ? " with comment" : ""}!`,
-    );
+    // toast.success(
+    //   `Review submitted (${rating}★)${comment ? " with comment" : ""}!`,
+    // );
   }, []);
   const callbacks: OrderCallbacks = useMemo(
     () => ({
