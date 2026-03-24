@@ -13,7 +13,7 @@ import CheckoutPage from "@/features/checkout/pages/CheckoutPage";
 import ProductPage from "@/features/product/pages/ProductPage";
 import { ShopPage } from "@/features/shop/pages/ShopPage";
 import { AccountLayout } from "@/features/account/components/layout/AccountLayout";
-import OrdersPage from "@/features/account/pages/OrdersPage ";
+import OrdersPage from "@/features/account/pages/OrdersPage";
 import { AccountOverviewPage } from "@/features/account/pages/AccountOverviewPage";
 import { AddressesPage } from "@/features/account/pages/AddressesPage";
 import { CartPage } from "@/features/account/pages/CartPage";
