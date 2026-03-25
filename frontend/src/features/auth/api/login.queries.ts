@@ -6,6 +6,7 @@ import { loginApi } from "./login.api";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import { useAuth } from "@/providers/AuthProvider";
 import type { LoginPayload, LoginResponse } from "@/shared/types/auth";
+import { setToken } from "@/shared/api/client";
 
 /**
  * useLoginMutation
@@ -22,8 +23,10 @@ export function useLoginMutation() {
   return useMutation<LoginResponse, Error, LoginPayload>({
     mutationFn: loginApi,
 
-    onSuccess(data) {
-      setUser(data.user);
+    onSuccess(response) {
+      const { accessToken, user } = response.data;
+      // setToken(response.data.token);
+      // setUser(response.data.user);
       showToast({
         severity: "success",
         summary: "Welcome back",

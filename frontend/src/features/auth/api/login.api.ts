@@ -1,6 +1,5 @@
 // src/features/auth/api/login.api.ts
 
-import { client, initCsrf } from "@/shared/api/client";
 import type { LoginPayload, LoginResponse } from "@/shared/types/auth";
 
 /**

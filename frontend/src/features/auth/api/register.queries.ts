@@ -6,6 +6,7 @@ import { registerApi } from "./register.api";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import { useAuth } from "@/providers/AuthProvider";
 import type { RegisterPayload, RegisterResponse } from "@/shared/types/auth";
+import { client, setToken } from "@/shared/api/client";
 
 /**
  * useRegisterMutation
@@ -22,14 +23,17 @@ export function useRegisterMutation() {
   return useMutation<RegisterResponse, Error, RegisterPayload>({
     mutationFn: registerApi,
 
-    onSuccess(data) {
-      setUser(data.user);
+    onSuccess(response) {
+      const { accessToken, user } = response.data;
+      setToken(accessToken);
+      setUser(user);
+      client.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
       showToast({
         severity: "success",
         summary: "Account created",
-        detail: data.message ?? "Welcome aboard! Your account is ready.",
+        detail: response.message ?? "Welcome aboard! Your account is ready.",
       });
-      router.navigate({ to: "/account" });
+      router.navigate({ to: "/account/overview" });
     },
 
     onError(error) {

@@ -13,61 +13,83 @@ use App\Http\Requests\Api\V1\ResetPasswordRequest;
 use App\Http\Requests\Api\V1\VerifyEmailRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
 final class AuthController extends ApiController
 {
+    public function __construct(
+        private readonly AuthService $service
+    )
+    {
+    }
     public function register(RegisterRequest $request): JsonResponse
     {
-        $user = User::query()->create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $userData = $request->validated();
 
-        $user->sendEmailVerificationNotification();
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        return $this->created([
-            'user' => new UserResource($user),
-            'token' => $token,
-        ], 'User registered successfully. Please check your email to verify your account.');
-    }
-
-    public function login(LoginRequest $request): JsonResponse
-    {
-        $user = User::query()->where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return $this->unauthorized('Invalid credentials');
+        try {
+            $user = $this->service->doRegistration($userData);
+        } catch (\Exception $exception) {
+            return $this->error(message: $exception->getMessage());
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
+        $tokens = $this->service->generateTokens($user);
 
-        return $this->success([
-            'user' => new UserResource($user),
-            'token' => $token,
-        ], 'Login successful');
+        return $this->sendResponseWithTokens($tokens, [
+            'user' => UserResource::make($user)
+        ]);
+    }
+
+    private function sendResponseWithTokens(array $tokens, $body = []): JsonResponse
+    {
+        $rtExpireTime = config('sanctum.rt_expiration');
+        $cookie = cookie('refreshToken', $tokens['refreshToken'], $rtExpireTime, secure: false);
+
+        return $this->success(array_merge($body, [
+            'accessToken' => $tokens['accessToken']
+        ]))->withCookie($cookie);
+    }
+
+      public function login(LoginRequest $request): JsonResponse
+    {
+        $credentials = $request->validated();
+        if (!Auth::attempt($credentials)) {
+            return $this->error(message: 'Wrong credentials.');
+        }
+
+        $user = Auth::user();
+        $tokens = $this->service->generateTokens($user);
+
+        return $this->sendResponseWithTokens($tokens, [
+            'user' => UserResource::make($user)
+        ]);
     }
 
     public function logout(Request $request): JsonResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-        $user->currentAccessToken()->delete();
+        if (Auth::check()) {
+            $request->user()->tokens()->delete();
+        }
+        $cookie = cookie()->forget('refreshToken');
 
-        return $this->success(message: 'Logged out successfully');
+        return $this
+            ->success(message: 'Successfully logged out.')
+            ->withCookie($cookie);
     }
 
-    public function me(Request $request): JsonResponse
+    public function refresh(Request $request): JsonResponse
     {
-        return $this->success(new UserResource($request->user()));
+        $user = Auth::user();
+        $request->user()->tokens()->delete();
+        $tokens = $this->service->generateTokens($user);
+
+        return $this->sendResponseWithTokens($tokens);
     }
 
     public function verifyEmail(VerifyEmailRequest $request): JsonResponse

@@ -1,4 +1,4 @@
-import { client, initCsrf } from "@/shared/api/client";
+import { client, setToken, clearToken } from "@/shared/api/client";
 import { queryClient } from "@/shared/api/queryClient";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import type { User } from "@/shared/types/auth";
@@ -7,6 +7,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -15,6 +16,7 @@ interface AuthContextValue {
   user: User | null;
   setUser: (user: User | null) => void;
   isLoggingOut: boolean;
+  isInitializing: boolean;
   logout: () => Promise<void>;
 }
 
@@ -25,8 +27,6 @@ export function useAuth(): AuthContextValue {
   if (!ctx) throw new Error("useAuth must be used inside <AppProviders>");
   return ctx;
 }
-
-// ── Inner provider (needs useAppToast, so must be inside AppToastProvider) ────
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -39,17 +39,38 @@ export function AuthProvider({
 }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(initialUser);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const { showToast } = useAppToast();
   const router = useRouter();
+
+  // 🔥 Restore session on app load using refresh token cookie
+  useEffect(() => {
+    async function initSession() {
+      try {
+        const { data } = await client.post("/v1/refresh-token");
+        setToken(data.data.accessToken);
+        setUser(data.data.user);
+      } catch {
+        // Not logged in (refresh token expired or missing)
+        clearToken();
+        setUser(null);
+      } finally {
+        setIsInitializing(false);
+      }
+    }
+
+    initSession();
+  }, []);
 
   const logout = useCallback(async () => {
     setIsLoggingOut(true);
     try {
-      await initCsrf();
-      await client.post("/logout");
+      await client.post("/v1/logout");
+    } catch {
+      // ignore error, still logout locally
+    } finally {
+      clearToken(); // remove Authorization header
       setUser(null);
-      // Clear all cached query data on logout so no user-specific
-      // data leaks to the next session.
       queryClient.clear();
       showToast({
         severity: "success",
@@ -57,19 +78,14 @@ export function AuthProvider({
         detail: "You have been successfully logged out.",
       });
       router.navigate({ to: "/login" });
-    } catch {
-      showToast({
-        severity: "error",
-        summary: "Logout failed",
-        detail: "Something went wrong. Please try again.",
-      });
-    } finally {
       setIsLoggingOut(false);
     }
   }, [router, showToast]);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, isLoggingOut, logout }}>
+    <AuthContext.Provider
+      value={{ user, setUser, isLoggingOut, isInitializing, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

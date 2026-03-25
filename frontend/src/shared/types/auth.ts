@@ -1,4 +1,13 @@
 // src/features/auth/types.ts
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+export interface AuthPayload {
+  user: User;
+  accessToken: string;
+}
 
 export interface User {
   id: number;
@@ -18,10 +27,7 @@ export interface LoginPayload {
   remember?: boolean;
 }
 
-export interface LoginResponse {
-  user: User;
-  message: string;
-}
+export type LoginResponse = ApiResponse<AuthPayload>;
 
 // ── Register ──────────────────────────────────────────────────────────────────
 
@@ -32,10 +38,7 @@ export interface RegisterPayload {
   password_confirmation: string;
 }
 
-export interface RegisterResponse {
-  user: User;
-  message: string;
-}
+export type RegisterResponse = ApiResponse<AuthPayload>;
 
 // ── Logout ────────────────────────────────────────────────────────────────────
 
