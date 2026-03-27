@@ -19,7 +19,10 @@ const links = [
   { label: "Settings", to: "/account/settings", icon: Settings },
 ];
 
-const AccountSidebar = () => {
+interface AccountSidebarProps {
+  onLogout: () => void;
+}
+const AccountSidebar = ({ onLogout }: AccountSidebarProps) => {
   return (
     <aside className="hidden lg:flex flex-col w-64 bg-white border-r border border-border/50 p-4 sticky top-8 rounded-2xl">
       <nav className="flex flex-col gap-1">
@@ -31,7 +34,10 @@ const AccountSidebar = () => {
       </nav>
 
       <div className="pt-6 border-t border-border/40">
-        <button className="flex items-center gap-3 text-sm font-medium text-rose-500 hover:text-rose-600 transition-colors w-full px-3 py-2 rounded-lg hover:bg-rose-50">
+        <button
+          onClick={onLogout}
+          className="flex items-center gap-3 text-sm font-medium text-rose-500 hover:text-rose-600 transition-colors w-full px-3 py-2 rounded-lg hover:bg-rose-50"
+        >
           <LogOut className="w-5 h-5 opacity-70" />
           Sign Out
         </button>

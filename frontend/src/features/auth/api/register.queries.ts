@@ -6,7 +6,7 @@ import { registerApi } from "./register.api";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import { useAuth } from "@/providers/AuthProvider";
 import type { RegisterPayload, RegisterResponse } from "@/shared/types/auth";
-import { client, setToken } from "@/shared/api/client";
+import { setToken } from "@/shared/api/client";
 
 /**
  * useRegisterMutation
@@ -16,7 +16,7 @@ import { client, setToken } from "@/shared/api/client";
  *   register({ name, email, password, password_confirmation });
  */
 export function useRegisterMutation() {
-  const { setUser } = useAuth();
+  const { setUser, scheduleProactiveRefresh } = useAuth();
   const { showToast } = useAppToast();
   const router = useRouter();
 
@@ -27,7 +27,7 @@ export function useRegisterMutation() {
       const { accessToken, user } = response.data;
       setToken(accessToken);
       setUser(user);
-      client.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+      scheduleProactiveRefresh();
       showToast({
         severity: "success",
         summary: "Account created",

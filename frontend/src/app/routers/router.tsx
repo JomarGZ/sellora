@@ -5,10 +5,10 @@ import {
   HeadContent,
   Outlet,
 } from "@tanstack/react-router";
-import { MainLayout } from "../shared/components/layout/MainLayout";
-import { HomePage } from "../features/home/pages/HomePage";
-import LoginPage from "../features/auth/pages/LoginPage";
-import RegisterPage from "../features/auth/pages/RegisterPage";
+import { MainLayout } from "../../shared/components/layout/MainLayout";
+import { HomePage } from "../../features/home/pages/HomePage";
+import LoginPage from "../../features/auth/pages/LoginPage";
+import RegisterPage from "../../features/auth/pages/RegisterPage";
 import CheckoutPage from "@/features/checkout/pages/CheckoutPage";
 import ProductPage from "@/features/product/pages/ProductPage";
 import { ShopPage } from "@/features/shop/pages/ShopPage";
@@ -19,16 +19,22 @@ import { AddressesPage } from "@/features/account/pages/AddressesPage";
 import { CartPage } from "@/features/account/pages/CartPage";
 import { WishlistPage } from "@/features/account/pages/WishlistPage";
 import { SettingPage } from "@/features/account/pages/SettingPage";
+import { useAuth } from "@/providers/AuthProvider";
+import { AppSkeleton } from "@/shared/components/feedback/AppSkeleton";
+import ProtectedRoute from "./ProtectedRoute";
+import GuestRoute from "./GuestRoute";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
 });
 
 function RootLayout() {
+  const { isInitializing, user, logout } = useAuth();
+  if (isInitializing) return <AppSkeleton />;
   return (
     <>
       <HeadContent />
-      <MainLayout isLoggedIn={false}>
+      <MainLayout isLoggedIn={!!user} onLogout={logout}>
         <Outlet />
       </MainLayout>
     </>
@@ -46,7 +52,7 @@ const indexRoute = createRoute({
 });
 
 const loginRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => guestRoute,
   path: "/login",
   component: LoginPage,
   head: () => ({
@@ -55,7 +61,7 @@ const loginRoute = createRoute({
 });
 
 const registerRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => guestRoute,
   path: "/register",
   component: RegisterPage,
   head: () => ({
@@ -89,9 +95,18 @@ const checkoutRoute = createRoute({
     meta: [{ title: "Sellora | Checkout" }],
   }),
 });
-
-const accountRoute = createRoute({
+const guestRoute = createRoute({
   getParentRoute: () => rootRoute,
+  id: "guest",
+  component: GuestRoute,
+});
+const protectedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "protected",
+  component: ProtectedRoute,
+});
+const accountRoute = createRoute({
+  getParentRoute: () => protectedRoute,
   path: "/account",
   component: AccountLayout,
 });
@@ -154,22 +169,23 @@ const accountSettingRoute = createRoute({
     meta: [{ title: "Sellora | Account Settings" }],
   }),
 });
+guestRoute.addChildren([loginRoute, registerRoute]);
 rootRoute.addChildren([
   indexRoute,
   shopRoute,
-  loginRoute,
-  registerRoute,
   productRoute,
   checkoutRoute,
-
-  accountRoute.addChildren({
-    accountOverviewRoute,
-    accountOrdersRoute,
-    accountAddressRoute,
-    accountCartRoute,
-    accountWishlistRoute,
-    accountSettingRoute,
-  }),
+  guestRoute,
+  protectedRoute.addChildren([
+    accountRoute.addChildren([
+      accountOverviewRoute,
+      accountOrdersRoute,
+      accountAddressRoute,
+      accountCartRoute,
+      accountWishlistRoute,
+      accountSettingRoute,
+    ]),
+  ]),
 ]);
 
 export const router = createRouter({ routeTree: rootRoute });

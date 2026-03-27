@@ -89,7 +89,9 @@ final class AuthController extends ApiController
         $request->user()->tokens()->delete();
         $tokens = $this->service->generateTokens($user);
 
-        return $this->sendResponseWithTokens($tokens);
+        return $this->sendResponseWithTokens($tokens, [
+            'user' => UserResource::make($user)
+        ]);
     }
 
     public function verifyEmail(VerifyEmailRequest $request): JsonResponse

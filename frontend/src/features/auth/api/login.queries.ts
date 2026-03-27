@@ -16,7 +16,7 @@ import { setToken } from "@/shared/api/client";
  *   login({ email, password, remember });
  */
 export function useLoginMutation() {
-  const { setUser } = useAuth();
+  const { setUser, scheduleProactiveRefresh } = useAuth();
   const { showToast } = useAppToast();
   const router = useRouter();
 
@@ -25,12 +25,13 @@ export function useLoginMutation() {
 
     onSuccess(response) {
       const { accessToken, user } = response.data;
-      // setToken(response.data.token);
-      // setUser(response.data.user);
+      setToken(accessToken);
+      setUser(user);
+      scheduleProactiveRefresh();
       showToast({
         severity: "success",
         summary: "Welcome back",
-        detail: data.message ?? "You have successfully logged in.",
+        detail: response.message ?? "You have successfully logged in.",
       });
       router.navigate({ to: "/account/overview" });
     },
