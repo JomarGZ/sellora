@@ -31,6 +31,7 @@ final class AuthController extends ApiController
 
     public function register(RegisterRequest $request): JsonResponse
     {
+        /** @var array{name: string, email: string, password: string} $userData */
         $userData = $request->validated();
 
         try {
@@ -52,8 +53,11 @@ final class AuthController extends ApiController
         if (! Auth::attempt($credentials)) {
             return $this->error(message: 'Wrong credentials.');
         }
-
         $user = Auth::user();
+        if (! $user instanceof User) {
+            return $this->error('Unauthenticated.', 401);
+        }
+
         $tokens = $this->service->generateTokens($user);
 
         return $this->sendResponseWithTokens(
@@ -65,9 +69,7 @@ final class AuthController extends ApiController
 
     public function logout(Request $request): JsonResponse
     {
-        if (Auth::check()) {
-            $request->user()->tokens()->delete();
-        }
+        $request->user()?->tokens()->delete();
 
         $cookie = cookie()->forget('refreshToken');
 
@@ -80,11 +82,6 @@ final class AuthController extends ApiController
     {
         /** @var User $user */
         $user = Auth::user();
-
-        // Optional: extra safety
-        if (! $user) {
-            return $this->error('Unauthenticated', 401);
-        }
 
         $user->tokens()->delete();
         $tokens = $this->service->generateTokens($user);
@@ -175,8 +172,10 @@ final class AuthController extends ApiController
      */
     private function sendResponseWithTokens(array $tokens, array $body = [], string $message = 'Success'): JsonResponse
     {
-        $rtExpireTime = (int) config('sanctum.rt_expiration');
-        $cookie = cookie('refreshToken', (string) $tokens['refreshToken'], $rtExpireTime, secure: false);
+        $rtExpiration = config('sanctum.rt_expiration');
+        $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
+
+        $cookie = cookie('refreshToken', $tokens['refreshToken'], $refreshTokenMinutes, secure: false);
 
         return $this->success(data: array_merge($body, [
             'accessToken' => $tokens['accessToken'],

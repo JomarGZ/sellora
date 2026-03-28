@@ -9,65 +9,66 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
 
 final class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void {}
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->configureRateLimiting();
         $this->overrideSanctumConfigurationToSupportRefreshToken();
     }
 
-    /**
-     * Configure the rate limiters for the application.
-     */
     private function configureRateLimiting(): void
     {
-        // Default API rate limiter - 60 requests per minute
-        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
+        RateLimiter::for(
+            'api',
+            fn (Request $request) => Limit::perMinute(60)
+                ->by($request->user()?->id ?: $request->ip())
+        );
 
-        // Auth endpoints - more restrictive (prevent brute force)
-        RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)
-            ->by(mb_strtolower($request->input('email') ?? 'guest').'|'.$request->ip())
-            ->response(fn () => response()->json([
-                'message' => 'Too many login attempts. Try again in 60 seconds.',
-            ], 429)));
+        RateLimiter::for(
+            'auth',
+            fn (Request $request) => Limit::perMinute(5)
+                ->by(mb_strtolower(is_string($request->input('email')) ? $request->input('email') : 'guest'))
+                ->response(fn () => response()->json([
+                    'message' => 'Too many login attempts. Try again in 60 seconds.',
+                ], 429))
+        );
 
-        // Authenticated user requests - higher limit
-        RateLimiter::for('authenticated', fn (Request $request) => $request->user()
-            ? Limit::perMinute(120)->by($request->user()->id)
-            : Limit::perMinute(60)->by($request->ip()));
+        RateLimiter::for(
+            'authenticated',
+            fn (Request $request) => $request->user()
+                ? Limit::perMinute(120)->by($request->user()->id)
+                : Limit::perMinute(60)->by($request->ip())
+        );
     }
 
     private function overrideSanctumConfigurationToSupportRefreshToken(): void
     {
-        Sanctum::$accessTokenAuthenticationCallback = function ($accessToken, $isValid) {
+        Sanctum::$accessTokenAuthenticationCallback = function (PersonalAccessToken $accessToken, bool $isValid): bool {
             $abilities = collect($accessToken->abilities);
+
             if ($abilities[0] === TokenAbility::ISSUE_ACCESS_TOKEN->value) {
-                return $accessToken->expires_at && $accessToken->expires_at->isFuture();
+                return $accessToken->expires_at !== null && $accessToken->expires_at->isFuture();
             }
 
             return $isValid;
         };
 
-        Sanctum::$accessTokenRetrievalCallback = function ($request) {
+        Sanctum::$accessTokenRetrievalCallback = function (Request $request): string {
             if (! $request->routeIs('api.v1.refresh.token')) {
-                return str_replace('Bearer ', '', $request->headers->get('Authorization'));
+                $header = $request->header('Authorization');
+
+                return is_string($header) ? str_replace('Bearer ', '', $header) : '';
             }
 
-            return $request->cookie('refreshToken') ?? '';
+            $cookie = $request->cookie('refreshToken');
+
+            return is_string($cookie) ? $cookie : '';
         };
     }
 }

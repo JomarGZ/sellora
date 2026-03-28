@@ -16,14 +16,14 @@ interface IRepository
     /**
      * Find a record by its ID.
      *
-     * @param  int  $id
      * @return mixed
      */
-    public function find($id);
+    public function find(int $id);
 
     /**
      * Create a new record in the repository.
      *
+     * @param  array<string, mixed>  $data
      * @return mixed
      */
     public function create(array $data);
@@ -31,16 +31,15 @@ interface IRepository
     /**
      * Update a record in the repository.
      *
-     * @param  int  $id
+     * @param  array<string, mixed>  $data
      * @return mixed
      */
-    public function update($id, array $data);
+    public function update(int $id, array $data);
 
     /**
      * Delete a record from the repository.
      *
-     * @param  int  $id
      * @return mixed
      */
-    public function delete($id);
+    public function delete(int $id);
 }

@@ -32,42 +32,42 @@ final readonly class AuthService
         return $this->userRepository->createUser($userData);
     }
 
-   /**
- * Generate access and refresh tokens for a user.
- *
- * @return array{
- *     accessToken: string,
- *     refreshToken: string,
- * }
- */
-public function generateTokens(User $user): array
-{
-    $expiration = config('sanctum.expiration');
-    $accessTokenMinutes = is_int($expiration) ? $expiration : 15;
+    /**
+     * Generate access and refresh tokens for a user.
+     *
+     * @return array{
+     *     accessToken: string,
+     *     refreshToken: string,
+     * }
+     */
+    public function generateTokens(User $user): array
+    {
+        $expiration = config('sanctum.expiration');
+        $accessTokenMinutes = is_int($expiration) ? $expiration : 15;
 
-    $rtExpiration = config('sanctum.rt_expiration');
-    $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
+        $rtExpiration = config('sanctum.rt_expiration');
+        $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
 
-    $accessTokenExpiresAt = now()->addMinutes($accessTokenMinutes);
-    $refreshTokenExpiresAt = now()->addMinutes($refreshTokenMinutes);
-    // Create tokens
-    $accessToken = $user->createToken(
-        'access_token',
-        [TokenAbility::ACCESS_API],
-        $accessTokenExpiresAt
-    );
+        $accessTokenExpiresAt = now()->addMinutes($accessTokenMinutes);
+        $refreshTokenExpiresAt = now()->addMinutes($refreshTokenMinutes);
+        // Create tokens
+        $accessToken = $user->createToken(
+            'access_token',
+            [TokenAbility::ACCESS_API],
+            $accessTokenExpiresAt
+        );
 
-    $refreshToken = $user->createToken(
-        'refresh_token',
-        [TokenAbility::ISSUE_ACCESS_TOKEN],
-        $refreshTokenExpiresAt
-    );
+        $refreshToken = $user->createToken(
+            'refresh_token',
+            [TokenAbility::ISSUE_ACCESS_TOKEN],
+            $refreshTokenExpiresAt
+        );
 
-    return [
-        'accessToken' => $accessToken->plainTextToken,
-        'refreshToken' => $refreshToken->plainTextToken,
-    ];
-}
+        return [
+            'accessToken' => $accessToken->plainTextToken,
+            'refreshToken' => $refreshToken->plainTextToken,
+        ];
+    }
 
     public function sendResetPasswordLink(string $email): string
     {
@@ -76,10 +76,10 @@ public function generateTokens(User $user): array
         ]);
     }
 
-   /**
+    /**
      * Reset the user's password.
      *
-     * @param array<string, string> $userData
+     * @param  array<string, string>  $userData
      * @return string Password reset status
      */
     public function doPasswordReset(array $userData): string
