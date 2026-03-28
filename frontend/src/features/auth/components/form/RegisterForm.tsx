@@ -1,3 +1,5 @@
+// src/features/auth/components/form/RegisterForm.tsx
+
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,12 +20,13 @@ import {
   type RegisterFormValues,
 } from "../../validation/register.schema";
 
-import { useAppToast } from "@/shared/components/feedback/AppToast";
+import { useRegisterMutation } from "../../api/register.queries";
 
 const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [isPending, setIsPending] = useState(false);
-  const { showToast } = useAppToast();
+
+  // ── Replaces the manual useState(isPending) + fake setTimeout ──────────────
+  const { mutate: register, isPending } = useRegisterMutation();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -36,23 +39,20 @@ const RegisterForm = () => {
     },
   });
 
-  const handleSubmit = async (data: RegisterFormValues) => {
-    setIsPending(true);
-    try {
-      await new Promise((r) => setTimeout(r, 500));
-
-      console.log("Register:", data);
-
-      showToast({
-        severity: "success",
-        summary: "Account created",
-        detail: "Welcome! Your account has been created.",
-      });
-
-      form.reset();
-    } finally {
-      setIsPending(false);
-    }
+  const handleSubmit = (data: RegisterFormValues) => {
+    register(
+      {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        password_confirmation: data.confirmPassword,
+      },
+      {
+        // Reset the form only on success so the user's input
+        // is preserved if the request fails (easier to correct).
+        onSuccess: () => form.reset(),
+      },
+    );
   };
 
   return (
@@ -71,6 +71,7 @@ const RegisterForm = () => {
                   {...field}
                   className="h-12 pl-10"
                   placeholder="John Doe"
+                  disabled={isPending}
                 />
               </div>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -87,7 +88,12 @@ const RegisterForm = () => {
               <FieldLabel>Email address</FieldLabel>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input {...field} type="email" className="h-12 pl-10" />
+                <Input
+                  {...field}
+                  type="email"
+                  className="h-12 pl-10"
+                  disabled={isPending}
+                />
               </div>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
@@ -107,6 +113,7 @@ const RegisterForm = () => {
                   {...field}
                   type={showPassword ? "text" : "password"}
                   className="h-12 pl-10 pr-11"
+                  disabled={isPending}
                 />
                 <button
                   type="button"
@@ -128,7 +135,12 @@ const RegisterForm = () => {
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel>Confirm password</FieldLabel>
-              <Input {...field} type="password" className="h-12" />
+              <Input
+                {...field}
+                type="password"
+                className="h-12"
+                disabled={isPending}
+              />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
@@ -144,6 +156,7 @@ const RegisterForm = () => {
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  disabled={isPending}
                 />
                 <p className="text-sm text-muted-foreground">
                   I agree to the{" "}

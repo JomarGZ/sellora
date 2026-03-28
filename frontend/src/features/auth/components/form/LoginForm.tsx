@@ -1,3 +1,5 @@
+// src/features/auth/components/form/LoginForm.tsx
+
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,12 +20,13 @@ import {
   type LoginFormValues,
 } from "../../validation/login.schema";
 
-import { useAppToast } from "@/shared/components/feedback/AppToast";
+import { useLoginMutation } from "../../api/login.queries";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [isPending, setIsPending] = useState(false);
-  const { showToast } = useAppToast();
+
+  // ── Replaces the manual useState(isPending) + fake setTimeout ──────────────
+  const { mutate: login, isPending } = useLoginMutation();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -34,23 +37,19 @@ const LoginForm = () => {
     },
   });
 
-  const handleSubmit = async (data: LoginFormValues) => {
-    setIsPending(true);
-    try {
-      await new Promise((r) => setTimeout(r, 500));
-
-      console.log("Login:", data);
-
-      showToast({
-        severity: "success",
-        summary: "Welcome back",
-        detail: "You have successfully logged in.",
-      });
-
-      form.reset();
-    } finally {
-      setIsPending(false);
-    }
+  const handleSubmit = (data: LoginFormValues) => {
+    login(
+      {
+        email: data.email,
+        password: data.password,
+        remember: data.rememberMe,
+      },
+      {
+        // Reset the form only on success so the user's input
+        // is preserved if the request fails (easier to correct).
+        onSuccess: () => form.reset(),
+      },
+    );
   };
 
   return (
@@ -70,6 +69,7 @@ const LoginForm = () => {
                   type="email"
                   className="h-12 pl-10"
                   placeholder="you@example.com"
+                  disabled={isPending}
                 />
               </div>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -91,6 +91,7 @@ const LoginForm = () => {
                   type={showPassword ? "text" : "password"}
                   className="h-12 pl-10 pr-11"
                   placeholder="••••••••"
+                  disabled={isPending}
                 />
                 <button
                   type="button"
@@ -116,6 +117,7 @@ const LoginForm = () => {
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    disabled={isPending}
                   />
                   <span className="text-sm text-muted-foreground">
                     Remember me

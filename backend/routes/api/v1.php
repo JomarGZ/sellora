@@ -22,6 +22,7 @@ Route::middleware('throttle:auth')->group(function (): void {
 
 // Protected routes with authenticated rate limiter (120/min)
 Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function (): void {
+    Route::post('refresh-token', [AuthController::class, 'refresh'])->name('api.v1.refresh.token');
     Route::post('logout', [AuthController::class, 'logout'])->name('api.v1.logout');
     Route::get('me', [AuthController::class, 'me'])->name('api.v1.me');
 

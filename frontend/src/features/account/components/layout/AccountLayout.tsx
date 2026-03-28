@@ -7,6 +7,7 @@ import AccountSidebar from "./AccountSidebar";
 import { Button } from "@/shared/components/ui/button";
 import { ProfileHeader } from "@/features/account/components/ui/ProfileHeader";
 import AccountMobileNav from "../navigation/AccountMobileNav";
+import { useAuth } from "@/providers/AuthProvider";
 
 function ErrorFallback({ error, resetErrorBoundary }: any) {
   return (
@@ -21,6 +22,7 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 }
 
 export function AccountLayout() {
+  const { logout } = useAuth();
   const matches = useMatches();
   const lastMatch = matches[matches.length - 1];
   const pageTitle = lastMatch.context?.pageTitle;
@@ -36,7 +38,7 @@ export function AccountLayout() {
         {true && <h1 className="text-2xl font-bold mb-6">{pageTitle}</h1>}
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-          <AccountSidebar />
+          <AccountSidebar onLogout={logout} />
 
           {/* Mobile nav */}
           <div className="lg:hidden">
