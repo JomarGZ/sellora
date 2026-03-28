@@ -1,36 +1,40 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
-class UserRepository extends BaseRepository
+final class UserRepository extends BaseRepository
 {
     public function __construct(User $user)
     {
         parent::__construct($user);
     }
 
-    public function create($userData)
+    /**
+     * Create a new user with hashed password and default role.
+     *
+     * @param array<string, mixed> $userData
+     */
+    public function createUser($userData): User
     {
         $userData['password'] = Hash::make($userData['password']);
-        $userData['role_id'] = $userData['role_id'] ?? 1;
+        $userData['role_id'] ??= 1;
 
-        return $this->model->create($userData);
+        return parent::create($userData);
     }
 
-    public function update($id, array $userData)
+    public function updateUser($id, array $userData)
     {
         if (isset($userData['password'])) {
             $userData['password'] = Hash::make($userData['password']);
             unset($userData['password_confirmation']);
         }
 
-        $user = $this->model->find($id);
-        $user->update($userData);
-
-        return $user->fresh();
+        return parent::update($id, $userData);
     }
 
     public function checkEmailExists($email): bool
@@ -38,8 +42,8 @@ class UserRepository extends BaseRepository
         return $this->model->whereEmail($email)->count() > 0;
     }
 
-    public function paginate(int $perPage)
+    public function paginateUsers(int $perPage)
     {
-        return $this->model->paginate($perPage);
+        return parent::paginate($perPage);
     }
 }

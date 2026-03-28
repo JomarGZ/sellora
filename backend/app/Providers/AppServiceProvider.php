@@ -39,15 +39,11 @@ final class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
 
         // Auth endpoints - more restrictive (prevent brute force)
-        RateLimiter::for('auth', function (Request $request) {
-            return Limit::perMinute(5)
-                ->by(strtolower($request->input('email') ?? 'guest') . '|' . $request->ip())
-                ->response(function () {
-                    return response()->json([
-                        'message' => 'Too many login attempts. Try again in 60 seconds.'
-                    ], 429);
-                });
-        });
+        RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)
+            ->by(mb_strtolower($request->input('email') ?? 'guest').'|'.$request->ip())
+            ->response(fn () => response()->json([
+                'message' => 'Too many login attempts. Try again in 60 seconds.',
+            ], 429)));
 
         // Authenticated user requests - higher limit
         RateLimiter::for('authenticated', fn (Request $request) => $request->user()
@@ -59,7 +55,7 @@ final class AppServiceProvider extends ServiceProvider
     {
         Sanctum::$accessTokenAuthenticationCallback = function ($accessToken, $isValid) {
             $abilities = collect($accessToken->abilities);
-            if (!empty($abilities) && $abilities[0] === TokenAbility::ISSUE_ACCESS_TOKEN->value) {
+            if ($abilities[0] === TokenAbility::ISSUE_ACCESS_TOKEN->value) {
                 return $accessToken->expires_at && $accessToken->expires_at->isFuture();
             }
 
@@ -67,7 +63,7 @@ final class AppServiceProvider extends ServiceProvider
         };
 
         Sanctum::$accessTokenRetrievalCallback = function ($request) {
-            if (!$request->routeIs('api.v1.refresh.token')) {
+            if (! $request->routeIs('api.v1.refresh.token')) {
                 return str_replace('Bearer ', '', $request->headers->get('Authorization'));
             }
 
