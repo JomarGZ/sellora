@@ -46,17 +46,17 @@ final class AuthController extends ApiController
         ]);
     }
 
-    private function sendResponseWithTokens(array $tokens, $body = []): JsonResponse
+    private function sendResponseWithTokens(array $tokens, $body = [], string $message = 'Success'): JsonResponse
     {
         $rtExpireTime = config('sanctum.rt_expiration');
         $cookie = cookie('refreshToken', $tokens['refreshToken'], $rtExpireTime, secure: false);
 
-        return $this->success(array_merge($body, [
+        return $this->success(data: array_merge($body, [
             'accessToken' => $tokens['accessToken']
-        ]))->withCookie($cookie);
+        ]), message: $message)->withCookie($cookie);
     }
 
-      public function login(LoginRequest $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
         if (!Auth::attempt($credentials)) {
@@ -66,9 +66,11 @@ final class AuthController extends ApiController
         $user = Auth::user();
         $tokens = $this->service->generateTokens($user);
 
-        return $this->sendResponseWithTokens($tokens, [
-            'user' => UserResource::make($user)
-        ]);
+        return $this->sendResponseWithTokens(
+            tokens: $tokens, 
+            body: ['user' => UserResource::make($user)],
+            message: 'You have successfully logged in.'
+        );
     }
 
     public function logout(Request $request): JsonResponse

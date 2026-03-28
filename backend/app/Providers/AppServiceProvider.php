@@ -39,7 +39,15 @@ final class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by($request->user()?->id ?: $request->ip()));
 
         // Auth endpoints - more restrictive (prevent brute force)
-        RateLimiter::for('auth', fn (Request $request) => Limit::perMinute(5)->by($request->ip()));
+        RateLimiter::for('auth', function (Request $request) {
+            return Limit::perMinute(5)
+                ->by(strtolower($request->input('email') ?? 'guest') . '|' . $request->ip())
+                ->response(function () {
+                    return response()->json([
+                        'message' => 'Too many login attempts. Try again in 60 seconds.'
+                    ], 429);
+                });
+        });
 
         // Authenticated user requests - higher limit
         RateLimiter::for('authenticated', fn (Request $request) => $request->user()
