@@ -1,76 +1,107 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
+use RuntimeException;
 
+/**
+ * @template TModel of Model
+ */
 abstract class BaseRepository implements IRepository
 {
-	protected $model;
+    /**
+     * @param  TModel  $model
+     */
+    public function __construct(protected Model $model) {}
 
-	public function __construct(Model $model)
-	{
-		$this->model = $model;
-	}
+    final public function all()
+    {
+        return $this->model->all();
+    }
 
-	public function all()
-	{
-		return $this->model->all();
-	}
+    /**
+     * @return TModel|null
+     */
+    final public function find(int $id)
+    {
+        return $this->model->find($id); // @phpstan-ignore-line
+    }
 
-	public function find($id)
-	{
-		return $this->model->find($id);
-	}
+    /**
+     * @param  array<string, mixed>  $data
+     * @return TModel
+     */
+    final public function create(array $data)
+    {
+        return $this->model->create($data); // @phpstan-ignore-line
+    }
 
-	public function create(array $data)
-	{
-		return $this->model->create($data);
-	}
+    /**
+     * @param  array<string, mixed>  $data
+     * @return TModel
+     */
+    final public function update(int $id, array $data)
+    {
+        $record = $this->model->find($id);
 
-	public function update($id, array $data)
-	{
-		$record = $this->model->find($id);
-		$record->update($data);
+        throw_unless($record, RuntimeException::class, sprintf('Record with ID %d not found.', $id));
 
-		return $record->fresh();
-	}
+        $record->update($data);
 
-	public function delete($id)
-	{
-		return $this->model->destroy($id);
-	}
+        return $record->fresh(); // @phpstan-ignore-line
+    }
 
-	public function paginate(int $perPage)
-	{
-		return $this->model->paginate($perPage);
-	}
+    final public function delete(int $id)
+    {
+        return $this->model->destroy($id);
+    }
 
-	public function checkIsExists(int | array $id): bool
-	{
-		$isExists = false;
+    /**
+     * @return LengthAwarePaginator<int, TModel>
+     */
+    final public function paginate(int $perPage): LengthAwarePaginator
+    {
+        return $this->model->paginate($perPage); // @phpstan-ignore-line
+    }
 
-		if (is_array($id)) {
-			foreach ($id as $modelId) {
-				$model = $this->model->find($modelId);
-				if ($model) $isExists = true;
-			}
+    /**
+     * @param  int|array<int>  $id
+     */
+    final public function checkIsExists(int|array $id): bool
+    {
+        $isExists = false;
 
-			return $isExists;
-		}
+        if (is_array($id)) {
+            foreach ($id as $modelId) {
+                $model = $this->model->find($modelId);
+                if ($model) {
+                    $isExists = true;
+                }
+            }
 
-		return boolval($this->model->find($id));
-	}
+            return $isExists;
+        }
 
-	protected function format(array $data): array
-	{
-		$saveCopy = [];
+        return (bool) ($this->model->find($id));
+    }
 
-		foreach ($data as $key => $value) {
-			$saveCopy[Str::snake($key)] = $value;
-		}
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function format(array $data): array
+    {
+        $saveCopy = [];
 
-		return $saveCopy;
-	}
+        foreach ($data as $key => $value) {
+            $saveCopy[Str::snake($key)] = $value;
+        }
+
+        return $saveCopy;
+    }
 }

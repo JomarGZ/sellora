@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\TokenAbility;
@@ -10,42 +12,56 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
-class AuthService
+final readonly class AuthService
 {
     public function __construct(
-        private readonly UserRepository $userRepository,
-    )
-    {
-    }
+        private UserRepository $userRepository,
+    ) {}
 
     /**
-     * @param $userData
-     *
-     * @return User
-     * @throws Exception
+     * @param array{
+     *     name: string,
+     *     email: string,
+     *     password: string
+     * } $userData
      */
-    public function doRegistration($userData): User
+    public function doRegistration(array $userData): User
     {
-        if ($this->userRepository->checkEmailExists($userData['email'])) {
-            throw new Exception('The email is already taken.');
-        }
+        throw_if($this->userRepository->checkEmailExists($userData['email']), Exception::class, 'The email is already taken.');
 
-        return $this->userRepository->create($userData);
+        return $this->userRepository->createUser($userData);
     }
 
     /**
+     * Generate access and refresh tokens for a user.
+     *
      * @return array{
      *     accessToken: string,
      *     refreshToken: string,
      * }
      */
-    public function generateTokens($user): array
+    public function generateTokens(User $user): array
     {
-        $atExpireTime = now()->addMinutes(config('sanctum.expiration'));
-        $rtExpireTime = now()->addMinutes(config('sanctum.rt_expiration'));
+        $expiration = config('sanctum.expiration');
+        $accessTokenMinutes = is_int($expiration) ? $expiration : 15;
 
-        $accessToken = $user->createToken('access_token', [TokenAbility::ACCESS_API], $atExpireTime);
-        $refreshToken = $user->createToken('refresh_token', [TokenAbility::ISSUE_ACCESS_TOKEN], $rtExpireTime);
+        $rtExpiration = config('sanctum.rt_expiration');
+        $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
+
+        $accessTokenExpiresAt = now()->addMinutes($accessTokenMinutes);
+        $refreshTokenExpiresAt = now()->addMinutes($refreshTokenMinutes);
+        // Create tokens
+        $accessToken = $user->createToken(
+            'access_token',
+            [TokenAbility::ACCESS_API],
+            $accessTokenExpiresAt
+        );
+
+        $refreshToken = $user->createToken(
+            'refresh_token',
+            [TokenAbility::ISSUE_ACCESS_TOKEN],
+            $refreshTokenExpiresAt
+        );
 
         return [
             'accessToken' => $accessToken->plainTextToken,
@@ -53,23 +69,33 @@ class AuthService
         ];
     }
 
-    public function sendResetPasswordLink($email): string
+    public function sendResetPasswordLink(string $email): string
     {
         return Password::sendResetLink([
-            'email' => $email
+            'email' => $email,
         ]);
     }
 
-    public function doPasswordReset($userData) {
-        return Password::reset(
+    /**
+     * Reset the user's password.
+     *
+     * @param  array<string, string>  $userData
+     * @return string Password reset status
+     */
+    public function doPasswordReset(array $userData): string
+    {
+        /** @var string $status Laravel always returns a string constant */
+        $status = Password::reset(
             $userData,
-            function (User $user, string $password) {
+            function (User $user, string $password): void {
                 $user->forceFill([
-                    'password' => Hash::make($password)
-                ]);
-                $user->save();
+                    'password' => Hash::make($password),
+                ])->save();
+
                 event(new PasswordReset($user));
             }
         );
+
+        return $status;
     }
 }

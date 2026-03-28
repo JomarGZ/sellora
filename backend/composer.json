@@ -1,9 +1,19 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "grazulex/laravel-api-kit",
-    "type": "project",
-    "description": "Laravel REST API starter kit with Sanctum, Spatie packages, Scramble docs, and Pest testing.",
-    "keywords": ["laravel", "api", "rest", "starter-kit", "sanctum"],
+    "name": "jomar/sellora-api",
+    "description": "Sellora E-commerce REST API built with Laravel, Sanctum, Spatie Query Builder, and Pest. Includes authentication, product catalog, cart, orders, and payment workflow.",
+    "keywords": [
+        "laravel",
+        "ecommerce",
+        "rest-api",
+        "sanctum",
+        "spatie",
+        "pest",
+        "phpstan",
+        "rector",
+        "docker",
+        "sail"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.3",

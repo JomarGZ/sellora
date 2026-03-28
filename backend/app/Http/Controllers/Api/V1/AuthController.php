@@ -14,6 +14,7 @@ use App\Http\Requests\Api\V1\VerifyEmailRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\AuthService;
+use Exception;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
@@ -26,48 +27,42 @@ final class AuthController extends ApiController
 {
     public function __construct(
         private readonly AuthService $service
-    )
-    {
-    }
+    ) {}
+
     public function register(RegisterRequest $request): JsonResponse
     {
+        /** @var array{name: string, email: string, password: string} $userData */
         $userData = $request->validated();
 
         try {
             $user = $this->service->doRegistration($userData);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             return $this->error(message: $exception->getMessage());
         }
 
         $tokens = $this->service->generateTokens($user);
 
         return $this->sendResponseWithTokens($tokens, [
-            'user' => UserResource::make($user)
+            'user' => UserResource::make($user),
         ]);
-    }
-
-    private function sendResponseWithTokens(array $tokens, $body = [], string $message = 'Success'): JsonResponse
-    {
-        $rtExpireTime = config('sanctum.rt_expiration');
-        $cookie = cookie('refreshToken', $tokens['refreshToken'], $rtExpireTime, secure: false);
-
-        return $this->success(data: array_merge($body, [
-            'accessToken' => $tokens['accessToken']
-        ]), message: $message)->withCookie($cookie);
     }
 
     public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
-        if (!Auth::attempt($credentials)) {
+        if (! Auth::attempt($credentials)) {
             return $this->error(message: 'Wrong credentials.');
         }
 
         $user = Auth::user();
+        if (! $user instanceof User) {
+            return $this->error('Unauthenticated.', 401);
+        }
+
         $tokens = $this->service->generateTokens($user);
 
         return $this->sendResponseWithTokens(
-            tokens: $tokens, 
+            tokens: $tokens,
             body: ['user' => UserResource::make($user)],
             message: 'You have successfully logged in.'
         );
@@ -75,9 +70,8 @@ final class AuthController extends ApiController
 
     public function logout(Request $request): JsonResponse
     {
-        if (Auth::check()) {
-            $request->user()->tokens()->delete();
-        }
+        $request->user()?->tokens()->delete();
+
         $cookie = cookie()->forget('refreshToken');
 
         return $this
@@ -87,12 +81,14 @@ final class AuthController extends ApiController
 
     public function refresh(Request $request): JsonResponse
     {
+        /** @var User $user */
         $user = Auth::user();
-        $request->user()->tokens()->delete();
+
+        $user->tokens()->delete();
         $tokens = $this->service->generateTokens($user);
 
         return $this->sendResponseWithTokens($tokens, [
-            'user' => UserResource::make($user)
+            'user' => UserResource::make($user),
         ]);
     }
 
@@ -169,5 +165,21 @@ final class AuthController extends ApiController
             },
             400
         );
+    }
+
+    /**
+     * @param  array{accessToken: string, refreshToken: string}  $tokens
+     * @param  array<string, mixed>  $body
+     */
+    private function sendResponseWithTokens(array $tokens, array $body = [], string $message = 'Success'): JsonResponse
+    {
+        $rtExpiration = config('sanctum.rt_expiration');
+        $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
+
+        $cookie = cookie('refreshToken', $tokens['refreshToken'], $refreshTokenMinutes, secure: false);
+
+        return $this->success(data: array_merge($body, [
+            'accessToken' => $tokens['accessToken'],
+        ]), message: $message)->withCookie($cookie);
     }
 }
