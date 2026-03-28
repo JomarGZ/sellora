@@ -53,6 +53,7 @@ final class AuthController extends ApiController
         if (! Auth::attempt($credentials)) {
             return $this->error(message: 'Wrong credentials.');
         }
+
         $user = Auth::user();
         if (! $user instanceof User) {
             return $this->error('Unauthenticated.', 401);
