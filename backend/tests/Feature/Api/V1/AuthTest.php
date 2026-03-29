@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
@@ -22,7 +23,7 @@ describe('Registration', function (): void {
                 'message',
                 'data' => [
                     'user' => ['id', 'name', 'email'],
-                    'token',
+                    'accessToken',
                 ],
             ])
             ->assertJson([
@@ -33,6 +34,7 @@ describe('Registration', function (): void {
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
         ]);
+        $response->assertCookie('refreshToken');
     });
 
     it('fails registration with invalid data', function (): void {
@@ -76,13 +78,14 @@ describe('Login', function (): void {
                 'message',
                 'data' => [
                     'user' => ['id', 'name', 'email'],
-                    'token',
+                    'accessToken',
                 ],
             ])
             ->assertJson([
                 'success' => true,
-                'message' => 'Login successful',
+                'message' => 'You have successfully logged in.',
             ]);
+        $response->assertCookie('refreshToken');
     });
 
     it('fails login with invalid credentials', function (): void {
@@ -98,7 +101,7 @@ describe('Login', function (): void {
         $response->assertStatus(401)
             ->assertJson([
                 'success' => false,
-                'message' => 'Invalid credentials',
+                'message' => 'Wrong credentials.',
             ]);
     });
 
@@ -123,7 +126,7 @@ describe('Logout', function (): void {
         $response->assertStatus(200)
             ->assertJson([
                 'success' => true,
-                'message' => 'Logged out successfully',
+                'message' => 'Successfully logged out.',
             ]);
     });
 
@@ -134,32 +137,39 @@ describe('Logout', function (): void {
     });
 });
 
-describe('Me', function (): void {
-    it('returns authenticated user data', function (): void {
-        $user = User::factory()->create();
-        $token = $user->createToken('test-token')->plainTextToken;
+describe('Refresh token and user details', function (): void {
+    it('returns new tokens and authenticated user data', function (): void {
+         $user = User::factory()->create();
 
-        $response = $this->withHeader('Authorization', 'Bearer '.$token)
-            ->getJson('/api/v1/me');
+    Sanctum::actingAs($user); // simulate logged in user
 
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'success',
-                'message',
-                'data' => ['id', 'name', 'email'],
-            ])
-            ->assertJson([
-                'success' => true,
-                'data' => [
+    $response = $this->postJson('/api/v1/refresh-token');
+
+    $response->assertStatus(200)
+        ->assertJsonStructure([
+            'success',
+            'message',
+            'data' => [
+                'user' => ['id', 'name', 'email'],
+                'accessToken',
+            ],
+        ])
+        ->assertJson([
+            'success' => true,
+            'data' => [
+                'user' => [
                     'id' => $user->id,
                     'email' => $user->email,
                 ],
-            ]);
+            ],
+        ]);
+
+    $response->assertCookie('refreshToken');
+
     });
 
     it('fails without authentication', function (): void {
-        $response = $this->getJson('/api/v1/me');
-
+        $response = $this->postJson('/api/v1/refresh-token');
         $response->assertStatus(401);
     });
 });
