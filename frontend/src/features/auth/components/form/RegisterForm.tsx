@@ -64,7 +64,7 @@ const RegisterForm = () => {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Full name</FieldLabel>
+              <FieldLabel required>Full name</FieldLabel>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -85,7 +85,7 @@ const RegisterForm = () => {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Email address</FieldLabel>
+              <FieldLabel required>Email address</FieldLabel>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -106,7 +106,7 @@ const RegisterForm = () => {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Password</FieldLabel>
+              <FieldLabel required>Password</FieldLabel>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -134,7 +134,7 @@ const RegisterForm = () => {
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel>Confirm password</FieldLabel>
+              <FieldLabel required>Confirm password</FieldLabel>
               <Input
                 {...field}
                 type="password"

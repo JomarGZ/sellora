@@ -24,7 +24,6 @@ Route::middleware('throttle:auth')->group(function (): void {
 Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function (): void {
     Route::post('refresh-token', [AuthController::class, 'refresh'])->name('api.v1.refresh.token');
     Route::post('logout', [AuthController::class, 'logout'])->name('api.v1.logout');
-    Route::get('me', [AuthController::class, 'me'])->name('api.v1.me');
 
     // Email verification
     Route::post('email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])

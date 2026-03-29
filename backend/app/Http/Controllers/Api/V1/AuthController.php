@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Symfony\Component\HttpFoundation\Response;
 
 final class AuthController extends ApiController
 {
@@ -42,16 +43,21 @@ final class AuthController extends ApiController
 
         $tokens = $this->service->generateTokens($user);
 
-        return $this->sendResponseWithTokens($tokens, [
+         return $this->sendResponseWithTokens(
+        tokens: $tokens,
+        body: [
             'user' => UserResource::make($user),
-        ]);
+        ],
+        message: 'User registered successfully. Please check your email to verify your account.',
+        code: Response::HTTP_CREATED // <-- set 201
+    );
     }
 
     public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
         if (! Auth::attempt($credentials)) {
-            return $this->error(message: 'Wrong credentials.');
+            return $this->error(message: 'Wrong credentials.', code: Response::HTTP_UNAUTHORIZED);
         }
 
         $user = Auth::user();
@@ -171,7 +177,7 @@ final class AuthController extends ApiController
      * @param  array{accessToken: string, refreshToken: string}  $tokens
      * @param  array<string, mixed>  $body
      */
-    private function sendResponseWithTokens(array $tokens, array $body = [], string $message = 'Success'): JsonResponse
+    private function sendResponseWithTokens(array $tokens, array $body = [], string $message = 'Success', $code = Response::HTTP_OK): JsonResponse
     {
         $rtExpiration = config('sanctum.rt_expiration');
         $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
@@ -180,6 +186,6 @@ final class AuthController extends ApiController
 
         return $this->success(data: array_merge($body, [
             'accessToken' => $tokens['accessToken'],
-        ]), message: $message)->withCookie($cookie);
+        ]), message: $message, code: $code)->withCookie($cookie);
     }
 }
