@@ -43,14 +43,14 @@ final class AuthController extends ApiController
 
         $tokens = $this->service->generateTokens($user);
 
-         return $this->sendResponseWithTokens(
-        tokens: $tokens,
-        body: [
-            'user' => UserResource::make($user),
-        ],
-        message: 'User registered successfully. Please check your email to verify your account.',
-        code: Response::HTTP_CREATED // <-- set 201
-    );
+        return $this->sendResponseWithTokens(
+            tokens: $tokens,
+            body: [
+                'user' => UserResource::make($user),
+            ],
+            message: 'User registered successfully. Please check your email to verify your account.',
+            code: Response::HTTP_CREATED
+        );
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -63,6 +63,12 @@ final class AuthController extends ApiController
         $user = Auth::user();
         if (! $user instanceof User) {
             return $this->error('Unauthenticated.', 401);
+        }
+
+        if ($user->is_admin) {
+            Auth::logout();
+
+            return $this->error(message: 'Access denied', code: Response::HTTP_FORBIDDEN);
         }
 
         $tokens = $this->service->generateTokens($user);
@@ -177,7 +183,7 @@ final class AuthController extends ApiController
      * @param  array{accessToken: string, refreshToken: string}  $tokens
      * @param  array<string, mixed>  $body
      */
-    private function sendResponseWithTokens(array $tokens, array $body = [], string $message = 'Success', $code = Response::HTTP_OK): JsonResponse
+    private function sendResponseWithTokens(array $tokens, array $body = [], string $message = 'Success', int $code = Response::HTTP_OK): JsonResponse
     {
         $rtExpiration = config('sanctum.rt_expiration');
         $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
