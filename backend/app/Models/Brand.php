@@ -8,12 +8,15 @@ use Database\Factories\BrandFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 final class Brand extends Model
 {
     /** @use HasFactory<BrandFactory> */
     use HasFactory;
 
+    use HasSlug;
     use SoftDeletes;
 
     protected $fillable = [
@@ -21,4 +24,11 @@ final class Brand extends Model
         'slug',
         'logo',
     ];
+
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('slug');
+    }
 }
