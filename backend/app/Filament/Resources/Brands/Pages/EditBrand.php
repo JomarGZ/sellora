@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Brands\Pages;
 
 use App\Filament\Resources\Brands\BrandResource;
@@ -9,7 +11,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditBrand extends EditRecord
+final class EditBrand extends EditRecord
 {
     protected static string $resource = BrandResource::class;
 

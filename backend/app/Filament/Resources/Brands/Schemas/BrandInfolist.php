@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Brands\Schemas;
 
 use App\Models\Brand;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
-class BrandInfolist
+final class BrandInfolist
 {
     public static function configure(Schema $schema): Schema
     {
