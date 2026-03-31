@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\Brand;
+use App\Models\ProductCategory;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,17 +15,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_categories', function (Blueprint $table): void {
+        Schema::create('products', function (Blueprint $table): void {
             $table->id();
-            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreignIdFor(Brand::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ProductCategory::class)->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
+            $table->text('description');
             $table->timestamps();
-
-            $table->foreign('parent_id')
-                ->references('id')
-                ->on('product_categories')
-                ->onDelete('cascade');
 
             $table->softDeletes();
         });
@@ -34,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_categories');
+        Schema::dropIfExists('products');
     }
 };

@@ -26,7 +26,7 @@ final class ProductCategoryFactory extends Factory
 
     public function withParent(): static
     {
-        return $this->state(fn(): array => [
+        return $this->state(fn (): array => [
             'parent_id' => ProductCategory::factory(),
         ]);
     }
