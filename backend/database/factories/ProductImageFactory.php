@@ -23,7 +23,14 @@ final class ProductImageFactory extends Factory
         return [
             'product_id' => Product::factory(),
             'image_path' => 'https://placehold.co/800x600',
-            'is_primary' => fake()->boolean(20),
+            'is_primary' => false,
         ];
+    }
+
+    public function primary(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'is_primary' => true,
+        ]);
     }
 }
