@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Brand;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,8 +21,12 @@ final class ProductFactory extends Factory
      */
     public function definition(): array
     {
+
         return [
-            //
+            'brand_id' => Brand::inRandomOrder()->value('id') ?? Brand::factory(),
+            'product_category_id' => ProductCategory::inRandomOrder()->value('id') ?? ProductCategory::factory(),
+            'name' => fake()->unique()->sentence(3),
+            'description' => fake()->paragraph(2, true),
         ];
     }
 }

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Brand;
+use App\Models\ProductImage;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Brand>
+ * @extends Factory<ProductImage>
  */
-final class BrandFactory extends Factory
+final class ProductImageFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -20,8 +21,9 @@ final class BrandFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->company(),
-            'logo' => 'https://placehold.co/800x600',
+            'product_id' => Product::factory(),
+            'image_path' => 'https://placehold.co/800x600',
+            'is_primary' => fake()->boolean(20),
         ];
     }
 }
