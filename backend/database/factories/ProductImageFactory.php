@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\ProductImage;
 use App\Models\Product;
+use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -29,7 +29,7 @@ final class ProductImageFactory extends Factory
 
     public function primary(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'is_primary' => true,
         ]);
     }

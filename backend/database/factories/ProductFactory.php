@@ -23,8 +23,8 @@ final class ProductFactory extends Factory
     {
 
         return [
-            'brand_id' => Brand::inRandomOrder()->value('id') ?? Brand::factory(),
-            'product_category_id' => ProductCategory::inRandomOrder()->value('id') ?? ProductCategory::factory(),
+            'brand_id' => Brand::query()->inRandomOrder()->value('id') ?? Brand::factory(),
+            'product_category_id' => ProductCategory::query()->inRandomOrder()->value('id') ?? ProductCategory::factory(),
             'name' => fake()->unique()->sentence(3),
             'description' => fake()->paragraph(2, true),
         ];

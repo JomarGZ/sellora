@@ -1,15 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
+use App\Models\Attribute;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Attribute>
+ * @extends Factory<Attribute>
  */
-class AttributeFactory extends Factory
+final class AttributeFactory extends Factory
 {
+    /**
+     * @var array<int, string>
+     */
     private static array $attributes = ['Color', 'Size', 'Material', 'Weight', 'Style'];
+
     private static int $index = 0;
 
     /**
@@ -21,16 +28,16 @@ class AttributeFactory extends Factory
     {
         $name = self::$attributes[self::$index % count(self::$attributes)];
         self::$index++;
-    
+
         return [
-            'name' => $name
+            'name' => $name,
         ];
     }
 
     public function named(string $name): static
     {
-        return $this->state(fn() => [
-            'name' => $name
+        return $this->state(fn (): array => [
+            'name' => $name,
         ]);
     }
 }
