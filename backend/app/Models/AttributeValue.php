@@ -8,6 +8,7 @@ use Database\Factories\AttributeValueFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 final class AttributeValue extends Model
 {
@@ -27,5 +28,15 @@ final class AttributeValue extends Model
     public function attribute(): BelongsTo
     {
         return $this->belongsTo(Attribute::class);
+    }
+
+    /**
+     * The items that belong to the attribute value.
+     *
+     * @return BelongsToMany<ProductItem, $this>
+     */
+    public function items(): BelongsToMany
+    {
+        return $this->belongsToMany(ProductItem::class, 'product_item_attribute_values');
     }
 }

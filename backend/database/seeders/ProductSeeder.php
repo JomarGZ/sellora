@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Attribute;
@@ -8,13 +10,13 @@ use App\Models\Product;
 use App\Models\ProductItem;
 use Illuminate\Database\Seeder;
 
-class ProductSeeder extends Seeder
+final class ProductSeeder extends Seeder
 {
     public function run(): void
     {
         // 1. Create attributes with values
         $color = Attribute::factory()->named('Color')->create();
-        $size  = Attribute::factory()->named('Size')->create();
+        $size = Attribute::factory()->named('Size')->create();
 
         $colors = AttributeValue::factory()
             ->count(4)
@@ -30,7 +32,7 @@ class ProductSeeder extends Seeder
         Product::factory()
             ->count(10)
             ->create()
-            ->each(function (Product $product) use ($colors, $sizes) {
+            ->each(function (Product $product) use ($colors, $sizes): void {
 
                 // Product-level images (1 primary + 1 extra)
                 $product->images()->createMany([
@@ -45,7 +47,7 @@ class ProductSeeder extends Seeder
                         /** @var ProductItem $item */
                         $item = ProductItem::factory()->create([
                             'product_id' => $product->id,
-                            'sku'        => strtoupper($product->slug . '-' . $color->value . '-' . $size->value),
+                            'sku' => mb_strtoupper($product->slug.'-'.$color->value.'-'.$size->value),
                         ]);
 
                         // Attach attribute values to the SKU
