@@ -19,6 +19,8 @@ return new class extends Migration
             $table->foreignIdFor(Attribute::class)->constrained()->cascadeOnDelete();
             $table->string('value');
             $table->timestamps();
+
+            $table->softDeletes();
         });
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Brands\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -15,9 +16,11 @@ final class BrandForm
             ->components([
                 TextInput::make('name')
                     ->required(),
-                TextInput::make('slug')
-                    ->required(),
-                TextInput::make('logo')
+                FileUpload::make('logo')
+                    ->disk(config('filesystems.default'))
+                    ->image()
+                    ->directory('brands')
+                    ->visibility('public')
                     ->required(),
             ]);
     }

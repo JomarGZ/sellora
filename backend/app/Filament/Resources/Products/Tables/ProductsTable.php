@@ -33,6 +33,9 @@ class ProductsTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('product_items_count')
+                    ->label('SKUs')
+                    ->counts('productItems'),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
