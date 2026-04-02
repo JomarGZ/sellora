@@ -18,8 +18,6 @@ final class ProductCategoryForm
                     ->relationship('parent', 'name'),
                 TextInput::make('name')
                     ->required(),
-                TextInput::make('slug')
-                    ->required(),
             ]);
     }
 }

@@ -10,20 +10,29 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
-
+    use HasSlug;
     use SoftDeletes;
 
     protected $fillable = [
         'brand_id',
-        'produt_category_id',
+        'product_category_id',
         'name',
         'description',
     ];
+
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('slug');
+    }
 
     /**
      * This product belongs to a brand
@@ -56,12 +65,17 @@ final class Product extends Model
     }
 
     /**
-     * This product has many items
+     * This product has many items  
      *
      * @return HasMany<ProductItem, $this>
      */
     public function productItems(): HasMany
     {
         return $this->hasMany(ProductItem::class);
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_primary', true);
     }
 }

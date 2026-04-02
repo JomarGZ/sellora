@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('image_path');
             $table->boolean('is_primary')->default(false);
             $table->timestamps();
+
+            $table->unique(['product_id', 'is_primary']);
         });
     }
 
