@@ -14,8 +14,9 @@ final class Attribute extends Model
 {
     /** @use HasFactory<AttributeFactory> */
     use HasFactory;
+
     use SoftDeletes;
-    
+
     protected $fillable = [
         'name',
     ];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Attributes;
 
 use App\Filament\Resources\Attributes\Pages\CreateAttribute;
@@ -18,7 +20,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
-class AttributeResource extends Resource
+final class AttributeResource extends Resource
 {
     protected static ?string $model = Attribute::class;
 
@@ -39,7 +41,7 @@ class AttributeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ValuesRelationManager::class
+            ValuesRelationManager::class,
         ];
     }
 

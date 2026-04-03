@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
@@ -17,6 +18,7 @@ final class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
     use HasFactory;
+
     use HasSlug;
     use SoftDeletes;
 
@@ -65,7 +67,7 @@ final class Product extends Model
     }
 
     /**
-     * This product has many items  
+     * This product has many items
      *
      * @return HasMany<ProductItem, $this>
      */
@@ -74,7 +76,12 @@ final class Product extends Model
         return $this->hasMany(ProductItem::class);
     }
 
-    public function primaryImage()
+    /**
+     * This product has one primary image.
+     *
+     * @return HasOne<ProductImage, $this>
+     */
+    public function primaryImage(): HasOne
     {
         return $this->hasOne(ProductImage::class)->where('is_primary', true);
     }

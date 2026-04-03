@@ -15,6 +15,7 @@ final class AttributeValue extends Model
 {
     /** @use HasFactory<AttributeValueFactory> */
     use HasFactory;
+
     use SoftDeletes;
 
     protected $fillable = [
@@ -37,7 +38,7 @@ final class AttributeValue extends Model
      *
      * @return BelongsToMany<ProductItem, $this>
      */
-    public function items(): BelongsToMany
+    public function productItems(): BelongsToMany
     {
         return $this->belongsToMany(ProductItem::class, 'product_item_attribute_values');
     }

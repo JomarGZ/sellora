@@ -17,7 +17,6 @@ final class BrandForm
                 TextInput::make('name')
                     ->required(),
                 FileUpload::make('logo')
-                    ->disk(config('filesystems.default'))
                     ->image()
                     ->directory('brands')
                     ->visibility('public')

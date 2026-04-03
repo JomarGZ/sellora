@@ -16,8 +16,9 @@ final class ProductItem extends Model
 {
     /** @use HasFactory<ProductItemFactory> */
     use HasFactory;
+
     use SoftDeletes;
-    
+
     protected $fillable = [
         'product_id',
         'sku',

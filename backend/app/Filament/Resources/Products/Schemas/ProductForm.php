@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Products\Schemas;
 
+use Closure;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -11,7 +14,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class ProductForm
+final class ProductForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -35,8 +38,8 @@ class ProductForm
                             ->required()
                             ->maxLength(255),
                         RichEditor::make('description')
-                            ->columnSpanFull()
-                        
+                            ->columnSpanFull(),
+
                     ])
                     ->columns(2),
 
@@ -54,41 +57,40 @@ class ProductForm
                                 Toggle::make('is_primary')
                                     ->label('Primary Image')
                                     ->live()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get): void {
                                         if ($state) {
                                             $images = $get('../../images');
 
                                             foreach ($images as $index => $image) {
-                                                $set("../../images.$index.is_primary", false);
+                                                $set(sprintf('../../images.%s.is_primary', $index), false);
                                             }
 
                                             $set('is_primary', true);
                                         }
-                                    })
+                                    }),
 
                             ])
                             ->columns(2)
                             ->addActionLabel('Add Image')
-                            ->afterStateUpdated(function ($state, Callable $set) {
+                            ->afterStateUpdated(function ($state, callable $set): void {
                                 $hasPrimary = collect($state)->contains('is_primary', true);
 
                                 if (! $hasPrimary && count($state) > 0) {
                                     $set('images.0.is_primary', true);
                                 }
                             })
-                            ->rules(function () {
-                                return function ($attribute, $value, $fail) {
-                                    $primaryCount = collect($value)->where('is_primary', true)->count();
+                            ->rules(fn (): Closure => function ($attribute, $value, $fail): void {
+                                $primaryCount = collect($value)->where('is_primary', true)->count();
 
-                                    if ($primaryCount === 0) {
-                                        $fail('You must select one primary image.');
-                                    }
-                                    if ($primaryCount > 1) {
-                                        $fail('Only one image can be primary.');
-                                    }
-                                };
-                            })
-                    ])
+                                if ($primaryCount === 0) {
+                                    $fail('You must select one primary image.');
+                                }
+
+                                if ($primaryCount > 1) {
+                                    $fail('Only one image can be primary.');
+                                }
+                            }),
+                    ]),
             ]);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Attributes\RelationManagers;
 
 use Filament\Actions\AssociateAction;
@@ -23,7 +25,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ValuesRelationManager extends RelationManager
+final class ValuesRelationManager extends RelationManager
 {
     protected static string $relationship = 'values';
 

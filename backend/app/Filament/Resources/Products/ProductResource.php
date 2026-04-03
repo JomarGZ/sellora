@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Resources\Products;
 
 use App\Filament\Resources\Products\Pages\CreateProduct;
@@ -20,12 +22,12 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
-class ProductResource extends Resource
+final class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
     protected static string|UnitEnum|null $navigationGroup = 'Catalog Management';
-    
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ShoppingBag;
 
     public static function form(Schema $schema): Schema
@@ -46,7 +48,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ProductItemsRelationManager::class
+            ProductItemsRelationManager::class,
         ];
     }
 
