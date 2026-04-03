@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Products\RelationManagers;
 
 use App\Models\AttributeValue;
+use App\Models\ProductItem;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -12,14 +13,15 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 final class ProductItemsRelationManager extends RelationManager
 {
@@ -32,8 +34,11 @@ final class ProductItemsRelationManager extends RelationManager
                 Section::make('SKU Details')
                     ->schema([
                         TextInput::make('sku')
-                            ->required()
-                            ->unique(ignoreRecord: true),
+                            ->label('SKU')
+                            ->placeholder('Auto-generated from product name + attributes')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->visibleOn('edit'),
 
                         TextInput::make('price')
                             ->required()
@@ -54,7 +59,10 @@ final class ProductItemsRelationManager extends RelationManager
                             ->multiple()
                             ->preload()
                             ->searchable()
-                            ->getOptionLabelFromRecordUsing(fn (AttributeValue $record): string => ($record->attribute->name ?? 'Unkown').': '.($record->value ?? 'N/A')),
+                            ->getOptionLabelFromRecordUsing(
+                                fn (AttributeValue $record): string =>
+                                    ($record->attribute->name ?? 'Unknown') . ': ' . ($record->value ?? 'N/A')
+                            ),
                     ]),
 
                 Section::make('Variant Images')
@@ -91,13 +99,50 @@ final class ProductItemsRelationManager extends RelationManager
                 TrashedFilter::make(),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->after(fn (ProductItem $record) => $this->generateSku($record)),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->after(fn (ProductItem $record) => $this->generateSku($record)),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),
             ]);
+    }
+
+    private function generateSku(ProductItem $productItem): void
+    {
+        $productItem->loadMissing('product', 'attributeValues');
+
+        $productName = Str::upper(
+            Str::slug($productItem->product->name, '-')
+        );
+
+        $attributes = $productItem->attributeValues
+            ->sortBy('attribute_id')
+            ->map(fn (AttributeValue $av) => Str::upper(Str::slug($av->value, '-')))
+            ->join('-');
+
+        $base = $attributes
+            ? "{$productName}-{$attributes}"
+            : $productName;
+
+        // Ensure uniqueness — append -1, -2 if collision
+        $sku = $base;
+        $i   = 1;
+
+        while (
+            ProductItem::where('sku', $sku)
+                ->where('id', '!=', $productItem->id)
+                ->exists()
+        ) {
+            $sku = "{$base}-{$i}";
+            $i++;
+        }
+
+        ProductItem::withoutEvents(
+            fn () => $productItem->update(['sku' => $sku])
+        );
     }
 }
