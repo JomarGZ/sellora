@@ -49,7 +49,6 @@ final class ProductForm
                             ->relationship(name: 'images')
                             ->schema([
                                 FileUpload::make('image_path')
-                                    ->disk(config('filesystems.default'))
                                     ->image()
                                     ->required()
                                     ->directory('products')
@@ -60,8 +59,11 @@ final class ProductForm
                                     ->afterStateUpdated(function ($state, callable $set, callable $get): void {
                                         if ($state) {
                                             $images = $get('../../images');
+                                            if (! is_array($images)) {
+                                                return;
+                                            }
 
-                                            foreach ($images as $index => $image) {
+                                            foreach (array_keys($images) as $index) {
                                                 $set(sprintf('../../images.%s.is_primary', $index), false);
                                             }
 
@@ -72,14 +74,14 @@ final class ProductForm
                             ])
                             ->columns(2)
                             ->addActionLabel('Add Image')
-                            ->afterStateUpdated(function ($state, callable $set): void {
+                            ->afterStateUpdated(function (array $state, callable $set): void {
                                 $hasPrimary = collect($state)->contains('is_primary', true);
 
-                                if (! $hasPrimary && count($state) > 0) {
+                                if (! $hasPrimary && $state !== []) {
                                     $set('images.0.is_primary', true);
                                 }
                             })
-                            ->rules(fn (): Closure => function ($attribute, $value, $fail): void {
+                            ->rules(fn (): Closure => function ($attribute, array $value, callable $fail): void {
                                 $primaryCount = collect($value)->where('is_primary', true)->count();
 
                                 if ($primaryCount === 0) {
