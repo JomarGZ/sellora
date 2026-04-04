@@ -74,6 +74,8 @@ final class ProductForm
                             ])
                             ->columns(2)
                             ->addActionLabel('Add Image')
+                            ->maxItems(5)
+                            ->minItems(1)
                             ->afterStateUpdated(function (array $state, callable $set): void {
                                 $hasPrimary = collect($state)->contains('is_primary', true);
 

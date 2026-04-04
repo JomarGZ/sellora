@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('product_items', function (Blueprint $table) {
+        Schema::table('product_items', function (Blueprint $table): void {
             $table->string('sku')->nullable()->change();
         });
     }
@@ -23,7 +23,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('product_items', function (Blueprint $table) {
+        Schema::table('product_items', function (Blueprint $table): void {
             //
         });
     }

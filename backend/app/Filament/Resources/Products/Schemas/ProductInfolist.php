@@ -16,18 +16,13 @@ final class ProductInfolist
             ->components([
                 TextEntry::make('brand.name')
                     ->label('Brand'),
-                TextEntry::make('product_category_id')
+                TextEntry::make('category.name')
                     ->numeric(),
                 TextEntry::make('name'),
                 TextEntry::make('slug'),
                 TextEntry::make('description')
+                    ->markdown()
                     ->columnSpanFull(),
-                TextEntry::make('created_at')
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->dateTime()
-                    ->placeholder('-'),
                 TextEntry::make('deleted_at')
                     ->dateTime()
                     ->visible(fn (Product $record): bool => $record->trashed()),

@@ -62,13 +62,13 @@ final class ProductItemsRelationManager extends RelationManager
                             ->schema([
                                 Select::make('attribute_id')
                                     ->label('Attribute')
-                                    ->options(Attribute::pluck('name', 'id'))
+                                    ->options(Attribute::query()->pluck('name', 'id'))
                                     ->live()
                                     ->distinct()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                                     ->required()
                                     ->dehydrated(false)
-                                    ->afterStateUpdated(fn (Set $set) => $set('attribute_value_id', null)),
+                                    ->afterStateUpdated(fn (Set $set): mixed => $set('attribute_value_id', null)),
 
                                 Select::make('attribute_value_id')
                                     ->label('Value')
@@ -78,7 +78,7 @@ final class ProductItemsRelationManager extends RelationManager
                                             return [];
                                         }
 
-                                        return AttributeValue::where('attribute_id', $attributeId)
+                                        return AttributeValue::query()->where('attribute_id', $attributeId)
                                             ->pluck('value', 'id')
                                             ->toArray();
                                     })
@@ -96,10 +96,13 @@ final class ProductItemsRelationManager extends RelationManager
                             ->relationship('itemImages')
                             ->schema([
                                 FileUpload::make('image_path')
+                                    ->label('Variant Image')
                                     ->image()
                                     ->directory('product-items'),
                             ])
-                            ->addActionLabel('Add Variant Image'),
+                            ->addActionLabel('Add Variant Image')
+                            ->maxItems(5)
+                            ->minItems(1),
                     ]),
             ]);
     }
