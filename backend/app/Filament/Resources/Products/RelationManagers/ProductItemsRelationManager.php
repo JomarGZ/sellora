@@ -127,9 +127,7 @@ final class ProductItemsRelationManager extends RelationManager
                 TrashedFilter::make(),
             ])
             ->headerActions([
-                CreateAction::make()
-                    ->after(fn (ProductItem $record) => $this->generateSku($record)),
-
+                CreateAction::make(),
             ])
             ->recordActions([
                 EditAction::make(),
@@ -139,33 +137,5 @@ final class ProductItemsRelationManager extends RelationManager
             ]);
     }
 
-    private function generateSku(ProductItem $productItem): void
-    {
-        $productItem->loadMissing('product', 'attributeValues');
-
-        $productName = Str::upper(Str::slug($productItem->product->name, '-'));
-
-        $attributes = $productItem->attributeValues
-            ->sortBy('attribute_id')
-            ->map(fn (AttributeValue $av) => Str::upper(Str::slug($av->value, '-')))
-            ->join('-');
-
-        $base = $attributes ? "{$productName}-{$attributes}" : $productName;
-
-        $sku = $base;
-        $i = 1;
-
-        while (
-            ProductItem::where('sku', $sku)
-                ->where('id', '!=', $productItem->id)
-                ->exists()
-        ) {
-            $sku = "{$base}-{$i}";
-            $i++;
-        }
-
-        ProductItem::withoutEvents(
-            fn () => $productItem->update(['sku' => $sku])
-        );
-    }
+    
 }
