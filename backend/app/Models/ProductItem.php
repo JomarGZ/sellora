@@ -46,6 +46,11 @@ final class ProductItem extends Model
         return $this->belongsToMany(AttributeValue::class, 'product_item_attribute_values');
     }
 
+    public function productItemAttributeValues(): HasMany
+    {
+        return $this->hasMany(ProductItemAttributeValue::class);
+    }
+
     /**
      * The images that belong to the item.
      *

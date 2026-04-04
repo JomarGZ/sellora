@@ -6,7 +6,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 final class EnsureCustomer
@@ -18,7 +17,6 @@ final class EnsureCustomer
      */
     public function handle(Request $request, Closure $next): Response
     {
-        Log::info('EnsureCustomer triggered');
         $user = $request->user();
         if (! $user || (bool) $user->is_admin) {
             return response()->json(['message' => 'Forbiddin. Customers only.'], Response::HTTP_FORBIDDEN);

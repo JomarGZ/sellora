@@ -7,7 +7,7 @@ namespace App\Models;
 use Database\Factories\ProductItemAttributeValueFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class ProductItemAttributeValue extends Model
 {
@@ -22,20 +22,20 @@ final class ProductItemAttributeValue extends Model
     /**
      * Get the product items that have this attribute value.
      *
-     * @return BelongsToMany<ProductItem, $this>
+     * @return BelongsTo<ProductItem, $this>
      */
-    public function productItems(): BelongsToMany
+    public function productItems(): BelongsTo
     {
-        return $this->belongsToMany(ProductItem::class, 'product_item_attribute_values');
+        return $this->belongsTo(ProductItem::class);
     }
 
     /**
      * Get the attribute values that belong to this product item.
      *
-     * @return BelongsToMany<AttributeValue, $this>
+     * @return BelongsTo<AttributeValue, $this>
      */
-    public function attributeValues(): BelongsToMany
+    public function attributeValues(): BelongsTo
     {
-        return $this->belongsToMany(AttributeValue::class, 'product_item_attribute_values');
+        return $this->belongsTo(AttributeValue::class);
     }
 }
