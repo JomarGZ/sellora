@@ -139,32 +139,32 @@ describe('Logout', function (): void {
 
 describe('Refresh token and user details', function (): void {
     it('returns new tokens and authenticated user data', function (): void {
-         $user = User::factory()->create();
+        $user = User::factory()->create();
 
-    Sanctum::actingAs($user); // simulate logged in user
+        Sanctum::actingAs($user); // simulate logged in user
 
-    $response = $this->postJson('/api/v1/refresh-token');
+        $response = $this->postJson('/api/v1/refresh-token');
 
-    $response->assertStatus(200)
-        ->assertJsonStructure([
-            'success',
-            'message',
-            'data' => [
-                'user' => ['id', 'name', 'email'],
-                'accessToken',
-            ],
-        ])
-        ->assertJson([
-            'success' => true,
-            'data' => [
-                'user' => [
-                    'id' => $user->id,
-                    'email' => $user->email,
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'message',
+                'data' => [
+                    'user' => ['id', 'name', 'email'],
+                    'accessToken',
                 ],
-            ],
-        ]);
+            ])
+            ->assertJson([
+                'success' => true,
+                'data' => [
+                    'user' => [
+                        'id' => $user->id,
+                        'email' => $user->email,
+                    ],
+                ],
+            ]);
 
-    $response->assertCookie('refreshToken');
+        $response->assertCookie('refreshToken');
 
     });
 

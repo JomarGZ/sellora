@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use App\Observers\BrandObserver;
+use Database\Factories\BrandFactory;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
+
+#[ObservedBy([BrandObserver::class])]
+final class Brand extends Model
+{
+    /** @use HasFactory<BrandFactory> */
+    use HasFactory;
+
+    use HasSlug;
+    use SoftDeletes;
+
+    protected $fillable = [
+        'name',
+        'slug',
+        'logo',
+    ];
+
+    public function getSlugOptions(): SlugOptions
+    {
+        return SlugOptions::create()
+            ->generateSlugsFrom('name')
+            ->saveSlugsTo('slug');
+    }
+
+    /**
+     *  This brand has many products
+     *
+     * @return HasMany<Product, $this>
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+}

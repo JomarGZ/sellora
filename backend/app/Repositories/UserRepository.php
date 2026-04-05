@@ -35,7 +35,7 @@ final class UserRepository extends BaseRepository
         $userData['password'] = Hash::make($userData['password']);
 
         // Set default role if not provided
-        $userData['role_id'] ??= 1;
+        $userData['is_admin'] = false;
 
         /** @var User $user */
         $user = parent::create($userData);
