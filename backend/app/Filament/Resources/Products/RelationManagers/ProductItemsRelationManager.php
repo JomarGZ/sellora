@@ -7,6 +7,7 @@ namespace App\Filament\Resources\Products\RelationManagers;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\ProductItem;
+use Exception;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -127,15 +128,43 @@ final class ProductItemsRelationManager extends RelationManager
                 TrashedFilter::make(),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->after(function (ProductItem $record): void {
+                        $this->generateSku($record);
+                    }),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->after(function (ProductItem $record): void {
+                        $this->generateSku($record);
+                    }),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),
             ]);
     }
 
-    
+    private function generateSku(ProductItem $record): void
+    {
+        $record->loadMissing('product', 'attributeValues.attribute');
+        // @var
+
+        throw_if(empty($record->product), Exception::class, 'Product is required for SKU generation.');
+        $baseSku = Str::slug($record->product->name);
+
+        throw_if($record->attributeValues->isEmpty(), Exception::class, 'Attribute values are required for SKU generation.');
+
+        $attributePart = collect($record->attributeValues)
+            ->sortBy('attribute_id')
+            ->pluck('value')
+            ->implode('-');
+
+        do {
+            $sku = Str::upper($baseSku.($attributePart ? '-'.Str::slug($attributePart) : '').'-'.random_int(100000, 999999));
+        } while (ProductItem::query()->where('sku', $sku)->exists());
+
+        logger('Generated SKU:', [$sku]);
+        $record->sku = $sku;
+        $record->save();
+    }
 }
