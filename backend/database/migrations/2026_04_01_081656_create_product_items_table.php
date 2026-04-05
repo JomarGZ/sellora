@@ -17,7 +17,7 @@ return new class extends Migration
         Schema::create('product_items', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
-            $table->string('sku')->unique();
+            $table->string('sku')->nullable()->unique();
             $table->decimal('price', 10, 2);
             $table->unsignedBigInteger('qty_in_stock')->default(0);
             $table->timestamps();
