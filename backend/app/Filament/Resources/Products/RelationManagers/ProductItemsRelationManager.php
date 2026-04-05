@@ -7,7 +7,7 @@ namespace App\Filament\Resources\Products\RelationManagers;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\ProductItem;
-use Exception;
+use App\Services\SkuGenerator;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -25,7 +25,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 final class ProductItemsRelationManager extends RelationManager
 {
@@ -130,41 +131,39 @@ final class ProductItemsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->after(function (ProductItem $record): void {
-                        $this->generateSku($record);
+                        DB::transaction(function () use ($record): void {
+                            do {
+                                $record->sku = SkuGenerator::generate($record);
+
+                                try {
+                                    $record->save();
+                                    break;
+
+                                } catch (QueryException) {
+                                }
+                            } while (true);
+                        });
                     }),
             ])
             ->recordActions([
                 EditAction::make()
                     ->after(function (ProductItem $record): void {
-                        $this->generateSku($record);
+                        DB::transaction(function () use ($record): void {
+                            do {
+                                $record->sku = SkuGenerator::generate($record);
+
+                                try {
+                                    $record->save();
+                                    break;
+
+                                } catch (QueryException) {
+                                }
+                            } while (true);
+                        });
                     }),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),
             ]);
-    }
-
-    private function generateSku(ProductItem $record): void
-    {
-        $record->loadMissing('product', 'attributeValues.attribute');
-        // @var
-
-        throw_if(empty($record->product), Exception::class, 'Product is required for SKU generation.');
-        $baseSku = Str::slug($record->product->name);
-
-        throw_if($record->attributeValues->isEmpty(), Exception::class, 'Attribute values are required for SKU generation.');
-
-        $attributePart = collect($record->attributeValues)
-            ->sortBy('attribute_id')
-            ->pluck('value')
-            ->implode('-');
-
-        do {
-            $sku = Str::upper($baseSku.($attributePart ? '-'.Str::slug($attributePart) : '').'-'.random_int(100000, 999999));
-        } while (ProductItem::query()->where('sku', $sku)->exists());
-
-        logger('Generated SKU:', [$sku]);
-        $record->sku = $sku;
-        $record->save();
     }
 }
