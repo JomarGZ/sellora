@@ -85,7 +85,7 @@ final class AuthController extends ApiController
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()?->tokens()->delete();
+        $request->user()?->currentAccessToken()->delete();
 
         $response = $this->success(message: 'Successfully logged out.');
         
@@ -99,9 +99,8 @@ final class AuthController extends ApiController
     public function refresh(Request $request): JsonResponse
     {
         /** @var User $user */
-        $user = Auth::user();
-
-        $user->tokens()->delete();
+        $request->user()->currentAccessToken()->delete();
+        $user = $request->user();
         $tokens = $this->service->generateTokens($user);
        
         $response = $this->success(message: 'Token refreshed successfully', data: [
@@ -198,9 +197,9 @@ final class AuthController extends ApiController
             'refreshToken',
             $refreshToken,
             $refreshTokenMinutes,
-            secure: false,
+            secure: app()->isProduction(),
             httpOnly: true,
-            sameSite: 'lax'
+            sameSite: 'Strict'
         );
     }
 
