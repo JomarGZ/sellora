@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\Brand;
 use Illuminate\Support\Facades\Storage;
 
-class BrandObserver
+final class BrandObserver
 {
     /**
      * Handle the Brand "force deleted" event.

@@ -29,7 +29,6 @@ final class AuthController extends ApiController
     public function __construct(
         private readonly AuthService $service
     ) {}
-
     public function register(RegisterRequest $request): JsonResponse
     {
         /** @var array{name: string, email: string, password: string} $userData */
@@ -43,14 +42,15 @@ final class AuthController extends ApiController
 
         $tokens = $this->service->generateTokens($user);
 
-        return $this->sendResponseWithTokens(
-            tokens: $tokens,
-            body: [
-                'user' => UserResource::make($user),
-            ],
-            message: 'User registered successfully. Please check your email to verify your account.',
-            code: Response::HTTP_CREATED
-        );
+        $response = $this->created([
+            'user' => new UserResource($user),
+            'accessToken' => $tokens['accessToken'],
+        ], 'User registered successfully. Please check your email to verify your account.');
+
+        $response->withCookie($this->refreshTokenCookie($tokens['refreshToken']));
+
+        return $response;
+
     }
 
     public function login(LoginRequest $request): JsonResponse
@@ -73,22 +73,27 @@ final class AuthController extends ApiController
 
         $tokens = $this->service->generateTokens($user);
 
-        return $this->sendResponseWithTokens(
-            tokens: $tokens,
-            body: ['user' => UserResource::make($user)],
-            message: 'You have successfully logged in.'
-        );
+        $response = $this->success(message: 'You have successfully logged in.', data: [
+            'user' => UserResource::make($user),
+            'accessToken' => $tokens['accessToken'],
+        ]);
+
+        $response->withCookie($this->refreshTokenCookie($tokens['refreshToken']));
+
+        return $response;
     }
 
     public function logout(Request $request): JsonResponse
     {
         $request->user()?->tokens()->delete();
 
-        $cookie = cookie()->forget('refreshToken');
+        $response = $this->success(message: 'Successfully logged out.');
+        
+        $response->withCookie(
+            cookie()->forget('refreshToken')
+        );
 
-        return $this
-            ->success(message: 'Successfully logged out.')
-            ->withCookie($cookie);
+        return $response;
     }
 
     public function refresh(Request $request): JsonResponse
@@ -98,10 +103,15 @@ final class AuthController extends ApiController
 
         $user->tokens()->delete();
         $tokens = $this->service->generateTokens($user);
-
-        return $this->sendResponseWithTokens($tokens, [
+       
+        $response = $this->success(message: 'Token refreshed successfully', data: [
             'user' => UserResource::make($user),
+            'accessToken' => $tokens['accessToken'],
         ]);
+
+        $response->withCookie($this->refreshTokenCookie($tokens['refreshToken']));
+
+        return $response;
     }
 
     public function verifyEmail(VerifyEmailRequest $request): JsonResponse
@@ -179,19 +189,19 @@ final class AuthController extends ApiController
         );
     }
 
-    /**
-     * @param  array{accessToken: string, refreshToken: string}  $tokens
-     * @param  array<string, mixed>  $body
-     */
-    private function sendResponseWithTokens(array $tokens, array $body = [], string $message = 'Success', int $code = Response::HTTP_OK): JsonResponse
+    private function refreshTokenCookie(string $refreshToken)
     {
         $rtExpiration = config('sanctum.rt_expiration');
         $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
 
-        $cookie = cookie('refreshToken', $tokens['refreshToken'], $refreshTokenMinutes, secure: false);
-
-        return $this->success(data: array_merge($body, [
-            'accessToken' => $tokens['accessToken'],
-        ]), message: $message, code: $code)->withCookie($cookie);
+        return cookie(
+            'refreshToken',
+            $refreshToken,
+            $refreshTokenMinutes,
+            secure: false,
+            httpOnly: true,
+            sameSite: 'lax'
+        );
     }
+
 }

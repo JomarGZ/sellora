@@ -1,14 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\ProductItem;
 use Illuminate\Support\Facades\Storage;
 
-class ProductItemObserver
+final class ProductItemObserver
 {
-    
-
     /**
      * Handle the ProductItem "deleting" event.
      */
