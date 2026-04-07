@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ProductCatalogController;
+use App\Http\Controllers\Api\V1\ProductFilterController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,6 +27,7 @@ Route::middleware('throttle:60,1')->group(function (): void {
     Route::get('product-catalog/new-arrivals', [ProductCatalogController::class, 'newArrivals'])->name('api.v1.product-catalog.new-arrivals');
     Route::get('product-catalog/best-sellers', [ProductCatalogController::class, 'bestSellers'])->name('api.v1.product-catalog.best-sellers');
     Route::get('product-catalog', [ProductCatalogController::class, 'index'])->name('api.v1.product-catalog');
+    Route::get('product-catalog/filters', [ProductFilterController::class, 'index'])->name('api.v1.product-catalog.filters');
 });
 
 // Protected routes with authenticated rate limiter (120/min)
