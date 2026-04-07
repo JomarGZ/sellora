@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
 final class AuthController extends ApiController
@@ -29,6 +30,7 @@ final class AuthController extends ApiController
     public function __construct(
         private readonly AuthService $service
     ) {}
+
     public function register(RegisterRequest $request): JsonResponse
     {
         /** @var array{name: string, email: string, password: string} $userData */
@@ -73,10 +75,10 @@ final class AuthController extends ApiController
 
         $tokens = $this->service->generateTokens($user);
 
-        $response = $this->success(message: 'You have successfully logged in.', data: [
+        $response = $this->success(data: [
             'user' => UserResource::make($user),
             'accessToken' => $tokens['accessToken'],
-        ]);
+        ], message: 'You have successfully logged in.');
 
         $response->withCookie($this->refreshTokenCookie($tokens['refreshToken']));
 
@@ -88,7 +90,7 @@ final class AuthController extends ApiController
         $request->user()?->currentAccessToken()->delete();
 
         $response = $this->success(message: 'Successfully logged out.');
-        
+
         $response->withCookie(
             cookie()->forget('refreshToken')
         );
@@ -98,16 +100,17 @@ final class AuthController extends ApiController
 
     public function refresh(Request $request): JsonResponse
     {
-        /** @var User $user */
-        $request->user()->currentAccessToken()->delete();
+        $request->user()?->currentAccessToken()->delete();
+
         $user = $request->user();
+
+        abort_unless($user instanceof User, 401, 'Unauthenticated.');
+
         $tokens = $this->service->generateTokens($user);
-       
-        $response = $this->success(message: 'Token refreshed successfully', data: [
+        $response = $this->success(data: [
             'user' => UserResource::make($user),
             'accessToken' => $tokens['accessToken'],
-        ]);
-
+        ], message: 'Token refreshed successfully');
         $response->withCookie($this->refreshTokenCookie($tokens['refreshToken']));
 
         return $response;
@@ -188,7 +191,7 @@ final class AuthController extends ApiController
         );
     }
 
-    private function refreshTokenCookie(string $refreshToken)
+    private function refreshTokenCookie(string $refreshToken): Cookie
     {
         $rtExpiration = config('sanctum.rt_expiration');
         $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
@@ -202,5 +205,4 @@ final class AuthController extends ApiController
             sameSite: 'Strict'
         );
     }
-
 }

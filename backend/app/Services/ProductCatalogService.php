@@ -4,22 +4,33 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\ProductItem;
+use App\Models\Product;
+use App\Repositories\Contracts\IProductCatalogRepository;
+use Illuminate\Database\Eloquent\Collection;
 
-final class ProductCatalogService
+final readonly class ProductCatalogService
 {
-    public function getNewArrivals(int $limit = 10)
+    public function __construct(
+        private IProductCatalogRepository $repository
+    ) {}
+
+    /**
+     * @param  array<int, string>  $columns
+     * @param  array<int, string>|string  $relations
+     * @return Collection<int, Product>
+     */
+    public function getNewArrivals(array $columns = ['*'], array|string $relations = [], int $limit = 10): Collection
     {
-        return ProductItem::query()->with(['product', 'images'])
-            ->latest()
-            ->limit($limit)
-            ->get();
+        return $this->repository->getNewArrivals($columns, $relations, $limit);
     }
 
-    public function getBestSellers(int $limit = 10)
+    /**
+     * @param  array<int, string>  $columns
+     * @param  array<int, string>|string  $relations
+     * @return Collection<int, Product>
+     */
+    public function getBestSellers(array $columns = ['*'], array|string $relations = [], int $limit = 10): Collection
     {
-        return ProductItem::query()->with(['product', 'images'])
-            ->limit($limit)
-            ->get();
+        return $this->repository->getBestSellers($columns, $relations, $limit);
     }
 }
