@@ -52,6 +52,7 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
      */
     protected $hidden = [
         'password',
+        'is_admin',
         'remember_token',
     ];
 
