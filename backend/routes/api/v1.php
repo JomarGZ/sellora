@@ -25,6 +25,7 @@ Route::middleware('throttle:auth')->group(function (): void {
 Route::middleware('throttle:60,1')->group(function (): void {
     Route::get('product-catalog/new-arrivals', [ProductCatalogController::class, 'newArrivals'])->name('api.v1.product-catalog.new-arrivals');
     Route::get('product-catalog/best-sellers', [ProductCatalogController::class, 'bestSellers'])->name('api.v1.product-catalog.best-sellers');
+    Route::get('product-catalog', [ProductCatalogController::class, 'index'])->name('api.v1.product-catalog');
 });
 
 // Protected routes with authenticated rate limiter (120/min)

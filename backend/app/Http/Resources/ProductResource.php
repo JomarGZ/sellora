@@ -8,9 +8,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @mixin Product
- */
+/** @extends JsonResource<Product> */
 final class ProductResource extends JsonResource
 {
     /**
@@ -20,6 +18,7 @@ final class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var Product $this */
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -27,6 +26,9 @@ final class ProductResource extends JsonResource
             'description' => $this->description,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
+            'brand' => BrandResource::make($this->whenLoaded('brand')),
+            'category' => CategoryResource::make($this->whenLoaded('category')),
+            'primary_image' => ProductImageResource::make($this->whenLoaded('primaryImage')),
         ];
     }
 }

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DTOs\ProductCatalogFilterDTO;
 use App\Models\Product;
 use App\Repositories\Contracts\IProductCatalogRepository;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 final readonly class ProductCatalogService
 {
@@ -32,5 +34,13 @@ final readonly class ProductCatalogService
     public function getBestSellers(array $columns = ['*'], array|string $relations = [], int $limit = 10): Collection
     {
         return $this->repository->getBestSellers($columns, $relations, $limit);
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, Product>
+     */
+    public function catalog(ProductCatalogFilterDTO $filters): LengthAwarePaginator
+    {
+        return $this->repository->catalog($filters);
     }
 }

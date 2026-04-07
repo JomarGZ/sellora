@@ -7,12 +7,14 @@ namespace App\Models;
 use App\Observers\ProductObserver;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
@@ -87,5 +89,69 @@ final class Product extends Model
     public function primaryImage(): HasOne
     {
         return $this->hasOne(ProductImage::class)->where('is_primary', true);
+    }
+
+    /** @param Builder<Product> $query */
+    public function scopeSearch(Builder $query, ?string $search): Builder
+    {
+        return $query->when(
+            $search,
+            fn (Builder $q) => $q->where('name', 'like', "%{$search}%")
+        );
+    }
+
+    /** @param Builder<Product> $query */
+    public function scopeFilterByCategory(Builder $query, ?string $categorySlug): Builder
+    {
+        return $query->when(
+            $categorySlug,
+            fn (Builder $q) => $q->whereHas(
+                'category',
+                fn (Builder $q) => $q->where('slug', $categorySlug)
+                    ->orWhereHas('parent', fn (Builder $q) => $q->where('slug', $categorySlug))
+            )
+        );
+    }
+
+    /** @param Builder<Product> $query */
+    public function scopeFilterByBrand(Builder $query, ?string $brandSlug): Builder
+    {
+        return $query->when(
+            $brandSlug,
+            fn (Builder $q) => $q->whereHas(
+                'brand',
+                fn (Builder $q) => $q->where('slug', $brandSlug)
+            )
+        );
+    }
+
+    /** @param Builder<Product> $query */
+    public function scopeFilterByPriceRange(Builder $query, ?float $min, ?float $max): Builder
+    {
+        return $query->when(
+            $min || $max,
+            fn (Builder $q) => $q->whereHas(
+                'productItems',
+                function (Builder $q) use ($min, $max) {
+                    $q->when($min, fn (Builder $q) => $q->where('price', '>=', $min))
+                        ->when($max, fn (Builder $q) => $q->where('price', '<=', $max));
+                }
+            )
+        );
+    }
+
+    /** @param Builder<Product> $query */
+    public function scopeSortBy(Builder $query, ?string $sort): Builder
+    {
+        return match ($sort) {
+            'price_asc' => $query->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
+                ->groupBy('products.id')
+                ->orderBy(DB::raw('MIN(product_items.price)'), 'asc'),
+            'price_desc' => $query->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
+                ->groupBy('products.id')
+                ->orderBy(DB::raw('MIN(product_items.price)'), 'desc'),
+            'newest' => $query->orderBy('created_at', 'desc'),
+            default => $query->inRandomOrder(),
+        };
     }
 }
