@@ -7,10 +7,8 @@ namespace App\Http\Resources;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
-/**
- * @mixin Brand
- */
 final class BrandResource extends JsonResource
 {
     /**
@@ -20,6 +18,26 @@ final class BrandResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        /** @var Brand $brand */
+        $brand = $this->resource;
+
+        return [
+            'id' => $brand->id,
+            'name' => $brand->name,
+            'slug' => $brand->slug,
+            'logo' => $this->resolveImageUrl($brand),
+        ];
+    }
+
+    private function resolveImageUrl(Brand $brand): string
+    {
+        $fallback = config('app.fallback_image');
+        assert(is_string($fallback));
+
+        if ($brand->logo) {
+            return Storage::url($brand->logo);
+        }
+
+        return $fallback;
     }
 }

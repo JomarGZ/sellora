@@ -7,6 +7,7 @@ namespace App\Repositories;
 use App\DTOs\ProductCatalogFilterDTO;
 use App\Models\Product;
 use App\Repositories\Contracts\IProductCatalogRepository;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -78,10 +79,10 @@ final class ProductCatalogRepository extends BaseRepository implements IProductC
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Builder<Product>
+     * @return Builder<Product>
      */
-    private function query(): \Illuminate\Database\Eloquent\Builder
+    private function query(): Builder
     {
-        return $this->model->newQuery(); // @phpstan-ignore-line
+        return $this->model->newQuery();
     }
 }

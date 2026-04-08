@@ -125,4 +125,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'fallback_image' => env('APP_FALLBACK_IMAGE', 'https://placehold.co/800x600'),
+
 ];

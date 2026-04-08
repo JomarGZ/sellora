@@ -4,29 +4,29 @@ declare(strict_types=1);
 
 namespace App\DTOs;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\ProductCatalogRequest;
 
 final readonly class ProductCatalogFilterDTO
 {
     public function __construct(
-        public readonly ?string $search,
-        public readonly ?string $category,
-        public readonly ?string $brand,
-        public readonly ?float $minPrice,
-        public readonly ?float $maxPrice,
-        public readonly ?string $sort,
-        public readonly int $perPage,
+        public ?string $search,
+        public ?string $category,
+        public ?string $brand,
+        public ?float $minPrice,
+        public ?float $maxPrice,
+        public ?string $sort,
+        public int $perPage,
     ) {}
 
-    public static function fromRequest(Request $request): self
+    public static function fromRequest(ProductCatalogRequest $request): self
     {
         return new self(
             search: $request->str('search')->trim()->value() ?: null,
-            category: $request->input('category'),
-            brand: $request->input('brand'),
-            minPrice: $request->filled('min_price') ? (float) $request->input('min_price') : null,
-            maxPrice: $request->filled('max_price') ? (float) $request->input('max_price') : null,
-            sort: $request->input('sort'),
+            category: $request->string('category')->value() ?: null,
+            brand: $request->string('brand')->value() ?: null,
+            minPrice: $request->filled('min_price') ? (float) $request->string('min_price')->value() : null,
+            maxPrice: $request->filled('max_price') ? (float) $request->string('max_price')->value() : null,
+            sort: $request->string('sort')->value() ?: null,
             perPage: min($request->integer('per_page', 15), 100),
         );
     }
