@@ -22,23 +22,30 @@ final class ProductItemFactory extends Factory
     {
         return [
             'product_id' => Product::factory(),
-            'sku' => mb_strtoupper(fake()->unique()->bothify('SKU-####-????')),
-            'price' => fake()->randomFloat(2, 99, 9999),
-            'qty_in_stock' => fake()->numberBetween(0, 500),
+            'sku' => fake()->unique()->bothify('SKU-####-???'),
+            'price' => fake()->randomFloat(2, 10, 10000),
+            'qty_in_stock' => fake()->numberBetween(0, 200),
         ];
+    }
+
+    public function forProduct(Product $product): static
+    {
+        return $this->state(fn (): array => [
+            'product_id' => $product->id,
+        ]);
     }
 
     public function outOfStock(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn (): array => [
             'qty_in_stock' => 0,
         ]);
     }
 
-    public function lowStock(): static
+    public function withPrice(float $price): static
     {
-        return $this->state(fn (array $attributes): array => [
-            'qty_in_stock' => fake()->numberBetween(1, 5),
+        return $this->state(fn (): array => [
+            'price' => $price,
         ]);
     }
 }

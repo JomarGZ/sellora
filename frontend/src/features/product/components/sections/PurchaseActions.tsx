@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
-import { Heart, ShoppingCart, Minus, Plus } from "lucide-react";
+import { Heart, ShoppingCart, Minus, Plus, ShoppingBag } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { ProductItem } from "../../types";
 
@@ -112,6 +112,21 @@ export function PurchaseActions({
               : isSelectionIncomplete
                 ? "Select Options"
                 : "Add to Cart"}
+        </Button>
+        <Button
+          size="lg"
+          className="flex-1 h-14 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+          disabled={isOutOfStock || isSelectionIncomplete || addingToCart}
+          onClick={handleAddToCart}
+        >
+          <ShoppingBag className="w-5 h-5 mr-2" />
+          {addingToCart
+            ? "Checking out..."
+            : isOutOfStock
+              ? "Out of Stock"
+              : isSelectionIncomplete
+                ? "Select Options"
+                : "Checkout"}
         </Button>
 
         {/* Wishlist */}

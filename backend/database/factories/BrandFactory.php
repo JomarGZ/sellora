@@ -21,7 +21,7 @@ final class BrandFactory extends Factory
     {
         return [
             'name' => fake()->company(),
-            'logo' => 'https://placehold.co/800x600',
+            'logo' => 'brands/'.fake()->unique()->word().'.png',
         ];
     }
 }

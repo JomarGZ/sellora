@@ -21,12 +21,27 @@ final class ProductFactory extends Factory
      */
     public function definition(): array
     {
+        $name = $this->faker->unique()->words(3, true);
 
         return [
-            'brand_id' => Brand::query()->inRandomOrder()->value('id') ?? Brand::factory(),
-            'product_category_id' => ProductCategory::query()->inRandomOrder()->value('id') ?? ProductCategory::factory(),
-            'name' => fake()->unique()->sentence(3),
-            'description' => fake()->paragraph(2, true),
+            'brand_id' => Brand::factory(),
+            'product_category_id' => ProductCategory::factory(),
+            'name' => $name,
+            'description' => fake()->paragraph(),
         ];
+    }
+
+    public function forBrand(Brand $brand): static
+    {
+        return $this->state(fn (): array => [
+            'brand_id' => $brand->id,
+        ]);
+    }
+
+    public function forCategory(ProductCategory $category): static
+    {
+        return $this->state(fn (): array => [
+            'product_category_id' => $category->id,
+        ]);
     }
 }

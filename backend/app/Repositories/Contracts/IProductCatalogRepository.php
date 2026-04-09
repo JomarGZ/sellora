@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
+use App\DTOs\ProductCatalogFilterDTO;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface IProductCatalogRepository
 {
@@ -24,4 +26,9 @@ interface IProductCatalogRepository
      * @return Collection<int, Product>
      */
     public function getBestSellers(array $columns = ['*'], array|string $relation = [], int $limit = 10): Collection;
+
+    /**
+     * @return LengthAwarePaginator<int, Product>
+     */
+    public function catalog(ProductCatalogFilterDTO $filters): LengthAwarePaginator;
 }

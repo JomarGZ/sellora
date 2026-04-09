@@ -20,6 +20,7 @@ final class BrandForm
                     ->image()
                     ->directory('brands')
                     ->visibility('public')
+                    ->disk('public')
                     ->required(),
             ]);
     }

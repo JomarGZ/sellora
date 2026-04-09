@@ -13,24 +13,18 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 final class AttributeFactory extends Factory
 {
     /**
-     * @var array<int, string>
-     */
-    private static array $attributes = ['Color', 'Size', 'Material', 'Weight', 'Style'];
-
-    private static int $index = 0;
-
-    /**
      * Define the model's default state.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
-        $name = self::$attributes[self::$index % count(self::$attributes)];
-        self::$index++;
 
         return [
-            'name' => $name,
+            'name' => $this->faker->unique()->randomElement([
+                'Color', 'Size', 'Material', 'Pattern',
+                'Fit', 'Colorway', 'Width', 'Closure',
+            ]),
         ];
     }
 

@@ -100,6 +100,7 @@ final class ProductItemsRelationManager extends RelationManager
                                 FileUpload::make('image_path')
                                     ->label('Variant Image')
                                     ->image()
+                                    ->disk('public')
                                     ->directory('product-items'),
                             ])
                             ->addActionLabel('Add Variant Image')
