@@ -25,7 +25,7 @@ final class ProductCatalogController extends ApiController
             ProductCatalogFilterDTO::fromRequest($request)
         );
 
-        return ProductResource::collection($products);
+        return ProductResource::collection($products)->additional(['message' => 'Paginated products retrieved successfully.', 'success' => true]);
     }
 
     public function newArrivals(Request $request): JsonResponse
