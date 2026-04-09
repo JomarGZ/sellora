@@ -33,14 +33,14 @@ final class ProductFactory extends Factory
 
     public function forBrand(Brand $brand): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'brand_id' => $brand->id,
         ]);
     }
 
     public function forCategory(ProductCategory $category): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'product_category_id' => $category->id,
         ]);
     }

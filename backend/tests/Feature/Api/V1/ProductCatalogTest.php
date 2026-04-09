@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Models\Product;
 
-describe('Product Catalog', function () {
+describe('Product Catalog', function (): void {
 
-    describe('Happy Path', function () {
+    describe('Happy Path', function (): void {
 
-        it('returns paginated products', function () {
+        it('returns paginated products', function (): void {
             createProduct();
             createProduct();
             createProduct();
@@ -25,7 +25,7 @@ describe('Product Catalog', function () {
                 ]);
         });
 
-        it('returns correct per_page count', function () {
+        it('returns correct per_page count', function (): void {
             Product::factory()->count(20)->create();
 
             $response = $this->getJson('/api/v1/product-catalog?per_page=5');
@@ -35,7 +35,7 @@ describe('Product Catalog', function () {
                 ->assertJsonPath('meta.per_page', 5);
         });
 
-        it('returns second page correctly', function () {
+        it('returns second page correctly', function (): void {
             Product::factory()->count(20)->create();
 
             $response = $this->getJson('/api/v1/product-catalog?per_page=10&page=2');
@@ -45,7 +45,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(10, 'data');
         });
 
-        it('returns empty data when no products exist', function () {
+        it('returns empty data when no products exist', function (): void {
             $response = $this->getJson('/api/v1/product-catalog');
 
             $response->assertOk()
@@ -55,9 +55,9 @@ describe('Product Catalog', function () {
 
     });
 
-    describe('Search Filter', function () {
+    describe('Search Filter', function (): void {
 
-        it('returns products matching search term', function () {
+        it('returns products matching search term', function (): void {
             createProduct(['name' => 'Nike Air Max']);
             createProduct(['name' => 'Adidas Ultraboost']);
 
@@ -68,7 +68,7 @@ describe('Product Catalog', function () {
                 ->assertJsonPath('data.0.name', 'Nike Air Max');
         });
 
-        it('returns products with partial search match', function () {
+        it('returns products with partial search match', function (): void {
             createProduct(['name' => 'Nike Air Max']);
             createProduct(['name' => 'Nike Air Force']);
             createProduct(['name' => 'Adidas Ultraboost']);
@@ -79,7 +79,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(2, 'data');
         });
 
-        it('returns empty when search has no match', function () {
+        it('returns empty when search has no match', function (): void {
             createProduct(['name' => 'Nike Air Max']);
 
             $response = $this->getJson('/api/v1/product-catalog?search=Puma');
@@ -88,7 +88,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(0, 'data');
         });
 
-        it('ignores whitespace in search term', function () {
+        it('ignores whitespace in search term', function (): void {
             createProduct(['name' => 'Nike Air Max']);
 
             $response = $this->getJson('/api/v1/product-catalog?search=%20%20Nike%20%20');
@@ -99,9 +99,9 @@ describe('Product Catalog', function () {
 
     });
 
-    describe('Category Filter', function () {
+    describe('Category Filter', function (): void {
 
-        it('returns products filtered by category slug', function () {
+        it('returns products filtered by category slug', function (): void {
             $shoes = createCategory(['name' => 'shoes']);
             $clothing = createCategory(['name' => 'clothing']);
 
@@ -114,7 +114,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(1, 'data');
         });
 
-        it('returns products from child category when filtering by parent slug', function () {
+        it('returns products from child category when filtering by parent slug', function (): void {
             $parent = createCategory(['slug' => 'clothing']);
             $child = createCategory(['slug' => 'tshirts', 'parent_id' => $parent->id]);
 
@@ -126,7 +126,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(1, 'data');
         });
 
-        it('returns empty when category has no products', function () {
+        it('returns empty when category has no products', function (): void {
             createCategory(['slug' => 'shoes']);
 
             $response = $this->getJson('/api/v1/product-catalog?category=shoes');
@@ -135,7 +135,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(0, 'data');
         });
 
-        it('returns empty when category slug does not exist', function () {
+        it('returns empty when category slug does not exist', function (): void {
             createProduct();
 
             $response = $this->getJson('/api/v1/product-catalog?category=nonexistent');
@@ -146,9 +146,9 @@ describe('Product Catalog', function () {
 
     });
 
-    describe('Brand Filter', function () {
+    describe('Brand Filter', function (): void {
 
-        it('returns products filtered by brand slug', function () {
+        it('returns products filtered by brand slug', function (): void {
             $nike = createBrand(['slug' => 'nike']);
             $adidas = createBrand(['slug' => 'adidas']);
 
@@ -161,7 +161,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(1, 'data');
         });
 
-        it('returns empty when brand has no products', function () {
+        it('returns empty when brand has no products', function (): void {
             createBrand(['slug' => 'nike']);
 
             $response = $this->getJson('/api/v1/product-catalog?brand=nike');
@@ -170,7 +170,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(0, 'data');
         });
 
-        it('returns empty when brand slug does not exist', function () {
+        it('returns empty when brand slug does not exist', function (): void {
             createProduct();
 
             $response = $this->getJson('/api/v1/product-catalog?brand=nonexistent');
@@ -181,9 +181,9 @@ describe('Product Catalog', function () {
 
     });
 
-    describe('Price Range Filter', function () {
+    describe('Price Range Filter', function (): void {
 
-        it('returns products within min and max price range', function () {
+        it('returns products within min and max price range', function (): void {
             $cheap = createProduct();
             $mid = createProduct();
             $expensive = createProduct();
@@ -198,7 +198,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(1, 'data');
         });
 
-        it('returns products above min price only', function () {
+        it('returns products above min price only', function (): void {
             $cheap = createProduct();
             $expensive = createProduct();
 
@@ -211,7 +211,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(1, 'data');
         });
 
-        it('returns products below max price only', function () {
+        it('returns products below max price only', function (): void {
             $cheap = createProduct();
             $expensive = createProduct();
 
@@ -224,7 +224,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(1, 'data');
         });
 
-        it('returns empty when no products fall within price range', function () {
+        it('returns empty when no products fall within price range', function (): void {
             $product = createProduct();
             createProductItem(['product_id' => $product->id, 'price' => 100]);
 
@@ -236,9 +236,9 @@ describe('Product Catalog', function () {
 
     });
 
-    describe('Sorting', function () {
+    describe('Sorting', function (): void {
 
-        it('sorts by price ascending', function () {
+        it('sorts by price ascending', function (): void {
             $first = createProduct();
             $second = createProduct();
             $third = createProduct();
@@ -255,7 +255,7 @@ describe('Product Catalog', function () {
                 ->assertJsonPath('data.2.id', $first->id);
         });
 
-        it('sorts by price descending', function () {
+        it('sorts by price descending', function (): void {
             $first = createProduct();
             $second = createProduct();
             $third = createProduct();
@@ -272,7 +272,7 @@ describe('Product Catalog', function () {
                 ->assertJsonPath('data.2.id', $second->id);
         });
 
-        it('sorts by newest', function () {
+        it('sorts by newest', function (): void {
             $old = createProduct(['created_at' => now()->subDays(10)]);
             $new = createProduct(['created_at' => now()]);
 
@@ -283,7 +283,7 @@ describe('Product Catalog', function () {
                 ->assertJsonPath('data.1.id', $old->id);
         });
 
-        it('falls back to random order when sort is not provided', function () {
+        it('falls back to random order when sort is not provided', function (): void {
             Product::factory()->count(5)->create();
 
             $response = $this->getJson('/api/v1/product-catalog');
@@ -294,9 +294,9 @@ describe('Product Catalog', function () {
 
     });
 
-    describe('Combined Filters', function () {
+    describe('Combined Filters', function (): void {
 
-        it('filters by brand and category together', function () {
+        it('filters by brand and category together', function (): void {
             $nike = createBrand(['slug' => 'nike']);
             $shoes = createCategory(['slug' => 'shoes']);
             $clothing = createCategory(['slug' => 'clothing']);
@@ -310,7 +310,7 @@ describe('Product Catalog', function () {
                 ->assertJsonCount(1, 'data');
         });
 
-        it('filters by search and price range together', function () {
+        it('filters by search and price range together', function (): void {
             $nike = createProduct(['name' => 'Nike Air Max']);
             $jordan = createProduct(['name' => 'Nike Jordan']);
 
@@ -326,33 +326,33 @@ describe('Product Catalog', function () {
 
     });
 
-    describe('Validation', function () {
+    describe('Validation', function (): void {
 
-        it('rejects invalid sort value', function () {
+        it('rejects invalid sort value', function (): void {
             $this->getJson('/api/v1/product-catalog?sort=invalid')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['sort']);
         });
 
-        it('rejects non-numeric min_price', function () {
+        it('rejects non-numeric min_price', function (): void {
             $this->getJson('/api/v1/product-catalog?min_price=abc')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['min_price']);
         });
 
-        it('rejects non-numeric max_price', function () {
+        it('rejects non-numeric max_price', function (): void {
             $this->getJson('/api/v1/product-catalog?max_price=abc')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['max_price']);
         });
 
-        it('rejects per_page above 100', function () {
+        it('rejects per_page above 100', function (): void {
             $this->getJson('/api/v1/product-catalog?per_page=999')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['per_page']);
         });
 
-        it('rejects per_page below 1', function () {
+        it('rejects per_page below 1', function (): void {
             $this->getJson('/api/v1/product-catalog?per_page=0')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['per_page']);
@@ -366,9 +366,9 @@ describe('Product Catalog', function () {
 // GET /api/v1/products/filters — Filter Options
 // ============================================================
 
-describe('Product Filter Options', function () {
+describe('Product Filter Options', function (): void {
 
-    it('returns categories and brands', function () {
+    it('returns categories and brands', function (): void {
         createCategory(['parent_id' => null]);
         createBrand();
 
@@ -383,7 +383,7 @@ describe('Product Filter Options', function () {
             ]);
     });
 
-    it('only returns top level categories', function () {
+    it('only returns top level categories', function (): void {
         $parent = createCategory(['parent_id' => null]);
         createCategory(['parent_id' => $parent->id]);
 
@@ -393,7 +393,7 @@ describe('Product Filter Options', function () {
             ->assertJsonCount(1, 'data.categories');
     });
 
-    it('returns children nested under parent category', function () {
+    it('returns children nested under parent category', function (): void {
         $parent = createCategory(['parent_id' => null]);
         createCategory(['parent_id' => $parent->id]);
         createCategory(['parent_id' => $parent->id]);
@@ -404,7 +404,7 @@ describe('Product Filter Options', function () {
             ->assertJsonCount(2, 'data.categories.0.children');
     });
 
-    it('returns empty categories and brands when none exist', function () {
+    it('returns empty categories and brands when none exist', function (): void {
         $response = $this->getJson('/api/v1/product-catalog/filters');
 
         $response->assertOk()
@@ -412,7 +412,7 @@ describe('Product Filter Options', function () {
             ->assertJsonCount(0, 'data.brands');
     });
 
-    it('caches filter options on subsequent calls', function () {
+    it('caches filter options on subsequent calls', function (): void {
         createCategory();
         createBrand();
 

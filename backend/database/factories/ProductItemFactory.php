@@ -30,21 +30,21 @@ final class ProductItemFactory extends Factory
 
     public function forProduct(Product $product): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'product_id' => $product->id,
         ]);
     }
 
     public function outOfStock(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'qty_in_stock' => 0,
         ]);
     }
 
     public function withPrice(float $price): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'price' => $price,
         ]);
     }

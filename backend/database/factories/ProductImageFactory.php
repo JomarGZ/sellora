@@ -29,7 +29,7 @@ final class ProductImageFactory extends Factory
 
     public function forProduct(Product $product): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'product_id' => $product->id,
         ]);
     }

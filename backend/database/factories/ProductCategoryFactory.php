@@ -34,7 +34,7 @@ final class ProductCategoryFactory extends Factory
 
     public function asChild(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'parent_id' => ProductCategory::factory(),
         ]);
     }

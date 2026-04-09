@@ -23,7 +23,7 @@ final class ProductImageResource extends JsonResource
 
         return [
             'id' => $productImage->id,
-            'image_url' => $this->resolveImageUrFl($productImage),
+            'image_url' => $this->resolveImageUrl($productImage),
             'is_primary' => $productImage->is_primary,
         ];
     }

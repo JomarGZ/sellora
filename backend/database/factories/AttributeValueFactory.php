@@ -36,7 +36,7 @@ final class AttributeValueFactory extends Factory
 
     public function asColor(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'hex_color' => fake()->hexColor(),
             'image' => null,
         ]);
@@ -44,7 +44,7 @@ final class AttributeValueFactory extends Factory
 
     public function asPattern(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'hex_color' => null,
         ]);
     }

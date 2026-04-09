@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('attribute_values', function (Blueprint $table) {
+        Schema::table('attribute_values', function (Blueprint $table): void {
             $table->string('hex_color')->nullable();
             $table->string('image')->nullable();
         });
@@ -24,7 +24,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('attribute_values', function (Blueprint $table) {
+        Schema::table('attribute_values', function (Blueprint $table): void {
             $table->dropColumn(['hex_color', 'image']);
         });
     }
