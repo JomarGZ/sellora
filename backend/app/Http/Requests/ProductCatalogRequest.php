@@ -26,10 +26,10 @@ final class ProductCatalogRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:255'],
-            'category' => ['nullable', 'string', 'exists:product_categories,slug'],
-            'brand' => ['nullable', 'string', 'exists:brands,slug'],
+            'category' => ['nullable', 'string'],
+            'brand' => ['nullable', 'string'],
             'min_price' => ['nullable', 'numeric', 'min:0'],
-            'max_price' => ['nullable', 'numeric', 'min:0', 'gt:min_price'],
+            'max_price' => ['nullable', 'numeric', 'min:0'],
             'sort' => ['nullable', 'string', 'in:price_asc,price_desc,newest,rating'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];

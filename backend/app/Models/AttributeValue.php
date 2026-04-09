@@ -21,6 +21,8 @@ final class AttributeValue extends Model
     protected $fillable = [
         'attribute_id',
         'value',
+        'hex_color',
+        'image',
     ];
 
     /**

@@ -22,7 +22,7 @@ final class ProductItemImageFactory extends Factory
     {
         return [
             'product_item_id' => ProductItem::factory(),
-            'image_path' => 'https://placehold.co/800x600',
+            'image_path' => 'product-items'.fake()->unique()->word().'.png',
         ];
     }
 }

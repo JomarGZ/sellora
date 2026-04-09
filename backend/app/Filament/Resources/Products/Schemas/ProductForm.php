@@ -50,6 +50,7 @@ final class ProductForm
                             ->schema([
                                 FileUpload::make('image_path')
                                     ->image()
+                                    ->disk('public')
                                     ->required()
                                     ->directory('products')
                                     ->visibility('public'),

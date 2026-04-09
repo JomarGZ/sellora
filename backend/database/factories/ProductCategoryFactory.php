@@ -21,12 +21,20 @@ final class ProductCategoryFactory extends Factory
     {
         return [
             'name' => fake()->word(),
+            'parent_id' => null,
         ];
     }
 
-    public function withParent(): static
+    public function withParent(ProductCategory $parent): static
     {
         return $this->state(fn (): array => [
+            'parent_id' => $parent->id,
+        ]);
+    }
+
+    public function asChild(): static
+    {
+        return $this->state(fn () => [
             'parent_id' => ProductCategory::factory(),
         ]);
     }

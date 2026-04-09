@@ -165,13 +165,18 @@ final class Product extends Model
     protected function sortBy(Builder $query, ?string $sort): Builder
     {
         return match ($sort) {
-            'price_asc' => $query->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
+            'price_asc' => $query->select('products.*')
+                ->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
                 ->groupBy('products.id')
                 ->orderBy(DB::raw('MIN(product_items.price)'), 'asc'),
-            'price_desc' => $query->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
+
+            'price_desc' => $query->select('products.*')
+                ->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
                 ->groupBy('products.id')
                 ->orderBy(DB::raw('MIN(product_items.price)'), 'desc'),
+
             'newest' => $query->latest(),
+
             default => $query->inRandomOrder(),
         };
     }

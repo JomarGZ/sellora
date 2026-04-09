@@ -22,9 +22,16 @@ final class ProductImageFactory extends Factory
     {
         return [
             'product_id' => Product::factory(),
-            'image_path' => 'https://placehold.co/800x600',
+            'image_path' => 'products'.fake()->unique()->word().'.png',
             'is_primary' => false,
         ];
+    }
+
+    public function forProduct(Product $product): static
+    {
+        return $this->state(fn () => [
+            'product_id' => $product->id,
+        ]);
     }
 
     public function primary(): static
