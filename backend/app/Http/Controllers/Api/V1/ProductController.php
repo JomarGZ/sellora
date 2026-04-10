@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Api\V1;
 use App\DTOs\ProductFilterDTO;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\ProductFilterRequest;
+use App\Http\Resources\AttributeResource;
+use App\Http\Resources\ProductDetailResource;
 use App\Http\Resources\ProductResource;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
@@ -26,6 +28,24 @@ final class ProductController extends ApiController
         );
 
         return ProductResource::collection($products)->additional(['message' => 'Paginated products retrieved successfully.', 'success' => true]);
+    }
+
+    public function show(string $slug): JsonResponse
+    {
+        $product = $this->service->findBySlug($slug);
+        if (is_null($product)) {
+            return $this->notFound('Product not found.');
+        }
+
+        $attributes = $this->service->resolveAttributes($product);
+
+        return $this->success(
+            data: (new ProductDetailResource($product))
+                ->additional([
+                    'attributes' => AttributeResource::collection($attributes),
+                ]),
+            message: 'Product retrieved successfully.'
+        );
     }
 
     public function newArrivals(Request $request): JsonResponse

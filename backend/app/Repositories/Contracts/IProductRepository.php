@@ -31,4 +31,6 @@ interface IProductRepository
      * @return LengthAwarePaginator<int, Product>
      */
     public function catalog(ProductFilterDTO $filters): LengthAwarePaginator;
+
+    public function findBySlug(string $slug): ?Product;
 }

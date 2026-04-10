@@ -27,6 +27,7 @@ Route::middleware('throttle:60,1')->group(function (): void {
     Route::get('products/new-arrivals', [ProductController::class, 'newArrivals'])->name('api.v1.products.new-arrivals');
     Route::get('products/best-sellers', [ProductController::class, 'bestSellers'])->name('api.v1.products.best-sellers');
     Route::get('products', [ProductController::class, 'index'])->name('api.v1.products');
+    Route::get('products/{slug}', [ProductController::class, 'show'])->name('api.v1.products.show');
     Route::get('products/filters', [ProductFilterController::class, 'index'])->name('api.v1.products.filters');
 });
 

@@ -78,6 +78,33 @@ final class ProductRepository extends BaseRepository implements IProductReposito
             ->paginate($filters->perPage);
     }
 
+    public function findBySlug(string $slug): ?Product
+    {
+        return $this->query()
+            ->select([
+                'id',
+                'brand_id',
+                'product_category_id',
+                'name',
+                'slug',
+                'description',
+            ])
+            ->with([
+                'images:id,product_id,image_path,is_primary',
+                'brand:id,name,slug,logo',
+                'category:id,name,slug',
+                'productItems:id,product_id,sku,price,qty_in_stock',
+                'productItems.images:id,product_item_id,image_path',
+                'productItems.attributeValues:id,attribute_id,value,hex_color,image',
+                'productItems.attributeValues.attribute:id,name',
+            ])
+            ->withMin('productItems', 'price')
+            ->withMax('productItems', 'price')
+            ->withSum('productItems', 'qty_in_stock')
+            ->where('slug', $slug)
+            ->first();
+    }
+
     /**
      * @return Builder<Product>
      */

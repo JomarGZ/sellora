@@ -35,7 +35,7 @@ final class BrandResource extends JsonResource
         assert(is_string($fallback));
 
         if ($brand->logo) {
-            return Storage::url($brand->logo);
+            return url(Storage::url($brand->logo));
         }
 
         return $fallback;

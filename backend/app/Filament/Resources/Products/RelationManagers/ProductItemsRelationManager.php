@@ -94,8 +94,8 @@ final class ProductItemsRelationManager extends RelationManager
 
                 Section::make('Variant Images')
                     ->schema([
-                        Repeater::make('itemImages')
-                            ->relationship('itemImages')
+                        Repeater::make('images')
+                            ->relationship('images')
                             ->schema([
                                 FileUpload::make('image_path')
                                     ->label('Variant Image')
