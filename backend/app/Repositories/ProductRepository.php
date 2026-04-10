@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\DTOs\ProductCatalogFilterDTO;
+use App\DTOs\ProductFilterDTO;
 use App\Models\Product;
-use App\Repositories\Contracts\IProductCatalogRepository;
+use App\Repositories\Contracts\IProductRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -14,7 +14,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 /**
  * @extends BaseRepository<Product>
  */
-final class ProductCatalogRepository extends BaseRepository implements IProductCatalogRepository
+final class ProductRepository extends BaseRepository implements IProductRepository
 {
     public function __construct(Product $product)
     {
@@ -57,7 +57,7 @@ final class ProductCatalogRepository extends BaseRepository implements IProductC
     /**
      * @return LengthAwarePaginator<int, Product>
      */
-    public function catalog(ProductCatalogFilterDTO $filters): LengthAwarePaginator
+    public function catalog(ProductFilterDTO $filters): LengthAwarePaginator
     {
         return $this->query()
             ->select([

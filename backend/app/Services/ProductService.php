@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DTOs\ProductCatalogFilterDTO;
+use App\DTOs\ProductFilterDTO;
 use App\Models\Product;
-use App\Repositories\Contracts\IProductCatalogRepository;
+use App\Repositories\Contracts\IProductRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-final readonly class ProductCatalogService
+final readonly class ProductService
 {
     public function __construct(
-        private IProductCatalogRepository $repository
+        private IProductRepository $repository
     ) {}
 
     /**
@@ -39,7 +39,7 @@ final readonly class ProductCatalogService
     /**
      * @return LengthAwarePaginator<int, Product>
      */
-    public function catalog(ProductCatalogFilterDTO $filters): LengthAwarePaginator
+    public function catalog(ProductFilterDTO $filters): LengthAwarePaginator
     {
         return $this->repository->catalog($filters);
     }

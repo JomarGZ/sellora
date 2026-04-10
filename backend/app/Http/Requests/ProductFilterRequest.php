@@ -7,7 +7,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-final class ProductCatalogRequest extends FormRequest
+final class ProductFilterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
