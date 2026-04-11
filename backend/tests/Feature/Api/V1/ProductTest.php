@@ -2,11 +2,149 @@
 
 declare(strict_types=1);
 
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductItem;
 
 describe('Product Catalog', function (): void {
 
     describe('Happy Path', function (): void {
+        it('returns product details correctly', function (): void {
+            $brand = createBrand([
+                'name' => 'havana',
+            ]);
+
+            $category = createCategory([
+                'name' => 'clothing',
+            ]);
+
+            $product = Product::factory()
+                ->forBrand($brand)
+                ->forCategory($category)
+                ->create([
+                    'name' => 'dress',
+                    'description' => '<p>asdadadadasda</p>',
+                ]);
+
+            $sizeAttribute = Attribute::factory()->create([
+                'name' => 'size',
+            ]);
+
+            $colorAttribute = Attribute::factory()->create([
+                'name' => 'color',
+            ]);
+
+            $sizeValue = AttributeValue::factory()
+                ->forAttribute($sizeAttribute)
+                ->create([
+                    'value' => 'M',
+                ]);
+
+            $colorValue = AttributeValue::factory()
+                ->forAttribute($colorAttribute)
+                ->create([
+                    'value' => 'green',
+                ]);
+
+            $productItem = ProductItem::factory()
+                ->forProduct($product)
+                ->create([
+                    'sku' => 'JOMAR-PRODUCT-M-GREEN-712978',
+                    'price' => 23.00,
+                    'qty_in_stock' => 1221,
+                ]);
+
+            $productItem->attributeValues()->attach([
+                $sizeValue->id,
+                $colorValue->id,
+            ]);
+
+            ProductImage::factory()
+                ->forProduct($product)
+                ->create([
+                    'is_primary' => true,
+                ]);
+
+            $response = $this->getJson("/api/v1/products/{$product->slug}");
+
+            $response->assertOk()
+                ->assertJson([
+                    'success' => true,
+                    'message' => 'Product retrieved successfully.',
+                ]);
+
+            $response->assertJsonPath('data.id', $product->id);
+            $response->assertJsonPath('data.name', 'dress');
+            $response->assertJsonPath('data.slug', 'dress');
+
+            $response->assertJsonPath('data.price_range.min', '23.00');
+            $response->assertJsonPath('data.price_range.max', '23.00');
+            $response->assertJsonPath('data.total_stock', 1221);
+
+            $response->assertJsonCount(1, 'data.images');
+            $response->assertJsonCount(1, 'data.variants');
+            $response->assertJsonCount(2, 'data.attributes');
+
+            $response->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'slug',
+                    'description',
+                    'price_range' => [
+                        'min',
+                        'max',
+                    ],
+                    'total_stock',
+                    'brand' => [
+                        'id',
+                        'name',
+                        'slug',
+                        'logo',
+                    ],
+                    'category' => [
+                        'id',
+                        'name',
+                        'slug',
+                    ],
+                    'images' => [
+                        [
+                            'id',
+                            'url',
+                            'is_primary',
+                        ],
+                    ],
+                    'attributes' => [
+                        [
+                            'id',
+                            'name',
+                            'values' => [
+                                [
+                                    'id',
+                                    'label',
+                                    'value',
+                                    'hex_color',
+                                    'swatch',
+                                ],
+                            ],
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'id',
+                            'sku',
+                            'price',
+                            'qty_in_stock',
+                            'in_stock',
+                            'attribute_value_ids',
+                            'images',
+                        ],
+                    ],
+                ],
+            ]);
+        });
 
         it('returns paginated products', function (): void {
             createProduct();

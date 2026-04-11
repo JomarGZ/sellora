@@ -51,16 +51,23 @@ final readonly class ProductService
         return $this->repository->catalog($filters);
     }
 
+    /**
+     * @return SupportCollection<int, AttributeGroupDTO>
+     */
     public function resolveAttributes(Product $product): SupportCollection
     {
         return $product->productItems
             ->flatMap(fn ($item) => $item->attributeValues)
             ->groupBy(fn ($value) => $value->attribute->id)
-            ->map(fn ($values) => new AttributeGroupDTO(
-                id: $values->first()->attribute->id,
-                name: $values->first()->attribute->name,
-                values: $values->unique('id')->values()->all(),
-            ))
+            ->map(function ($values): AttributeGroupDTO {
+                $first = $values->firstOrFail();
+
+                return new AttributeGroupDTO(
+                    id: $first->attribute->id,
+                    name: $first->attribute->name,
+                    values: $values->unique('id')->values()->all(),
+                );
+            })
             ->values();
     }
 }

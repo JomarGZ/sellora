@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property Attribute $attribute
+ */
 final class AttributeValue extends Model
 {
     /** @use HasFactory<AttributeValueFactory> */
@@ -46,6 +49,9 @@ final class AttributeValue extends Model
         return $this->belongsToMany(ProductItem::class, 'product_item_attribute_values');
     }
 
+    /**
+     * @return array{type: string, value: string}|null
+     */
     public function swatch(): ?array
     {
         if ($this->hex_color) {
