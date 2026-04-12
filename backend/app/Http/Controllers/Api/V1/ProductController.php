@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\DTOs\ProductFilterDTO;
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Requests\ProductFilterRequest;
+use App\Http\Requests\Api\V1\ProductFilterRequest;
 use App\Http\Resources\AttributeResource;
 use App\Http\Resources\ProductDetailResource;
 use App\Http\Resources\ProductResource;

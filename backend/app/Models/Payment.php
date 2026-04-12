@@ -23,9 +23,12 @@ final class Payment extends Model
         'payment_provider',
     ];
 
+    protected $casts = ['amount' => 'decimal:2']; 
+
     /** @return BelongsTo<Order, $this> */
     public function order(): BelongsTo
     {
+        Country
         return $this->belongsTo(Order::class);
     }
 }

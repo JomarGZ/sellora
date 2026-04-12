@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DTOs;
 
-use App\Http\Requests\ProductFilterRequest;
+use App\Http\Requests\Api\V1\ProductFilterRequest;
 
 final readonly class ProductFilterDTO
 {
