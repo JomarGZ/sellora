@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\DTOs\ProductCatalogFilterDTO;
+use App\DTOs\ProductFilterDTO;
 use App\Models\Product;
-use App\Repositories\Contracts\IProductCatalogRepository;
+use App\Repositories\Contracts\IProductRepository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -14,7 +14,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 /**
  * @extends BaseRepository<Product>
  */
-final class ProductCatalogRepository extends BaseRepository implements IProductCatalogRepository
+final class ProductRepository extends BaseRepository implements IProductRepository
 {
     public function __construct(Product $product)
     {
@@ -57,7 +57,7 @@ final class ProductCatalogRepository extends BaseRepository implements IProductC
     /**
      * @return LengthAwarePaginator<int, Product>
      */
-    public function catalog(ProductCatalogFilterDTO $filters): LengthAwarePaginator
+    public function catalog(ProductFilterDTO $filters): LengthAwarePaginator
     {
         return $this->query()
             ->select([
@@ -76,6 +76,33 @@ final class ProductCatalogRepository extends BaseRepository implements IProductC
             ->filterByPriceRange($filters->minPrice, $filters->maxPrice)
             ->sortBy($filters->sort)
             ->paginate($filters->perPage);
+    }
+
+    public function findBySlug(string $slug): ?Product
+    {
+        return $this->query()
+            ->select([
+                'id',
+                'brand_id',
+                'product_category_id',
+                'name',
+                'slug',
+                'description',
+            ])
+            ->with([
+                'images:id,product_id,image_path,is_primary',
+                'brand:id,name,slug,logo',
+                'category:id,name,slug',
+                'productItems:id,product_id,sku,price,qty_in_stock',
+                'productItems.images:id,product_item_id,image_path',
+                'productItems.attributeValues:id,attribute_id,value,hex_color,image',
+                'productItems.attributeValues.attribute:id,name',
+            ])
+            ->withMin('productItems', 'price')
+            ->withMax('productItems', 'price')
+            ->withSum('productItems', 'qty_in_stock')
+            ->where('slug', $slug)
+            ->first();
     }
 
     /**

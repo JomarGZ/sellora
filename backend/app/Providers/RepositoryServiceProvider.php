@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Repositories\Contracts\IProductCatalogRepository;
 use App\Repositories\Contracts\IProductFilterRepository;
-use App\Repositories\ProductCatalogRepository;
+use App\Repositories\Contracts\IProductRepository;
 use App\Repositories\ProductFilterRepository;
+use App\Repositories\ProductRepository;
 use Illuminate\Support\ServiceProvider;
 
 final class RepositoryServiceProvider extends ServiceProvider
@@ -17,7 +17,7 @@ final class RepositoryServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(IProductCatalogRepository::class, ProductCatalogRepository::class);
+        $this->app->bind(IProductRepository::class, ProductRepository::class);
         $this->app->bind(IProductFilterRepository::class, ProductFilterRepository::class);
     }
 

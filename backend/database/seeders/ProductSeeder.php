@@ -57,7 +57,7 @@ final class ProductSeeder extends Seeder
                         ]);
 
                         // SKU-specific image
-                        $item->itemImages()->create([
+                        $item->images()->create([
                             'image_path' => 'https://placehold.co/800x600',
                         ]);
                     }

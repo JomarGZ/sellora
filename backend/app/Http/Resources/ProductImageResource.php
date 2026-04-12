@@ -23,8 +23,8 @@ final class ProductImageResource extends JsonResource
 
         return [
             'id' => $productImage->id,
-            'image_url' => $this->resolveImageUrl($productImage),
-            'is_primary' => $productImage->is_primary,
+            'url' => $this->resolveImageUrl($productImage),
+            'is_primary' => (bool) $productImage->is_primary,
         ];
     }
 
@@ -35,7 +35,7 @@ final class ProductImageResource extends JsonResource
         assert(is_string($fallback));
 
         if ($productImage->image_path) {
-            return Storage::url($productImage->image_path);
+            return asset(Storage::url($productImage->image_path));
         }
 
         return $fallback;

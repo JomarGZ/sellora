@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
-use App\DTOs\ProductCatalogFilterDTO;
+use App\DTOs\ProductFilterDTO;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
-interface IProductCatalogRepository
+interface IProductRepository
 {
     /**
      * @param  array<int, string>  $columns  Columns to select
@@ -30,5 +30,7 @@ interface IProductCatalogRepository
     /**
      * @return LengthAwarePaginator<int, Product>
      */
-    public function catalog(ProductCatalogFilterDTO $filters): LengthAwarePaginator;
+    public function catalog(ProductFilterDTO $filters): LengthAwarePaginator;
+
+    public function findBySlug(string $slug): ?Product;
 }

@@ -4,28 +4,48 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\DTOs\ProductCatalogFilterDTO;
+use App\DTOs\ProductFilterDTO;
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Requests\ProductCatalogRequest;
+use App\Http\Requests\ProductFilterRequest;
+use App\Http\Resources\AttributeResource;
+use App\Http\Resources\ProductDetailResource;
 use App\Http\Resources\ProductResource;
-use App\Services\ProductCatalogService;
+use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-final class ProductCatalogController extends ApiController
+final class ProductController extends ApiController
 {
     public function __construct(
-        private readonly ProductCatalogService $service
+        private readonly ProductService $service
     ) {}
 
-    public function index(ProductCatalogRequest $request): AnonymousResourceCollection
+    public function index(ProductFilterRequest $request): AnonymousResourceCollection
     {
         $products = $this->service->catalog(
-            ProductCatalogFilterDTO::fromRequest($request)
+            ProductFilterDTO::fromRequest($request)
         );
 
         return ProductResource::collection($products)->additional(['message' => 'Paginated products retrieved successfully.', 'success' => true]);
+    }
+
+    public function show(string $slug): JsonResponse
+    {
+        $product = $this->service->findBySlug($slug);
+        if (is_null($product)) {
+            return $this->notFound('Product not found.');
+        }
+
+        $attributes = $this->service->resolveAttributes($product);
+
+        return $this->success(
+            data: (new ProductDetailResource($product))
+                ->additional([
+                    'attributes' => AttributeResource::collection($attributes),
+                ]),
+            message: 'Product retrieved successfully.'
+        );
     }
 
     public function newArrivals(Request $request): JsonResponse

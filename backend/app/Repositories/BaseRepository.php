@@ -75,20 +75,11 @@ abstract class BaseRepository implements IRepository
      */
     final public function checkIsExists(int|array $id): bool
     {
-        $isExists = false;
-
         if (is_array($id)) {
-            foreach ($id as $modelId) {
-                $model = $this->model->find($modelId);
-                if ($model) {
-                    $isExists = true;
-                }
-            }
-
-            return $isExists;
+            return $this->model->whereIn('id', $id)->exists();
         }
 
-        return (bool) ($this->model->find($id));
+        return $this->model->whereKey($id)->exists();
     }
 
     /**

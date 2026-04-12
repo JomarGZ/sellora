@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\DTOs;
 
-use App\Http\Requests\ProductCatalogRequest;
+use App\Http\Requests\ProductFilterRequest;
 
-final readonly class ProductCatalogFilterDTO
+final readonly class ProductFilterDTO
 {
     public function __construct(
         public ?string $search,
@@ -18,7 +18,7 @@ final readonly class ProductCatalogFilterDTO
         public int $perPage,
     ) {}
 
-    public static function fromRequest(ProductCatalogRequest $request): self
+    public static function fromRequest(ProductFilterRequest $request): self
     {
         return new self(
             search: $request->str('search')->trim()->value() ?: null,

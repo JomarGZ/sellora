@@ -64,7 +64,7 @@ final class ProductItem extends Model
      *
      * @return HasMany<ProductItemImage, $this>
      */
-    public function itemImages(): HasMany
+    public function images(): HasMany
     {
         return $this->hasMany(ProductItemImage::class);
     }

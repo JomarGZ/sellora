@@ -2,18 +2,156 @@
 
 declare(strict_types=1);
 
+use App\Models\Attribute;
+use App\Models\AttributeValue;
 use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductItem;
 
 describe('Product Catalog', function (): void {
 
     describe('Happy Path', function (): void {
+        it('returns product details correctly', function (): void {
+            $brand = createBrand([
+                'name' => 'havana',
+            ]);
+
+            $category = createCategory([
+                'name' => 'clothing',
+            ]);
+
+            $product = Product::factory()
+                ->forBrand($brand)
+                ->forCategory($category)
+                ->create([
+                    'name' => 'dress',
+                    'description' => '<p>asdadadadasda</p>',
+                ]);
+
+            $sizeAttribute = Attribute::factory()->create([
+                'name' => 'size',
+            ]);
+
+            $colorAttribute = Attribute::factory()->create([
+                'name' => 'color',
+            ]);
+
+            $sizeValue = AttributeValue::factory()
+                ->forAttribute($sizeAttribute)
+                ->create([
+                    'value' => 'M',
+                ]);
+
+            $colorValue = AttributeValue::factory()
+                ->forAttribute($colorAttribute)
+                ->create([
+                    'value' => 'green',
+                ]);
+
+            $productItem = ProductItem::factory()
+                ->forProduct($product)
+                ->create([
+                    'sku' => 'JOMAR-PRODUCT-M-GREEN-712978',
+                    'price' => 23.00,
+                    'qty_in_stock' => 1221,
+                ]);
+
+            $productItem->attributeValues()->attach([
+                $sizeValue->id,
+                $colorValue->id,
+            ]);
+
+            ProductImage::factory()
+                ->forProduct($product)
+                ->create([
+                    'is_primary' => true,
+                ]);
+
+            $response = $this->getJson("/api/v1/products/{$product->slug}");
+
+            $response->assertOk()
+                ->assertJson([
+                    'success' => true,
+                    'message' => 'Product retrieved successfully.',
+                ]);
+
+            $response->assertJsonPath('data.id', $product->id);
+            $response->assertJsonPath('data.name', 'dress');
+            $response->assertJsonPath('data.slug', 'dress');
+
+            $response->assertJsonPath('data.price_range.min', '23.00');
+            $response->assertJsonPath('data.price_range.max', '23.00');
+            $response->assertJsonPath('data.total_stock', 1221);
+
+            $response->assertJsonCount(1, 'data.images');
+            $response->assertJsonCount(1, 'data.variants');
+            $response->assertJsonCount(2, 'data.attributes');
+
+            $response->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'name',
+                    'slug',
+                    'description',
+                    'price_range' => [
+                        'min',
+                        'max',
+                    ],
+                    'total_stock',
+                    'brand' => [
+                        'id',
+                        'name',
+                        'slug',
+                        'logo',
+                    ],
+                    'category' => [
+                        'id',
+                        'name',
+                        'slug',
+                    ],
+                    'images' => [
+                        [
+                            'id',
+                            'url',
+                            'is_primary',
+                        ],
+                    ],
+                    'attributes' => [
+                        [
+                            'id',
+                            'name',
+                            'values' => [
+                                [
+                                    'id',
+                                    'label',
+                                    'value',
+                                    'hex_color',
+                                    'swatch',
+                                ],
+                            ],
+                        ],
+                    ],
+                    'variants' => [
+                        [
+                            'id',
+                            'sku',
+                            'price',
+                            'qty_in_stock',
+                            'in_stock',
+                            'attribute_value_ids',
+                            'images',
+                        ],
+                    ],
+                ],
+            ]);
+        });
 
         it('returns paginated products', function (): void {
             createProduct();
             createProduct();
             createProduct();
 
-            $response = $this->getJson('/api/v1/product-catalog');
+            $response = $this->getJson('/api/v1/products');
 
             $response->assertOk()
                 ->assertJsonStructure([
@@ -28,7 +166,7 @@ describe('Product Catalog', function (): void {
         it('returns correct per_page count', function (): void {
             Product::factory()->count(20)->create();
 
-            $response = $this->getJson('/api/v1/product-catalog?per_page=5');
+            $response = $this->getJson('/api/v1/products?per_page=5');
 
             $response->assertOk()
                 ->assertJsonCount(5, 'data')
@@ -38,7 +176,7 @@ describe('Product Catalog', function (): void {
         it('returns second page correctly', function (): void {
             Product::factory()->count(20)->create();
 
-            $response = $this->getJson('/api/v1/product-catalog?per_page=10&page=2');
+            $response = $this->getJson('/api/v1/products?per_page=10&page=2');
 
             $response->assertOk()
                 ->assertJsonPath('meta.current_page', 2)
@@ -46,7 +184,7 @@ describe('Product Catalog', function (): void {
         });
 
         it('returns empty data when no products exist', function (): void {
-            $response = $this->getJson('/api/v1/product-catalog');
+            $response = $this->getJson('/api/v1/products');
 
             $response->assertOk()
                 ->assertJsonCount(0, 'data')
@@ -61,7 +199,7 @@ describe('Product Catalog', function (): void {
             createProduct(['name' => 'Nike Air Max']);
             createProduct(['name' => 'Adidas Ultraboost']);
 
-            $response = $this->getJson('/api/v1/product-catalog?search=Nike');
+            $response = $this->getJson('/api/v1/products?search=Nike');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data')
@@ -73,7 +211,7 @@ describe('Product Catalog', function (): void {
             createProduct(['name' => 'Nike Air Force']);
             createProduct(['name' => 'Adidas Ultraboost']);
 
-            $response = $this->getJson('/api/v1/product-catalog?search=Nike');
+            $response = $this->getJson('/api/v1/products?search=Nike');
 
             $response->assertOk()
                 ->assertJsonCount(2, 'data');
@@ -82,7 +220,7 @@ describe('Product Catalog', function (): void {
         it('returns empty when search has no match', function (): void {
             createProduct(['name' => 'Nike Air Max']);
 
-            $response = $this->getJson('/api/v1/product-catalog?search=Puma');
+            $response = $this->getJson('/api/v1/products?search=Puma');
 
             $response->assertOk()
                 ->assertJsonCount(0, 'data');
@@ -91,7 +229,7 @@ describe('Product Catalog', function (): void {
         it('ignores whitespace in search term', function (): void {
             createProduct(['name' => 'Nike Air Max']);
 
-            $response = $this->getJson('/api/v1/product-catalog?search=%20%20Nike%20%20');
+            $response = $this->getJson('/api/v1/products?search=%20%20Nike%20%20');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data');
@@ -108,7 +246,7 @@ describe('Product Catalog', function (): void {
             createProduct(['product_category_id' => $shoes->id]);
             createProduct(['product_category_id' => $clothing->id]);
 
-            $response = $this->getJson('/api/v1/product-catalog?category=shoes');
+            $response = $this->getJson('/api/v1/products?category=shoes');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data');
@@ -120,7 +258,7 @@ describe('Product Catalog', function (): void {
 
             createProduct(['product_category_id' => $child->id]);
 
-            $response = $this->getJson('/api/v1/product-catalog?category=clothing');
+            $response = $this->getJson('/api/v1/products?category=clothing');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data');
@@ -129,7 +267,7 @@ describe('Product Catalog', function (): void {
         it('returns empty when category has no products', function (): void {
             createCategory(['slug' => 'shoes']);
 
-            $response = $this->getJson('/api/v1/product-catalog?category=shoes');
+            $response = $this->getJson('/api/v1/products?category=shoes');
 
             $response->assertOk()
                 ->assertJsonCount(0, 'data');
@@ -138,7 +276,7 @@ describe('Product Catalog', function (): void {
         it('returns empty when category slug does not exist', function (): void {
             createProduct();
 
-            $response = $this->getJson('/api/v1/product-catalog?category=nonexistent');
+            $response = $this->getJson('/api/v1/products?category=nonexistent');
 
             $response->assertOk()
                 ->assertJsonCount(0, 'data');
@@ -155,7 +293,7 @@ describe('Product Catalog', function (): void {
             createProduct(['brand_id' => $nike->id]);
             createProduct(['brand_id' => $adidas->id]);
 
-            $response = $this->getJson('/api/v1/product-catalog?brand=nike');
+            $response = $this->getJson('/api/v1/products?brand=nike');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data');
@@ -164,7 +302,7 @@ describe('Product Catalog', function (): void {
         it('returns empty when brand has no products', function (): void {
             createBrand(['slug' => 'nike']);
 
-            $response = $this->getJson('/api/v1/product-catalog?brand=nike');
+            $response = $this->getJson('/api/v1/products?brand=nike');
 
             $response->assertOk()
                 ->assertJsonCount(0, 'data');
@@ -173,7 +311,7 @@ describe('Product Catalog', function (): void {
         it('returns empty when brand slug does not exist', function (): void {
             createProduct();
 
-            $response = $this->getJson('/api/v1/product-catalog?brand=nonexistent');
+            $response = $this->getJson('/api/v1/products?brand=nonexistent');
 
             $response->assertOk()
                 ->assertJsonCount(0, 'data');
@@ -192,7 +330,7 @@ describe('Product Catalog', function (): void {
             createProductItem(['product_id' => $mid->id,       'price' => 500]);
             createProductItem(['product_id' => $expensive->id, 'price' => 1000]);
 
-            $response = $this->getJson('/api/v1/product-catalog?min_price=200&max_price=600');
+            $response = $this->getJson('/api/v1/products?min_price=200&max_price=600');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data');
@@ -205,7 +343,7 @@ describe('Product Catalog', function (): void {
             createProductItem(['product_id' => $cheap->id,     'price' => 100]);
             createProductItem(['product_id' => $expensive->id, 'price' => 1000]);
 
-            $response = $this->getJson('/api/v1/product-catalog?min_price=500');
+            $response = $this->getJson('/api/v1/products?min_price=500');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data');
@@ -218,7 +356,7 @@ describe('Product Catalog', function (): void {
             createProductItem(['product_id' => $cheap->id,     'price' => 100]);
             createProductItem(['product_id' => $expensive->id, 'price' => 1000]);
 
-            $response = $this->getJson('/api/v1/product-catalog?max_price=500');
+            $response = $this->getJson('/api/v1/products?max_price=500');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data');
@@ -228,7 +366,7 @@ describe('Product Catalog', function (): void {
             $product = createProduct();
             createProductItem(['product_id' => $product->id, 'price' => 100]);
 
-            $response = $this->getJson('/api/v1/product-catalog?min_price=500&max_price=1000');
+            $response = $this->getJson('/api/v1/products?min_price=500&max_price=1000');
 
             $response->assertOk()
                 ->assertJsonCount(0, 'data');
@@ -247,7 +385,7 @@ describe('Product Catalog', function (): void {
             createProductItem(['product_id' => $second->id, 'price' => 100]);
             createProductItem(['product_id' => $third->id,  'price' => 200]);
 
-            $response = $this->getJson('/api/v1/product-catalog?sort=price_asc');
+            $response = $this->getJson('/api/v1/products?sort=price_asc');
 
             $response->assertOk()
                 ->assertJsonPath('data.0.id', $second->id)
@@ -264,7 +402,7 @@ describe('Product Catalog', function (): void {
             createProductItem(['product_id' => $second->id, 'price' => 100]);
             createProductItem(['product_id' => $third->id,  'price' => 200]);
 
-            $response = $this->getJson('/api/v1/product-catalog?sort=price_desc');
+            $response = $this->getJson('/api/v1/products?sort=price_desc');
 
             $response->assertOk()
                 ->assertJsonPath('data.0.id', $first->id)
@@ -276,7 +414,7 @@ describe('Product Catalog', function (): void {
             $old = createProduct(['created_at' => now()->subDays(10)]);
             $new = createProduct(['created_at' => now()]);
 
-            $response = $this->getJson('/api/v1/product-catalog?sort=newest');
+            $response = $this->getJson('/api/v1/products?sort=newest');
 
             $response->assertOk()
                 ->assertJsonPath('data.0.id', $new->id)
@@ -286,7 +424,7 @@ describe('Product Catalog', function (): void {
         it('falls back to random order when sort is not provided', function (): void {
             Product::factory()->count(5)->create();
 
-            $response = $this->getJson('/api/v1/product-catalog');
+            $response = $this->getJson('/api/v1/products');
 
             $response->assertOk()
                 ->assertJsonCount(5, 'data');
@@ -304,7 +442,7 @@ describe('Product Catalog', function (): void {
             createProduct(['brand_id' => $nike->id, 'product_category_id' => $shoes->id]);
             createProduct(['brand_id' => $nike->id, 'product_category_id' => $clothing->id]);
 
-            $response = $this->getJson('/api/v1/product-catalog?brand=nike&category=shoes');
+            $response = $this->getJson('/api/v1/products?brand=nike&category=shoes');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data');
@@ -317,7 +455,7 @@ describe('Product Catalog', function (): void {
             createProductItem(['product_id' => $nike->id,   'price' => 100]);
             createProductItem(['product_id' => $jordan->id, 'price' => 500]);
 
-            $response = $this->getJson('/api/v1/product-catalog?search=Nike&max_price=200');
+            $response = $this->getJson('/api/v1/products?search=Nike&max_price=200');
 
             $response->assertOk()
                 ->assertJsonCount(1, 'data')
@@ -329,31 +467,31 @@ describe('Product Catalog', function (): void {
     describe('Validation', function (): void {
 
         it('rejects invalid sort value', function (): void {
-            $this->getJson('/api/v1/product-catalog?sort=invalid')
+            $this->getJson('/api/v1/products?sort=invalid')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['sort']);
         });
 
         it('rejects non-numeric min_price', function (): void {
-            $this->getJson('/api/v1/product-catalog?min_price=abc')
+            $this->getJson('/api/v1/products?min_price=abc')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['min_price']);
         });
 
         it('rejects non-numeric max_price', function (): void {
-            $this->getJson('/api/v1/product-catalog?max_price=abc')
+            $this->getJson('/api/v1/products?max_price=abc')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['max_price']);
         });
 
         it('rejects per_page above 100', function (): void {
-            $this->getJson('/api/v1/product-catalog?per_page=999')
+            $this->getJson('/api/v1/products?per_page=999')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['per_page']);
         });
 
         it('rejects per_page below 1', function (): void {
-            $this->getJson('/api/v1/product-catalog?per_page=0')
+            $this->getJson('/api/v1/products?per_page=0')
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['per_page']);
         });
@@ -372,7 +510,7 @@ describe('Product Filter Options', function (): void {
         createCategory(['parent_id' => null]);
         createBrand();
 
-        $response = $this->getJson('/api/v1/product-catalog/filters');
+        $response = $this->getJson('/api/v1/products/filters');
 
         $response->assertOk()
             ->assertJsonStructure([
@@ -387,7 +525,7 @@ describe('Product Filter Options', function (): void {
         $parent = createCategory(['parent_id' => null]);
         createCategory(['parent_id' => $parent->id]);
 
-        $response = $this->getJson('/api/v1/product-catalog/filters');
+        $response = $this->getJson('/api/v1/products/filters');
 
         $response->assertOk()
             ->assertJsonCount(1, 'data.categories');
@@ -398,36 +536,36 @@ describe('Product Filter Options', function (): void {
         createCategory(['parent_id' => $parent->id]);
         createCategory(['parent_id' => $parent->id]);
 
-        $response = $this->getJson('/api/v1/product-catalog/filters');
+        $response = $this->getJson('/api/v1/products/filters');
 
         $response->assertOk()
             ->assertJsonCount(2, 'data.categories.0.children');
     });
 
     it('returns empty categories and brands when none exist', function (): void {
-        $response = $this->getJson('/api/v1/product-catalog/filters');
+        $response = $this->getJson('/api/v1/products/filters');
 
         $response->assertOk()
             ->assertJsonCount(0, 'data.categories')
             ->assertJsonCount(0, 'data.brands');
     });
 
-    it('caches filter options on subsequent calls', function (): void {
-        createCategory();
-        createBrand();
+    // it('caches filter options on subsequent calls', function (): void {
+    //     createCategory();
+    //     createBrand();
 
-        $this->getJson('/api/v1/product-catalog/filters')->assertOk();
+    //     $this->getJson('/api/v1/products/filters')->assertOk();
 
-        // Add new data after cache is set
-        createCategory();
-        createBrand();
+    //     // Add new data after cache is set
+    //     createCategory();
+    //     createBrand();
 
-        // Should still return cached result
-        // $response = $this->getJson('/api/v1/product-catalog/filters');
+    //     // Should still return cached result
+    //     $response = $this->getJson('/api/v1/products/filters');
 
-        // $response->assertOk()
-        //     ->assertJsonCount(1, 'data.categories')
-        //     ->assertJsonCount(1, 'data.brands');
-    });
+    //     $response->assertOk()
+    //         ->assertJsonCount(1, 'data.categories')
+    //         ->assertJsonCount(1, 'data.brands');
+    // });
 
 });

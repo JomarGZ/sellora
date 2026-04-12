@@ -15,8 +15,8 @@ final class ProductItemObserver
     public function deleting(ProductItem $productItem): void
     {
         if ($productItem->isForceDeleting()) {
-            $productItem->loadMissing('itemImages');
-            foreach ($productItem->itemImages as $image) {
+            $productItem->loadMissing('images');
+            foreach ($productItem->images as $image) {
                 if ($image->image_path && Storage::exists($image->image_path)) {
                     Storage::delete($image->image_path);
                 }
