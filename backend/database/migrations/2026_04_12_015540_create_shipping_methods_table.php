@@ -13,8 +13,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table): void {
-            $table->softDeletes();
+        Schema::create('shipping_methods', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->decimal('price', 10, 2);
+            $table->integer('estimated_days');
+            $table->timestamps();
         });
     }
 
@@ -23,8 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table): void {
-            $table->dropSoftDeletes();
-        });
+        Schema::dropIfExists('shipping_methods');
     }
 };

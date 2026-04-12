@@ -13,9 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('attribute_values', function (Blueprint $table): void {
-            $table->string('hex_color')->nullable();
-            $table->string('image')->nullable();
+        Schema::create('order_statuses', function (Blueprint $table): void {
+            $table->id();
+            $table->string('status');
+            $table->timestamps();
         });
     }
 
@@ -24,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('attribute_values', function (Blueprint $table): void {
-            $table->dropColumn(['hex_color', 'image']);
-        });
+        Schema::dropIfExists('order_statuses');
     }
 };
