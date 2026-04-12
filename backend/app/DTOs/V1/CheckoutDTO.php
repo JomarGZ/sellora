@@ -1,19 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTOs\V1;
 
 use App\Http\Requests\Api\V1\CheckoutRequest;
 use Illuminate\Support\Collection;
 
-class CheckoutDTO
+final class CheckoutDTO
 {
     /**
-     * @param Collection<int, CheckoutItemDTO> $items
+     * @param  Collection<int, CheckoutItemDTO>  $items
      */
     public function __construct(
-        public Collection        $items,
+        public Collection $items,
         public CheckoutAddressDTO $address,
-        public int               $shippingMethodId,
+        public int $shippingMethodId,
     ) {}
 
     public static function fromRequest(CheckoutRequest $request): self
@@ -22,7 +24,7 @@ class CheckoutDTO
             items: collect($request->validated('items'))
                 ->map(fn (array $item) => new CheckoutItemDTO(
                     productItemId: $item['product_item_id'],
-                    qty:           $item['qty'],
+                    qty: $item['qty'],
                 )),
             address: new CheckoutAddressDTO(
                 addressId: $request->integer('address_id'),

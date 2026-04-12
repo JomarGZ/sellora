@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Api\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CheckoutPreviewRequest extends FormRequest
+final class CheckoutPreviewRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +24,10 @@ class CheckoutPreviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'items'                      => ['required', 'array', 'min:1'],
-            'items.*.product_item_id'    => ['required', 'integer', 'exists:product_items,id'],
-            'items.*.qty'                => ['required', 'integer', 'min:1'],
-            'shipping_method_id'         => ['nullable', 'integer', 'exists:shipping_methods,id'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_item_id' => ['required', 'integer', 'exists:product_items,id'],
+            'items.*.qty' => ['required', 'integer', 'min:1'],
+            'shipping_method_id' => ['nullable', 'integer', 'exists:shipping_methods,id'],
         ];
     }
 }
