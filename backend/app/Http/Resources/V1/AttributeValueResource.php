@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\V1;
 
-use App\Models\ProductCategory;
+use App\Models\AttributeValue;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin ProductCategory
+ * @mixin AttributeValue
  */
-final class CategoryResource extends JsonResource
+final class AttributeValueResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -22,9 +22,10 @@ final class CategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'slug' => $this->slug,
-            'children' => self::collection($this->whenLoaded('children')),
+            'label' => ucfirst($this->value),
+            'value' => $this->value,
+            'hex_color' => $this->hex_color,
+            'swatch' => $this->swatch(),
         ];
     }
 }

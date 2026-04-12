@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\V1;
 
-use App\Models\AttributeValue;
+use App\Models\Attribute;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin AttributeValue
+ * @mixin Attribute
  */
-final class AttributeValueResource extends JsonResource
+final class AttributeResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -22,10 +22,8 @@ final class AttributeValueResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'label' => ucfirst($this->value),
-            'value' => $this->value,
-            'hex_color' => $this->hex_color,
-            'swatch' => $this->swatch(),
+            'name' => $this->name,
+            'values' => AttributeValueResource::collection($this->values),
         ];
     }
 }

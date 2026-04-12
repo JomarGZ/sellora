@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Resources\BrandResource;
-use App\Http\Resources\CategoryResource;
+use App\Http\Resources\V1\BrandResource;
+use App\Http\Resources\V1\CategoryResource;
 use App\Services\ProductFilterService;
 use Illuminate\Http\JsonResponse;
 

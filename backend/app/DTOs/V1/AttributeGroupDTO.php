@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\DTOs;
+namespace App\DTOs\V1;
 
 use App\Models\AttributeValue;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTOs;
+namespace App\DTOs\V1;
 
 use App\Http\Requests\Api\V1\CheckoutRequest;
 use Illuminate\Support\Collection;
