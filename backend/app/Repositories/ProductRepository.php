@@ -7,7 +7,6 @@ namespace App\Repositories;
 use App\DTOs\V1\ProductFilterDTO;
 use App\Models\Product;
 use App\Repositories\Contracts\IProductRepository;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -29,7 +28,7 @@ final class ProductRepository extends BaseRepository implements IProductReposito
      */
     public function getNewArrivals(array $columns = ['*'], array|string $relations = [], int $limit = 10): Collection
     {
-        return $this->query()
+        return $this->model->query()
             ->select($columns)
             ->with($relations)
             ->orderBy('created_at', 'desc')
@@ -45,7 +44,7 @@ final class ProductRepository extends BaseRepository implements IProductReposito
      */
     public function getBestSellers(array $columns = ['*'], array|string $relations = [], int $limit = 10): Collection
     {
-        return $this->query()
+        return $this->model->query()
             ->select($columns)
             ->with($relations)
             // ->withCount('orders') // Assuming there's an 'orders' relationship
@@ -59,7 +58,7 @@ final class ProductRepository extends BaseRepository implements IProductReposito
      */
     public function catalog(ProductFilterDTO $filters): LengthAwarePaginator
     {
-        return $this->query()
+        return $this->model->query()
             ->select([
                 'id',
                 'brand_id',
@@ -80,7 +79,7 @@ final class ProductRepository extends BaseRepository implements IProductReposito
 
     public function findBySlug(string $slug): ?Product
     {
-        return $this->query()
+        return $this->model->query()
             ->select([
                 'id',
                 'brand_id',
@@ -103,13 +102,5 @@ final class ProductRepository extends BaseRepository implements IProductReposito
             ->withSum('productItems', 'qty_in_stock')
             ->where('slug', $slug)
             ->first();
-    }
-
-    /**
-     * @return Builder<Product>
-     */
-    private function query(): Builder
-    {
-        return $this->model->newQuery();
     }
 }

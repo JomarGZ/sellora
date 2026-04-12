@@ -5,28 +5,19 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\ProductItem;
-use Illuminate\Database\Eloquent\Builder;
 use App\Repositories\Contracts\IProductItemRepository;
 use Illuminate\Support\Collection;
 
 final class ProductItemRepository extends BaseRepository implements IProductItemRepository
 {
-     public function __construct(ProductItem $product)
+    public function __construct(ProductItem $productItem)
     {
-        parent::__construct($product);
-    }
-
-    /**
-     * @return Builder<Product>
-     */
-    private function query(): Builder
-    {
-        return $this->model->newQuery();
+        parent::__construct($productItem);
     }
 
     public function findByIds(array $ids): Collection
     {
-        return $this->query()
+        return $this->model->query()
             ->select([
                 'id',
                 'product_id',

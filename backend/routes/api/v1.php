@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CheckoutController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductFilterController;
 use Illuminate\Support\Facades\Route;
@@ -43,6 +44,8 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group
     Route::post('email/resend', [AuthController::class, 'resendVerificationEmail'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
+    Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('api.v1.checkout');
+    Route::post('checkout/preview', [CheckoutController::class, 'preview'])->name('api.v1.checkout.preview');
 });
 
 // Password reset routes (public with rate limiting)
