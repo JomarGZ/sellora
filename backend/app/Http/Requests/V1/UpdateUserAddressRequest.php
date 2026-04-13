@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Validator;
 
-final class StoreUserAddressRequest extends FormRequest
+final class UpdateUserAddressRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -32,22 +31,6 @@ final class StoreUserAddressRequest extends FormRequest
             'city_id' => ['required', 'exists:cities,id'],
             'street_address' => ['required', 'string'],
             'is_default' => ['boolean'],
-        ];
-    }
-
-    public function after(): array
-    {
-        return [
-            function (Validator $validator) {
-                $count = $this->user()->addresses()->count();
-
-                if ($count >= config('app.user_max_addresses')) {
-                    $validator->errors()->add(
-                        'user_addresses',
-                        'You have reached the maximum number of addresses'
-                    );
-                }
-            },
         ];
     }
 }

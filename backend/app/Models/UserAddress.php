@@ -25,6 +25,10 @@ final class UserAddress extends Model
         'is_default',
     ];
 
+    protected $casts = [
+        'is_default' => 'boolean',
+    ];
+
     public function country()
     {
         return $this->belongsTo(Country::class);

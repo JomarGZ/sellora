@@ -46,8 +46,11 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group
         ->middleware('throttle:6,1')
         ->name('verification.send');
 
-    Route::post('user/address', [UserAddressController::class, 'store'])->name('api.v1.user.address');
-    Route::put('user/address/set-default/{id}', [UserAddressController::class, 'setDefault'])->name('api.v1.user.address.default');
+    Route::get('user/address', [UserAddressController::class, 'index'])->name('api.v1.user.address.index');
+    Route::post('user/address', [UserAddressController::class, 'store'])->name('api.v1.user.address.store');
+    Route::put('user/address/{userAddress}', [UserAddressController::class, 'update'])->name('api.v1.user.address.update');
+    Route::delete('user/address/{userAddress}', [UserAddressController::class, 'destroy'])->name('api.v1.user.address.destroy');
+    Route::put('user/address/{userAddress}/default', [UserAddressController::class, 'setDefault'])->name('api.v1.user.address.default');
 
     Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('api.v1.checkout');
     Route::post('checkout/preview', [CheckoutController::class, 'preview'])->name('api.v1.checkout.preview');

@@ -6,12 +6,20 @@ namespace App\Repositories;
 
 use App\Models\UserAddress;
 use App\Repositories\Contracts\IUserAddressRepository;
+use Illuminate\Support\Collection;
 
 final class UserAddressRepository extends BaseRepository implements IUserAddressRepository
 {
     public function __construct(UserAddress $userAddress)
     {
         parent::__construct($userAddress);
+    }
+
+    public function list(int $userId): Collection
+    {
+        return $this->model->query()
+            ->where('user_id', $userId)
+            ->get();
     }
 
     public function findWithRelations(int $id): UserAddress
@@ -46,8 +54,13 @@ final class UserAddressRepository extends BaseRepository implements IUserAddress
 
     public function hasDefault(int $userId): bool
     {
-        return $this->model->where('user_id', $userId)
+        return $this->model->query()->where('user_id', $userId)
             ->where('is_default', true)
             ->exists();
+    }
+
+    public function countByUser(int $userId)
+    {
+        return $this->model->where('user_id', $userId)->count();
     }
 }
