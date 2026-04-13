@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CheckoutController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductFilterController;
+use App\Http\Controllers\Api\V1\UserAddressController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -44,6 +45,10 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group
     Route::post('email/resend', [AuthController::class, 'resendVerificationEmail'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
+
+    Route::post('user/address', [UserAddressController::class, 'store'])->name('api.v1.user.address');
+    Route::put('user/address/set-default/{id}', [UserAddressController::class, 'setDefault'])->name('api.v1.user.address.default');
+
     Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('api.v1.checkout');
     Route::post('checkout/preview', [CheckoutController::class, 'preview'])->name('api.v1.checkout.preview');
 });

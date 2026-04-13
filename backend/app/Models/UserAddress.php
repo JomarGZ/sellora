@@ -14,6 +14,17 @@ final class UserAddress extends Model
     /** @use HasFactory<\Database\Factories\UserAddressFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'user_id',
+        'first_name',
+        'last_name',
+        'phone',
+        'country_id',
+        'city_id',
+        'street_address',
+        'is_default',
+    ];
+
     public function country()
     {
         return $this->belongsTo(Country::class);

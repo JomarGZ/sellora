@@ -20,4 +20,34 @@ final class UserAddressRepository extends BaseRepository implements IUserAddress
             ->with(['country', 'city'])
             ->findOrFail($id);
     }
+
+    public function unsetOtherDefaults(int $userId, int $addressId): void
+    {
+        $this->model->where('user_id', $userId)
+            ->where('is_default', true)
+            ->where('id', '!=', $addressId)
+            ->update(['is_default' => false]);
+    }
+
+    public function setAsDefault(int $addressId): UserAddress
+    {
+        $address = $this->model->findOrFail($addressId);
+        $address->update(['is_default' => true]);
+
+        return $address;
+    }
+
+    public function findByIdAndUser(int $addressId, int $userId): ?UserAddress
+    {
+        return $this->model->query()->where('id', $addressId)
+            ->where('user_id', $userId)
+            ->first();
+    }
+
+    public function hasDefault(int $userId): bool
+    {
+        return $this->model->where('user_id', $userId)
+            ->where('is_default', true)
+            ->exists();
+    }
 }

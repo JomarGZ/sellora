@@ -25,7 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-final class User extends Authenticatable implements FilamentUser, MustVerifyEmail, HasName
+final class User extends Authenticatable implements FilamentUser, HasName, MustVerifyEmail
 {
     use HasApiTokens;
 
@@ -63,19 +63,6 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
         return (bool) $this->is_admin;
     }
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
     public function getFilamentName(): string
     {
         return "{$this->first_name} {$this->last_name}";
@@ -89,5 +76,18 @@ final class User extends Authenticatable implements FilamentUser, MustVerifyEmai
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 }
