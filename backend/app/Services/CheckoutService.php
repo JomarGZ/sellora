@@ -17,6 +17,7 @@ use App\Repositories\Contracts\IOrderRepository;
 use App\Repositories\Contracts\IPaymentRepository;
 use App\Repositories\Contracts\IProductItemRepository;
 use App\Repositories\Contracts\IUserAddressRepository;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -61,10 +62,17 @@ final class CheckoutService
 
         $ids = $dto->items->pluck('productItemId')->all();
         $productItems = $this->productItemRepository->findByIds($ids);
-
+        $addressId = $dto->address->addressId ?? null;
         $this->validateStock($dto->items, $productItems);
 
-        $address = $this->userAddressRepository->findWithRelations($dto->address->addressId);
+        $address = $addressId
+            ? $this->userAddressRepository->findByIdAndUser($addressId, auth()->id())
+            : $this->userAddressRepository->getDefault(auth()->id());
+
+        if (! $address) {
+            throw new Exception('No valid address found.');
+        }
+
         $shippingMethod = ShippingMethod::findOrFail($dto->shippingMethodId);
         $pendingStatus = OrderStatus::where('status', 'pending')->firstOrFail();
         $subtotal = $this->calculateSubtotal($dto->items, $productItems);

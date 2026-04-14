@@ -48,8 +48,14 @@ final class UserAddressRepository extends BaseRepository implements IUserAddress
     public function findByIdAndUser(int $addressId, int $userId): ?UserAddress
     {
         return $this->model->query()->where('id', $addressId)
+            ->with(['country', 'city'])
             ->where('user_id', $userId)
             ->first();
+    }
+
+    public function getDefault(int $userId): ?UserAddress
+    {
+        return $this->model->query()->where('user_id', $userId)->where('is_default', true)->firstOrFail();
     }
 
     public function hasDefault(int $userId): bool
