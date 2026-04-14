@@ -32,7 +32,7 @@ final class CheckoutRequest extends FormRequest
                 'required',
                 'integer',
                 // ensures the address belongs to the authenticated user
-                'exists:addresses,id,user_id,'.auth()->id(),
+                'exists:user_addresses,id,user_id,'.auth()->id(),
             ],
         ];
     }

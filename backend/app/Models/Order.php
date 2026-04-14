@@ -45,7 +45,7 @@ final class Order extends Model
      */
     public function status(): BelongsTo
     {
-        return $this->belongsTo(OrderStatus::class);
+        return $this->belongsTo(OrderStatus::class, 'order_status_id');
     }
 
     /**
@@ -68,5 +68,10 @@ final class Order extends Model
     public function payment(): HasOne
     {
         return $this->hasOne(Payment::class);
+    }
+
+    public function address()
+    {
+        return $this->hasOne(OrderAddress::class);
     }
 }

@@ -58,6 +58,7 @@ final class CheckoutService
 
     public function checkout(CheckoutDTO $dto): array
     {
+
         $ids = $dto->items->pluck('productItemId')->all();
         $productItems = $this->productItemRepository->findByIds($ids);
 
@@ -97,8 +98,7 @@ final class CheckoutService
     private function calculateSubtotal(Collection $items, Collection $productItems): float
     {
         return round(
-            $items->sum(fn ($item) => $productItems->get($item->productItemId)->price * $item->qty
-            ),
+            $items->sum(fn ($item) => $productItems->get($item->productItemId)->price * $item->qty),
             2
         );
     }

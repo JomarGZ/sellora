@@ -20,9 +20,9 @@ final class OrderResource extends JsonResource
             'id' => $this->id,
             'status' => $this->status->status,
             'currency' => $this->currency,
-            'subtotal' => number_format($this->subtotal, 2),
-            'shipping_fee' => number_format($this->shipping_fee, 2),
-            'order_total' => number_format($this->order_total, 2),
+            'subtotal' => number_format((float) $this->subtotal, 2),
+            'shipping_fee' => number_format((float) $this->shipping_fee, 2),
+            'order_total' => number_format((float) $this->order_total, 2),
             'shipping_method' => [
                 'name' => $this->shippingMethod->name,
                 'estimated_days' => $this->shippingMethod->estimated_days,
@@ -32,7 +32,7 @@ final class OrderResource extends JsonResource
                 'product_name' => $item->product_name,
                 'sku' => $item->sku,
                 'qty' => $item->quantity,
-                'price' => number_format($item->price, 2),
+                'price' => number_format((float) $item->price, 2),
             ]),
             'address' => [
                 'first_name' => $this->address->first_name,

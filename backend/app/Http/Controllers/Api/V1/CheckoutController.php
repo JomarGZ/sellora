@@ -40,6 +40,8 @@ final class CheckoutController extends ApiController
                 CheckoutDTO::fromRequest($request)
             );
 
+            logger('test', $result);
+
             return $this->success(
                 data: [
                     'order' => new OrderResource($result['order']),

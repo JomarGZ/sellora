@@ -11,4 +11,19 @@ final class OrderAddress extends Model
 {
     /** @use HasFactory<\Database\Factories\OrderAddressFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'order_id',
+        'first_name',
+        'last_name',
+        'phone',
+        'country',
+        'city',
+        'street_address',
+    ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
 }
