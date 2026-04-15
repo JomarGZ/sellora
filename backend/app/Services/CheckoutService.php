@@ -78,7 +78,7 @@ final class CheckoutService
         $subtotal = $this->calculateSubtotal($dto->items, $productItems);
         $shippingFee = (float) $shippingMethod->price;
 
-        $order = DB::transaction(function () use (
+        return DB::transaction(function () use (
             $dto,
             $productItems,
             $address,
@@ -94,13 +94,17 @@ final class CheckoutService
 
             $this->paymentService->createPayment($order->id, $subtotal + $shippingFee);
 
-            return $order->load(['items', 'address', 'payment', 'shippingMethod', 'status']);
+            $order->load(['items', 'address', 'payment', 'shippingMethod', 'status']);
+            $session = $this->stripeService->createCheckoutSession($this->buildPayload($order));
+
+            $order->payment->update(['transaction_id' => $session->id]);
+
+            return [
+                'order' => $order,
+                'checkout_url' => $session->url,
+            ];
         });
 
-        return [
-            'order' => $order,
-            'checkout_url' => $this->stripeService->createCheckoutSession($order),
-        ];
     }
 
     private function calculateSubtotal(Collection $items, Collection $productItems): float
@@ -171,5 +175,60 @@ final class CheckoutService
                 );
             }
         }
+    }
+
+    private function buildPayload(Order $order): array
+    {
+        return [
+            'payment_method_types' => ['card'],
+            'mode' => 'payment',
+
+            'line_items' => $this->buildLineItems($order),
+
+            'customer_email' => $order->user->email ?? null,
+
+            'shipping_address_collection' => [
+                'allowed_countries' => ['PH'],
+            ],
+
+            'shipping_options' => [
+                [
+                    'shipping_rate_data' => [
+                        'type' => 'fixed_amount',
+                        'fixed_amount' => [
+                            'amount' => (int) round($order->shipping_fee * 100),
+                            'currency' => 'php',
+                        ],
+                        'display_name' => ucfirst($order->shippingMethod->name ?? 'Shipping'),
+                    ],
+                ],
+            ],
+
+            'metadata' => [
+                'order_id' => $order->id,
+                'payment_id' => $order->payment->id,
+            ],
+
+            'success_url' => route('api.v1.checkout.verify').'?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('api.v1.checkout.cancel', ['order' => $order->id]),
+        ];
+    }
+
+    private function buildLineItems(Order $order): array
+    {
+        return $order->items->map(fn ($item) => [
+            'price_data' => [
+                'currency' => 'php',
+                'product_data' => [
+                    'name' => $item->product_name,
+                    'metadata' => [
+                        'sku' => $item->sku,
+                        'product_item_id' => $item->product_item_id,
+                    ],
+                ],
+                'unit_amount' => (int) round($item->price * 100),
+            ],
+            'quantity' => $item->quantity,
+        ])->toArray();
     }
 }

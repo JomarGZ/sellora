@@ -58,6 +58,9 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group
     Route::post('checkout/preview', [CheckoutController::class, 'preview'])->name('api.v1.checkout.preview');
 });
 
+Route::get('/checkout/verify', [CheckoutController::class, 'verifySession'])->name('api.v1.checkout.verify');
+Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('api.v1.checkout.cancel');
+
 // Password reset routes (public with rate limiting)
 Route::middleware('throttle:6,1')->group(function (): void {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword'])

@@ -9,4 +9,6 @@ use App\Models\Order;
 interface IOrderRepository
 {
     public function createOrder(array $data): Order;
+
+    public function find(int $id);
 }
