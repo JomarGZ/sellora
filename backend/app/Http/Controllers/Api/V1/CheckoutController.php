@@ -54,6 +54,8 @@ final class CheckoutController extends ApiController
             );
         } catch (OutOfStockException $e) {
             return $this->error(message: $e->getMessage(), code: 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return $this->error(message: 'Checkout failed due to a database error.', code: 500);
         }
     }
 

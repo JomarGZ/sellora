@@ -24,6 +24,7 @@ final class Order extends Model
         'shipping_fee',
         'order_total',
         'currency',
+        'idempotency_key',
     ];
 
     protected $casts = [

@@ -11,4 +11,6 @@ interface IOrderRepository
     public function createOrder(array $data): Order;
 
     public function find(int $id);
+
+    public function findByIdempotencyKey(string $key, int $userId): ?Order;
 }

@@ -13,9 +13,10 @@ final class CheckoutDTO
      * @param  Collection<int, CheckoutItemDTO>  $items
      */
     public function __construct(
-        public Collection $items,
-        public CheckoutAddressDTO $address,
-        public int $shippingMethodId,
+        public readonly Collection $items,
+        public readonly CheckoutAddressDTO $address,
+        public readonly int $shippingMethodId,
+        public readonly string $idempotencyKey
     ) {}
 
     public static function fromRequest(CheckoutRequest $request): self
@@ -27,9 +28,10 @@ final class CheckoutDTO
                     qty: $item['qty'],
                 )),
             address: new CheckoutAddressDTO(
-                addressId: $request->integer('address_id'),
+                addressId: $request->validated('address_id'),
             ),
-            shippingMethodId: $request->integer('shipping_method_id'),
+            shippingMethodId: $request->validated('shipping_method_id'),
+            idempotencyKey: $request->validated('idempotency_key'),
         );
     }
 }

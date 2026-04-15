@@ -17,6 +17,7 @@ use App\Repositories\Contracts\IOrderRepository;
 use App\Repositories\Contracts\IProductItemRepository;
 use App\Repositories\Contracts\IUserAddressRepository;
 use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -60,6 +61,14 @@ final class CheckoutService
     public function checkout(CheckoutDTO $dto): array
     {
 
+        $existingOrder = $this->orderRepository->findByIdempotencyKey(
+            $dto->idempotencyKey,
+            auth()->id()
+        );
+
+        if ($existingOrder) {
+            return $this->resolveExistingOrder($existingOrder);
+        }
         $ids = $dto->items->pluck('productItemId')->all();
         $productItems = $this->productItemRepository->findByIds($ids);
         $addressId = $dto->address->addressId ?? null;
@@ -78,33 +87,81 @@ final class CheckoutService
         $subtotal = $this->calculateSubtotal($dto->items, $productItems);
         $shippingFee = (float) $shippingMethod->price;
 
-        return DB::transaction(function () use (
-            $dto,
-            $productItems,
-            $address,
-            $subtotal,
-            $shippingFee,
-            $pendingStatus,
-        ) {
-            $order = $this->createOrder($dto, $subtotal, $shippingFee, $pendingStatus->id);
+        try {
+            return DB::transaction(function () use (
+                $dto,
+                $productItems,
+                $address,
+                $subtotal,
+                $shippingFee,
+                $pendingStatus,
+            ) {
+                $order = $this->createOrder($dto, $subtotal, $shippingFee, $pendingStatus->id);
 
-            $this->createOrderItems($order->id, $dto->items, $productItems);
+                $this->createOrderItems($order->id, $dto->items, $productItems);
 
-            $this->createOrderAddress($order->id, $address);
+                $this->createOrderAddress($order->id, $address);
 
-            $this->paymentService->createPayment($order->id, $subtotal + $shippingFee);
+                $this->paymentService->createPayment($order->id, $subtotal + $shippingFee);
 
-            $order->load(['items', 'address', 'payment', 'shippingMethod', 'status']);
+                $order->load(['items', 'address', 'payment', 'shippingMethod', 'status']);
+                $session = $this->stripeService->createCheckoutSession($this->buildPayload($order));
+
+                $order->payment->update(['transaction_id' => $session->id]);
+
+                return [
+                    'order' => $order,
+                    'checkout_url' => $session->url,
+                ];
+            });
+        } catch (QueryException $e) {
+            if ($e->getCode() === '23000') {
+                $order = $this->orderRepository->findByIdempotencyKey(
+                    $dto->idempotencyKey,
+                    auth()->id()
+                );
+
+                if ($order) {
+                    return $this->resolveExistingOrder($order);
+                }
+            }
+
+            throw $e;
+        }
+
+    }
+
+    private function resolveExistingOrder(Order $order): array
+    {
+        $payment = $order->payment;
+        $checkoutUrl = null;
+
+        if ($payment?->transaction_id) {
+            try {
+                $session = $this->stripeService->retrieveSession($payment->transaction_id);
+
+                // Reuse the session if it's still open (not paid, not expired)
+                if ($session->status === 'open') {
+                    $checkoutUrl = $session->url;
+                }
+            } catch (\Stripe\Exception\InvalidRequestException $e) {
+                // Session not found in Stripe — treat as expired, fall through
+            }
+        }
+
+        // Session was expired, missing, or already paid — create a fresh one
+        if (! $checkoutUrl) {
+            $order->load(['items', 'address', 'payment', 'shippingMethod', 'status', 'user']);
             $session = $this->stripeService->createCheckoutSession($this->buildPayload($order));
+            $checkoutUrl = $session->url;
 
-            $order->payment->update(['transaction_id' => $session->id]);
+            $payment->update(['transaction_id' => $session->id]);
+        }
 
-            return [
-                'order' => $order,
-                'checkout_url' => $session->url,
-            ];
-        });
-
+        return [
+            'order' => $order,
+            'checkout_url' => $checkoutUrl,
+        ];
     }
 
     private function calculateSubtotal(Collection $items, Collection $productItems): float
@@ -123,6 +180,7 @@ final class CheckoutService
     ): Order {
         return $this->orderRepository->createOrder([
             'user_id' => auth()->id(),
+            'idempotency_key' => $dto->idempotencyKey,
             'order_status_id' => $pendingStatusId,
             'shipping_method_id' => $dto->shippingMethodId,
             'subtotal' => $subtotal,

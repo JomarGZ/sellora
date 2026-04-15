@@ -24,6 +24,7 @@ final class CheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'idempotency_key' => ['required', 'string', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_item_id' => ['required', 'integer', 'exists:product_items,id'],
             'items.*.qty' => ['required', 'integer', 'min:1'],

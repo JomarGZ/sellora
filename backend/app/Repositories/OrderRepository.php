@@ -18,4 +18,12 @@ final class OrderRepository extends BaseRepository implements IOrderRepository
     {
         return $this->model->create($data);
     }
+
+    public function findByIdempotencyKey(string $key, int $userId): ?Order
+    {
+        return $this->model->query()->where('idempotency_key', $key)
+            ->where('user_id', $userId)
+            ->with(['items', 'address', 'payment', 'shippingMethod', 'status'])
+            ->first();
+    }
 }
