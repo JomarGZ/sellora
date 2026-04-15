@@ -18,30 +18,14 @@ final class OrderResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'status' => $this->status->status,
+            'status' => OrderStatusResource::make($this->whenLoaded('status')),
             'currency' => $this->currency,
             'subtotal' => number_format((float) $this->subtotal, 2),
             'shipping_fee' => number_format((float) $this->shipping_fee, 2),
             'order_total' => number_format((float) $this->order_total, 2),
-            'shipping_method' => [
-                'name' => $this->shippingMethod->name,
-                'estimated_days' => $this->shippingMethod->estimated_days,
-            ],
-            'items' => $this->items->map(fn ($item) => [
-                'product_item_id' => $item->product_item_id,
-                'product_name' => $item->product_name,
-                'sku' => $item->sku,
-                'qty' => $item->quantity,
-                'price' => number_format((float) $item->price, 2),
-            ]),
-            'address' => [
-                'first_name' => $this->address->first_name,
-                'last_name' => $this->address->last_name,
-                'phone' => $this->address->phone,
-                'street_address' => $this->address->street_address,
-                'city' => $this->address->city,
-                'country' => $this->address->country,
-            ],
+            'shipping_method' => ShippingMethodResource::make($this->whenLoaded('shippingMethod')),
+            'items' => OrderItemResource::collection($this->whenLoaded('items')),
+            'address' => OrderAddressResource::make($this->whenLoaded('address')),
         ];
     }
 }

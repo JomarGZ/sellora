@@ -36,21 +36,29 @@ final class CheckoutController extends ApiController
     public function checkout(CheckoutRequest $request): JsonResponse
     {
         try {
-            $result = $this->service->checkout(
+            $record = $this->service->checkout(
                 CheckoutDTO::fromRequest($request)
             );
 
-            logger('test', $result);
-
             return $this->success(
                 data: [
-                    'order' => new OrderResource($result['order']),
-                    'checkout_url' => $result['checkout_url'],
+                    'order' => new OrderResource($record['order']),
+                    'checkout_url' => $record['checkout_url'],
                 ],
                 message: 'Order created successfully.'
             );
         } catch (OutOfStockException $e) {
             return $this->error(message: $e->getMessage(), code: 422);
         }
+    }
+
+    public function verifySession()
+    {
+        return $this->success(message: 'Verifying Checkout process');
+    }
+
+    public function cancel()
+    {
+        return $this->success(message: 'Cancel checkout successfully');
     }
 }

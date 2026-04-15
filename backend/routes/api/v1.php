@@ -53,6 +53,8 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group
     Route::put('user/address/{userAddress}/default', [UserAddressController::class, 'setDefault'])->name('api.v1.user.address.default');
 
     Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('api.v1.checkout');
+    Route::get('/checkout/verifySession', [CheckoutController::class, 'verifySession'])->name('api.v1.checkout.verifySession');
+    Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('api.v1.checkout.cancel');
     Route::post('checkout/preview', [CheckoutController::class, 'preview'])->name('api.v1.checkout.preview');
 });
 

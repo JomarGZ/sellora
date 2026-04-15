@@ -14,7 +14,6 @@ use App\Models\UserAddress;
 use App\Repositories\Contracts\IOrderAddressRepository;
 use App\Repositories\Contracts\IOrderItemRepository;
 use App\Repositories\Contracts\IOrderRepository;
-use App\Repositories\Contracts\IPaymentRepository;
 use App\Repositories\Contracts\IProductItemRepository;
 use App\Repositories\Contracts\IUserAddressRepository;
 use Exception;
@@ -28,8 +27,9 @@ final class CheckoutService
         private IOrderRepository $orderRepository,
         private IUserAddressRepository $userAddressRepository,
         private IOrderAddressRepository $orderAddressRepository,
-        private IPaymentRepository $paymentRepository,
-        private IOrderItemRepository $orderItemRepository
+        private IOrderItemRepository $orderItemRepository,
+        private StripeService $stripeService,
+        private PaymentService $paymentService
     ) {}
 
     public function preview(PreviewDTO $dto): array
@@ -92,14 +92,14 @@ final class CheckoutService
 
             $this->createOrderAddress($order->id, $address);
 
-            $this->createPayment($order->id, $subtotal + $shippingFee);
+            $this->paymentService->createPayment($order->id, $subtotal + $shippingFee);
 
             return $order->load(['items', 'address', 'payment', 'shippingMethod', 'status']);
         });
 
         return [
             'order' => $order,
-            'checkout_url' => $this->createStripeSession($order),
+            'checkout_url' => $this->stripeService->createCheckoutSession($order),
         ];
     }
 
@@ -158,18 +158,6 @@ final class CheckoutService
         ]);
     }
 
-    private function createPayment(int $orderId, float $amount): void
-    {
-        $this->paymentRepository->createPayment([
-            'order_id' => $orderId,
-            'payment_method' => 'card',
-            'payment_provider' => 'stripe',
-            'amount' => $amount,
-            'transaction_id' => null,
-            'status' => 'pending',
-        ]);
-    }
-
     private function validateStock(Collection $items, Collection $productItems): void
     {
         foreach ($items as $item) {
@@ -183,15 +171,5 @@ final class CheckoutService
                 );
             }
         }
-    }
-
-    private function createStripeSession(Order $order): string
-    {
-        // TODO: implement real Stripe session
-        // \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
-        // $session = \Stripe\Checkout\Session::create([...]);
-        // return $session->url;
-
-        return 'https://checkout.stripe.com/pay/placeholder_'.$order->id;
     }
 }
