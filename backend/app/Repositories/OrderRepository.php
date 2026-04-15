@@ -26,4 +26,14 @@ final class OrderRepository extends BaseRepository implements IOrderRepository
             ->with(['items', 'address', 'payment', 'shippingMethod', 'status'])
             ->first();
     }
+
+    public function updateStatus(int $orderId, int $statusId): void
+    {
+        Order::where('id', $orderId)->update(['order_status_id' => $statusId]);
+    }
+
+    public function findWithItems(int $orderId): Order
+    {
+        return Order::with('items')->findOrFail($orderId);
+    }
 }

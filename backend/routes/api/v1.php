@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CheckoutController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductFilterController;
+use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\UserAddressController;
 use Illuminate\Support\Facades\Route;
 
@@ -60,7 +61,7 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group
 
 Route::get('/checkout/verify', [CheckoutController::class, 'verifySession'])->name('api.v1.checkout.verify');
 Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('api.v1.checkout.cancel');
-
+Route::post('webhooks/stripe', [StripeWebhookController::class, 'handle'])->name('api.v1.webhooks.stripe');
 // Password reset routes (public with rate limiting)
 Route::middleware('throttle:6,1')->group(function (): void {
     Route::post('forgot-password', [AuthController::class, 'forgotPassword'])

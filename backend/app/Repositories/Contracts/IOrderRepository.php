@@ -13,4 +13,8 @@ interface IOrderRepository
     public function find(int $id);
 
     public function findByIdempotencyKey(string $key, int $userId): ?Order;
+
+    public function updateStatus(int $orderId, int $statusId): void;
+    
+    public function findWithItems(int $orderId): Order;
 }
