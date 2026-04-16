@@ -19,7 +19,8 @@ return new class extends Migration
             $table->foreignIdFor(Order::class)->constrained()->restrictOnDelete();
             $table->string('stripe_session_id')->nullable();
             $table->string('stripe_payment_intent_id')->nullable();
-            $table->string('payment_method');
+            $table->text('stripe_checkout_url')->nullable();
+            $table->string('payment_method')->nullable();
             $table->decimal('amount', 10, 2);
             $table->string('stripe_event_id')->nullable()->unique();
             $table->string('status');
