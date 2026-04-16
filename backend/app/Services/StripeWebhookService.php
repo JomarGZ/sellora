@@ -25,9 +25,16 @@ final class StripeWebhookService
     public function handleSessionCompleted(Event $event): void
     {
         $session = $event->data->object; // Stripe\Checkout\Session
-        $orderId = $session->metadata->order_id ?? null;
-        $paymentId = $session->metadata->payment_id ?? null;
+        $orderId = isset($session->metadata->order_id)
+            ? (int) $session->metadata->order_id
+            : null;
+
+        $paymentId = isset($session->metadata->payment_id)
+            ? (int) $session->metadata->payment_id
+            : null;
         $eventId = $event->id;
+
+        Log::info('test', [$session]);
 
         if (! $orderId || ! $paymentId) {
             Log::warning('Stripe webhook missing metadata.', [

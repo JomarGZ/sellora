@@ -17,6 +17,7 @@ use App\Services\CheckoutService;
 use App\Services\StripeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 final class CheckoutController extends ApiController
 {
@@ -41,21 +42,29 @@ final class CheckoutController extends ApiController
     public function checkout(CheckoutRequest $request): JsonResponse
     {
         try {
-            $record = $this->checkoutService->checkout(
+            $result = $this->checkoutService->checkout(
                 CheckoutDTO::fromRequest($request)
             );
 
             return $this->success(
                 data: [
-                    'order' => new OrderResource($record['order']),
-                    'checkout_url' => $record['checkout_url'],
+                    'order' => new OrderResource($result['order']),
+                    'checkout_url' => $result['checkout_url'],
+                    'status' => $result['status'] ?? null,
                 ],
-                message: 'Order created successfully.'
+                message: $result['message'] ?? 'Checkout processed successfully.'
             );
+
         } catch (OutOfStockException $e) {
-            return $this->error(message: $e->getMessage(), code: 422);
-        } catch (\Illuminate\Database\QueryException $e) {
-            return $this->error(message: 'Checkout failed due to a database error.', code: 500);
+            return $this->error(
+                message: $e->getMessage(),
+                code: 422
+            );
+        } catch (Throwable $e) {
+            return $this->error(
+                message: 'Something went wrong during checkout.',
+                code: 500
+            );
         }
     }
 

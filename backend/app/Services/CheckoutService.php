@@ -134,15 +134,36 @@ final class CheckoutService
     private function resolveExistingOrder(Order $order): array
     {
         $payment = $order->payment;
-        $checkoutUrl = null;
+        $response = [
+            'order' => $order,
+            'checkout_url' => null,
+            'status' => $order->status?->status,
+            'message' => null,
+        ];
 
-        if ($payment?->transaction_id) {
+        if ($order->status?->status === 'paid') {
+            $response['message'] = 'Order already paid.';
+
+            return $response;
+        }
+        if ($order->status?->status === 'processing') {
+            $response['message'] = 'Order is already processing.';
+
+            return $response;
+        }
+        if ($payment?->stripe_session_id) {
             try {
-                $session = $this->stripeService->retrieveSession($payment->transaction_id);
+                $session = $this->stripeService->retrieveSession($payment->stripe_session_id);
 
                 // Reuse the session if it's still open (not paid, not expired)
-                if ($session->status === 'open') {
-                    $checkoutUrl = $session->url;
+                if (
+                    $session->status === 'open' &&
+                    ($session->payment_status ?? null) !== 'paid'
+                ) {
+                    $response['checkout_url'] = $session->url;
+                    $response['message'] = 'Reusing existing checkout session.';
+
+                    return $response;
                 }
             } catch (\Stripe\Exception\InvalidRequestException $e) {
                 // Session not found in Stripe — treat as expired, fall through
@@ -150,18 +171,17 @@ final class CheckoutService
         }
 
         // Session was expired, missing, or already paid — create a fresh one
-        if (! $checkoutUrl) {
-            $order->load(['items', 'address', 'payment', 'shippingMethod', 'status', 'user']);
-            $session = $this->stripeService->createCheckoutSession($this->buildPayload($order));
-            $checkoutUrl = $session->url;
+        $order->load(['items', 'address', 'payment', 'shippingMethod', 'status', 'user']);
+        $session = $this->stripeService->createCheckoutSession($this->buildPayload($order));
 
-            $payment->update(['transaction_id' => $session->id]);
-        }
+        $payment->update([
+            'stripe_session_id' => $session->id,
+        ]);
 
-        return [
-            'order' => $order,
-            'checkout_url' => $checkoutUrl,
-        ];
+        $response['checkout_url'] = $session->url;
+        $response['message'] = 'New checkout session created.';
+
+        return $response;
     }
 
     private function calculateSubtotal(Collection $items, Collection $productItems): float
@@ -251,7 +271,7 @@ final class CheckoutService
                         'type' => 'fixed_amount',
                         'fixed_amount' => [
                             'amount' => (int) round($order->shipping_fee * 100),
-                            'currency' => 'php',
+                            'currency' => 'usd',
                         ],
                         'display_name' => ucfirst($order->shippingMethod->name ?? 'Shipping'),
                     ],
@@ -272,7 +292,7 @@ final class CheckoutService
     {
         return $order->items->map(fn ($item) => [
             'price_data' => [
-                'currency' => 'php',
+                'currency' => 'usd',
                 'product_data' => [
                     'name' => $item->product_name,
                     'metadata' => [

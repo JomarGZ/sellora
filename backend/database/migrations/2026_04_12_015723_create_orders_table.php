@@ -25,7 +25,7 @@ return new class extends Migration
             $table->decimal('subtotal', 10, 2);
             $table->decimal('shipping_fee', 10, 2);
             $table->string('idempotency_key', 255)->nullable()->unique();
-            $table->char('currency', 3)->default('PHP');
+            $table->char('currency', 3)->nullable();
             $table->timestamps();
         });
     }

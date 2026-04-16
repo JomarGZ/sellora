@@ -22,7 +22,7 @@ final class PaymentService
             'payment_method' => 'card',
             'payment_provider' => 'stripe',
             'amount' => $amount,
-            'transaction_id' => null,
+            'stripe_session_id' => null,
             'status' => 'pending',
         ]);
     }
