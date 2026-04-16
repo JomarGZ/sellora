@@ -107,7 +107,7 @@ final class CheckoutService
                 $order->load(['items', 'address', 'payment', 'shippingMethod', 'status']);
                 $session = $this->stripeService->createCheckoutSession($this->buildPayload($order));
 
-                $order->payment->update(['transaction_id' => $session->id]);
+                $order->payment->update(['stripe_session_id' => $session->id]);
 
                 return [
                     'order' => $order,
@@ -244,10 +244,6 @@ final class CheckoutService
             'line_items' => $this->buildLineItems($order),
 
             'customer_email' => $order->user->email ?? null,
-
-            'shipping_address_collection' => [
-                'allowed_countries' => ['PH'],
-            ],
 
             'shipping_options' => [
                 [

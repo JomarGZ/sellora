@@ -1,22 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Jobs\HandleStripeSessionCompleted;
-use App\Services\StripeWebhookService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Webhook;
 
-class StripeWebhookController extends ApiController
+final class StripeWebhookController extends ApiController
 {
     public function handle(Request $request): JsonResponse
     {
-        $payload   = $request->getContent();
+        $payload = $request->getContent();
         $sigHeader = $request->header('Stripe-Signature');
-        $secret    = config('stripe.webhook_secret');
+        $secret = config('stripe.webhook_secret');
 
         // ── 1. Verify the request genuinely came from Stripe ──────────────
         try {

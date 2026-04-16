@@ -22,8 +22,9 @@ return new class extends Migration
             $table->foreignIdFor(OrderStatus::class)->constrained()->restrictOnDelete();
             $table->foreignIdFor(ShippingMethod::class)->constrained()->restrictOnDelete();
             $table->decimal('order_total', 10, 2);
-            $table->decimal('sub_total', 10, 2);
+            $table->decimal('subtotal', 10, 2);
             $table->decimal('shipping_fee', 10, 2);
+            $table->string('idempotency_key', 255)->nullable()->unique();
             $table->char('currency', 3)->default('PHP');
             $table->timestamps();
         });

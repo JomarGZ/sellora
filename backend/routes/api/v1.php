@@ -53,14 +53,12 @@ Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group
     Route::delete('user/address/{userAddress}', [UserAddressController::class, 'destroy'])->name('api.v1.user.address.destroy');
     Route::put('user/address/{userAddress}/default', [UserAddressController::class, 'setDefault'])->name('api.v1.user.address.default');
 
-    Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('api.v1.checkout');
-    Route::get('/checkout/verifySession', [CheckoutController::class, 'verifySession'])->name('api.v1.checkout.verifySession');
-    Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('api.v1.checkout.cancel');
+    Route::post('checkout', [CheckoutController::class, 'checkout'])->name('api.v1.checkout');
     Route::post('checkout/preview', [CheckoutController::class, 'preview'])->name('api.v1.checkout.preview');
 });
 
-Route::get('/checkout/verify', [CheckoutController::class, 'verifySession'])->name('api.v1.checkout.verify');
-Route::get('/checkout/cancel', [CheckoutController::class, 'cancel'])->name('api.v1.checkout.cancel');
+Route::get('checkout/verify', [CheckoutController::class, 'verifySession'])->name('api.v1.checkout.verify');
+Route::get('checkout/cancel', [CheckoutController::class, 'cancel'])->name('api.v1.checkout.cancel');
 Route::post('webhooks/stripe', [StripeWebhookController::class, 'handle'])->name('api.v1.webhooks.stripe');
 // Password reset routes (public with rate limiting)
 Route::middleware('throttle:6,1')->group(function (): void {

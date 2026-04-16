@@ -18,7 +18,9 @@ final class Payment extends Model
         'order_id',
         'payment_method',
         'amount',
-        'transaction_id',
+        'stripe_session_id',
+        'stripe_payment_intent_id',
+        'stripe_event_id',
         'status',
         'payment_provider',
     ];

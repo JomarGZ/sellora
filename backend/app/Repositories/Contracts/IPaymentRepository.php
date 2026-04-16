@@ -11,5 +11,6 @@ interface IPaymentRepository
     public function createPayment(array $data): Payment;
 
     public function existsByStripeEventId(string $eventId): bool;
-    public function markAsPaid(int $paymentId, string $transactionId, string $stripeEventId): void;
+
+    public function markAsPaid(int $paymentId, string $paymentIntent, string $stripeEventId): void;
 }

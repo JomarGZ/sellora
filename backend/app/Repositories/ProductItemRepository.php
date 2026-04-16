@@ -34,6 +34,6 @@ final class ProductItemRepository extends BaseRepository implements IProductItem
     public function decrementStock(int $productItemId, int $qty): void
     {
         ProductItem::where('id', $productItemId)
-                ->decrement('qty_in_stock', $qty);
+            ->decrement('qty_in_stock', $qty);
     }
 }

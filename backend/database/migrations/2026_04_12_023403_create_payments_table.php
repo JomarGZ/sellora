@@ -17,9 +17,11 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(Order::class)->constrained()->restrictOnDelete();
+            $table->string('stripe_session_id')->nullable();
+            $table->string('stripe_payment_intent_id')->nullable();
             $table->string('payment_method');
             $table->decimal('amount', 10, 2);
-            $table->string('transaction_id')->nullable();
+            $table->string('stripe_event_id')->nullable()->unique();
             $table->string('status');
             $table->string('payment_provider');
             $table->timestamps();

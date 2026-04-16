@@ -1,16 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
+use App\Events\OrderPaid;
 use App\Models\OrderStatus;
 use App\Repositories\Contracts\IOrderRepository;
 use App\Repositories\Contracts\IPaymentRepository;
 use App\Repositories\Contracts\IProductItemRepository;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Stripe\Event;
 
-class StripeWebhookService
+final class StripeWebhookService
 {
     public function __construct(
         private readonly IOrderRepository $orderRepository,
@@ -21,41 +25,81 @@ class StripeWebhookService
     public function handleSessionCompleted(Event $event): void
     {
         $session = $event->data->object; // Stripe\Checkout\Session
-
-        $orderId   = $session->metadata->order_id ?? null;
+        $orderId = $session->metadata->order_id ?? null;
         $paymentId = $session->metadata->payment_id ?? null;
-        $eventId   = $event->id; // e.g. "evt_1ABC..."
+        $eventId = $event->id;
 
         if (! $orderId || ! $paymentId) {
-            Log::warning('Stripe webhook missing metadata.', ['event_id' => $eventId]);
+            Log::warning('Stripe webhook missing metadata.', [
+                'event_id' => $eventId,
+            ]);
+
             return;
         }
 
-        // ── Idempotency: skip if we already processed this exact event ────
-        // Uses the unique stripe_event_id column added in the migration
-        $alreadyProcessed = $this->paymentRepository->existsByStripeEventId($eventId);
+        // Optional safety check (extra layer)
+        if (($session->payment_status ?? null) !== 'paid') {
+            Log::info('Stripe session not paid yet.', [
+                'event_id' => $eventId,
+            ]);
 
-        if ($alreadyProcessed) {
-            Log::info('Duplicate Stripe webhook ignored.', ['event_id' => $eventId]);
             return;
         }
 
         DB::transaction(function () use ($orderId, $paymentId, $eventId, $session) {
-            $processingStatus = OrderStatus::where('status', 'processing')->firstOrFail();
 
-            // ── 1. Update order status to 'processing' ────────────────────
-            $this->orderRepository->updateStatus($orderId, $processingStatus->id);
-
-            // ── 2. Update payment: mark paid, store event ID ──────────────
-            $this->paymentRepository->markAsPaid(
-                paymentId: $paymentId,
-                transactionId: $session->payment_intent,
-                stripeEventId: $eventId,
-            );
-
-            // ── 3. Deduct stock for each item in the order ────────────────
+            // Load order once
             $order = $this->orderRepository->findWithItems($orderId);
 
+            if (! $order) {
+                Log::warning('Order not found.', ['order_id' => $orderId]);
+
+                return;
+            }
+            $order->loadMissing('status');
+            // ✅ Order-level idempotency (state machine guard)
+            if ($order->status->status !== 'pending') {
+                Log::info('Order already processed.', [
+                    'order_id' => $orderId,
+                    'status' => $order->status->status,
+                ]);
+
+                return;
+            }
+
+            // Get processing status (better: cache or constant)
+            $processingStatus = OrderStatus::where('status', 'processing')->firstOrFail();
+
+            try {
+                // ─────────────────────────────────────────────
+                // 1. Update order status
+                // ─────────────────────────────────────────────
+                $this->orderRepository->updateStatus(
+                    $orderId,
+                    $processingStatus->id
+                );
+
+                // ─────────────────────────────────────────────
+                // 2. Mark payment as paid (DB-level idempotency happens here)
+                // ─────────────────────────────────────────────
+                $this->paymentRepository->markAsPaid(
+                    paymentId: $paymentId,
+                    paymentIntent: $session->payment_intent,
+                    stripeEventId: $eventId,
+                );
+
+            } catch (QueryException $e) {
+                // Handles duplicate stripe_event_id (race-safe idempotency)
+                Log::info('Duplicate Stripe event ignored (DB constraint).', [
+                    'event_id' => $eventId,
+                ]);
+
+                return;
+            }
+
+            // ─────────────────────────────────────────────
+            // 3. Deduct stock
+            // ─────────────────────────────────────────────
             foreach ($order->items as $item) {
                 $this->productItemRepository->decrementStock(
                     productItemId: $item->product_item_id,
@@ -63,11 +107,15 @@ class StripeWebhookService
                 );
             }
 
-            // ── 4. Dispatch event for email / notifications ───────────────
-            // OrderPaid::dispatch($order);
+            // ─────────────────────────────────────────────
+            // 4. Dispatch domain event (optional)
+            // ─────────────────────────────────────────────
+            OrderPaid::dispatch($order);
         });
 
-        Log::info('Order fulfilled via Stripe webhook.', ['order_id' => $orderId]);
+        Log::info('Order processed via Stripe webhook.', [
+            'order_id' => $orderId,
+            'event_id' => $eventId,
+        ]);
     }
-
 }

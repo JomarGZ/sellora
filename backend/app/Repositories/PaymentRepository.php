@@ -24,13 +24,13 @@ final class PaymentRepository extends BaseRepository implements IPaymentReposito
         return Payment::where('stripe_event_id', $eventId)->exists();
     }
 
-    public function markAsPaid(int $paymentId, string $transactionId, string $stripeEventId): void
+    public function markAsPaid(int $paymentId, string $paymentIntent, string $stripeEventId): void
     {
         Payment::where('id', $paymentId)->update([
-            'status'          => 'paid',
-            'transaction_id'  => $transactionId, // now stores payment_intent ID, not session ID
+            'status' => 'paid',
+            'stripe_payment_intent_id' => $paymentIntent, // now stores payment_intent ID, not session ID
             'stripe_event_id' => $stripeEventId,
-            'payment_method'  => 'card',
+            'payment_method' => 'card',
         ]);
     }
 }
