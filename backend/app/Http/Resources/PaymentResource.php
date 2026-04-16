@@ -1,17 +1,11 @@
 <?php
 
-declare(strict_types=1);
+namespace App\Http\Resources;
 
-namespace App\Http\Resources\V1;
-
-use App\Models\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @mixin OrderStatus
- */
-final class OrderStatusResource extends JsonResource
+class PaymentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -20,8 +14,6 @@ final class OrderStatusResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
-            'status' => $this->status,
-        ];
+        return parent::toArray($request);
     }
 }

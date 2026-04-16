@@ -19,9 +19,9 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table): void {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->restrictOnDelete();
-            $table->foreignIdFor(OrderStatus::class)->constrained()->restrictOnDelete();
             $table->foreignIdFor(ShippingMethod::class)->constrained()->restrictOnDelete();
             $table->decimal('order_total', 10, 2);
+            $table->string('status');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('shipping_fee', 10, 2);
             $table->string('idempotency_key', 255)->nullable()->unique();

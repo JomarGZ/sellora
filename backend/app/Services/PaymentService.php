@@ -1,29 +1,83 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Services;
 
-use App\Repositories\Contracts\IPaymentRepository;
+use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
+use App\Events\OrderPaid;
+use App\Models\Payment;
+use Illuminate\Support\Facades\Log;
 
-final class PaymentService
+class PaymentService
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct(
-        private readonly IPaymentRepository $repository
-    ) {}
+    public function __construct(private InventoryService $inventory) {}
 
-    public function createPayment(int $orderId, float $amount): void
+    public function markPaid(Payment $payment, object $session, string $eventId): void
     {
-        $this->repository->createPayment([
-            'order_id' => $orderId,
-            'payment_method' => 'card',
-            'payment_provider' => 'stripe',
-            'amount' => $amount,
-            'stripe_session_id' => null,
-            'status' => 'pending',
+        // ── Crash-recovery guard using enum comparison ────────────────
+        // ✅ GOOD: $payment->status === PaymentStatus::Paid
+        // ❌ BAD: $payment->status->status === 'paid'
+        // ❌ BAD: $payment->status === 'paid'
+        if ($payment->status === PaymentStatus::Paid) {
+            // Already processed; mark event and exit cleanly
+            return;
+        }
+
+        // ── Transition via the model's state machine ──────────────────
+        // This internally calls canTransitionTo() and throws on illegal moves.
+        $payment->transitionTo(PaymentStatus::Paid);
+
+        $payment->update([
+            'stripe_event_id'          => $eventId,
+            'stripe_payment_intent_id' => $session->payment_intent,
+            'payment_method'           => $session->payment_method_types,
         ]);
+
+        // ── Advance order through state machine ───────────────────────
+        $order = $payment->order;
+
+        // pending → processing first (optional intermediate step)
+        if ($order->status === OrderStatus::Pending) {
+            $order->transitionTo(OrderStatus::Processing);
+        }
+
+        // processing → paid
+        if ($order->status === OrderStatus::Processing) {
+            $order->transitionTo(OrderStatus::Paid);
+        }
+
+        // ── Deduct stock ──────────────────────────────────────────────
+        $items = $order->items->map(fn($i) => [
+            'product_item_id' => $i->product_item_id,
+            'quantity'        => $i->quantity,
+        ])->toArray();
+
+        $this->inventory->deductStock($items);
+
+        // ── Dispatch domain event ─────────────────────────────────────
+        event(new OrderPaid($order));
+    }
+
+    public function markFailed(Payment $payment, string $reason = ''): void
+    {
+        $payment->transitionTo(PaymentStatus::Failed);
+
+        $order = $payment->order;
+
+        if (! $order->status->isTerminal()) {
+            $order->transitionTo(OrderStatus::Failed);
+        }
+
+        Log::warning('Payment marked failed', [
+            'payment_id' => $payment->id,
+            'order_id'   => $order->id,
+            'reason'     => $reason,
+        ]);
+    }
+
+    public function markRefunded(Payment $payment): void
+    {
+        // canTransitionTo() will throw if payment isn't Paid
+        $payment->transitionTo(PaymentStatus::Refunded);
     }
 }

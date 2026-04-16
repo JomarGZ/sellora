@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,8 +19,8 @@ final class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'order_status_id',
         'shipping_method_id',
+        'status',
         'subtotal',
         'shipping_fee',
         'order_total',
@@ -28,6 +29,7 @@ final class Order extends Model
     ];
 
     protected $casts = [
+        'status' => OrderStatus::class,
         'subtotal' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
         'order_total' => 'decimal:2',
@@ -39,14 +41,6 @@ final class Order extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @return BelongsTo<OrderStatus, $this>
-     */
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(OrderStatus::class, 'order_status_id');
     }
 
     /**
@@ -75,4 +69,26 @@ final class Order extends Model
     {
         return $this->hasOne(OrderAddress::class);
     }
+
+     public function transitionTo(OrderStatus $next): void
+    {
+        if (! $this->status->canTransitionTo($next)) {
+            throw new \DomainException(
+                "Illegal order transition: {$this->status->value} → {$next->value} "
+                . "(order #{$this->id})"
+            );
+        }
+
+        $this->update(['status' => $next]);
+    }
+       public function scopePaid($query)
+    {
+        return $query->where('status', OrderStatus::Paid);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', OrderStatus::Pending);
+    }
+
 }

@@ -5,35 +5,34 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Repositories\Contracts\IOrderRepository;
 
-final class OrderRepository extends BaseRepository implements IOrderRepository
+final class OrderRepository extends BaseRepository
 {
     public function __construct(Order $order)
     {
         parent::__construct($order);
     }
 
-    public function createOrder(array $data): Order
+    public function findByIdempotencyKey(string $key): ?Order
     {
-        return $this->model->create($data);
-    }
-
-    public function findByIdempotencyKey(string $key, int $userId): ?Order
-    {
-        return $this->model->query()->where('idempotency_key', $key)
-            ->where('user_id', $userId)
-            ->with(['items', 'address', 'payment', 'shippingMethod', 'status'])
+        return Order::with('payment')
+            ->where('idempotency_key', $key)
             ->first();
     }
 
-    public function updateStatus(int $orderId, int $statusId): void
+    public function createItems(int $orderId, array $items): void
     {
-        Order::where('id', $orderId)->update(['order_status_id' => $statusId]);
-    }
+        $rows = collect($items)->map(fn($i) => [
+            'order_id'        => $orderId,
+            'product_name'    => $i['product_name'],
+            'sku'             => $i['sku'],
+            'product_item_id' => $i['product_item_id'],
+            'quantity'        => $i['quantity'],
+            'price'           => $i['price'],
+        ])->toArray();
 
-    public function findWithItems(int $orderId): Order
-    {
-        return Order::with('items')->findOrFail($orderId);
+        OrderItem::insert($rows);
     }
 }

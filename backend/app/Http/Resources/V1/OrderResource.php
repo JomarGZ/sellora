@@ -1,31 +1,24 @@
 <?php
+// app/Http/Resources/OrderResource.php
 
-declare(strict_types=1);
+namespace App\Http\Resources;
 
-namespace App\Http\Resources\V1;
-
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-final class OrderResource extends JsonResource
+class OrderResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
         return [
-            'id' => $this->id,
-            'status' => OrderStatusResource::make($this->whenLoaded('status')),
-            'currency' => $this->currency,
-            'subtotal' => number_format((float) $this->subtotal, 2),
-            'shipping_fee' => number_format((float) $this->shipping_fee, 2),
-            'order_total' => number_format((float) $this->order_total, 2),
-            'shipping_method' => ShippingMethodResource::make($this->whenLoaded('shippingMethod')),
-            'items' => OrderItemResource::collection($this->whenLoaded('items')),
-            'address' => OrderAddressResource::make($this->whenLoaded('address')),
+            'id'             => $this->id,
+            'status'         => $this->status->value,        // ✅ "paid" not the enum object
+            'status_label'   => $this->status->label(),      // ✅ "Payment confirmed"
+            'is_paid'        => $this->status->isPaid(),     // ✅ boolean for frontend
+            'order_total'    => $this->order_total,
+            'currency'       => $this->currency,
+            'idempotency_key' => $this->idempotency_key,
+            'created_at'     => $this->created_at->toISOString(),
+            'payment'        => new PaymentResource($this->whenLoaded('payment')),
         ];
     }
 }

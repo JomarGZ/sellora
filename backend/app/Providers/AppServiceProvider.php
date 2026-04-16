@@ -14,10 +14,17 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
+use Stripe\StripeClient;
 
 final class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void {
+        $this->app->singleton(StripeClient::class, function () {
+            return new StripeClient(
+                config('stripe.secret_key')
+            );
+        });
+    }
 
     public function boot(): void
     {
