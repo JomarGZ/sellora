@@ -11,7 +11,8 @@ uses(RefreshDatabase::class);
 describe('Registration', function (): void {
     it('registers a new user successfully', function (): void {
         $response = $this->postJson('/api/v1/register', [
-            'name' => 'Test User',
+            'first_name' => 'fist name',
+            'last_name' => 'last name',
             'email' => 'test@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -22,7 +23,7 @@ describe('Registration', function (): void {
                 'success',
                 'message',
                 'data' => [
-                    'user' => ['id', 'name', 'email'],
+                    'user' => ['id', 'first_name', 'last_name', 'email'],
                     'accessToken',
                 ],
             ])
@@ -51,7 +52,8 @@ describe('Registration', function (): void {
         User::factory()->create(['email' => 'existing@example.com']);
 
         $response = $this->postJson('/api/v1/register', [
-            'name' => 'Test User',
+            'first_name' => 'first name',
+            'last_name' => 'last name',
             'email' => 'existing@example.com',
             'password' => 'password123',
             'password_confirmation' => 'password123',
@@ -77,7 +79,7 @@ describe('Login', function (): void {
                 'success',
                 'message',
                 'data' => [
-                    'user' => ['id', 'name', 'email'],
+                    'user' => ['id', 'first_name', 'last_name', 'email'],
                     'accessToken',
                 ],
             ])
@@ -150,7 +152,7 @@ describe('Refresh token and user details', function (): void {
                 'success',
                 'message',
                 'data' => [
-                    'user' => ['id', 'name', 'email'],
+                    'user' => ['id', 'first_name', 'last_name', 'email'],
                     'accessToken',
                 ],
             ])

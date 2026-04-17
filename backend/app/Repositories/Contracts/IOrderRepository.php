@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repositories\Contracts;
+
+use App\Models\Order;
+
+interface IOrderRepository
+{
+    public function createOrder(array $data): Order;
+
+    public function find(int $id);
+
+    public function findByIdempotencyKey(string $key, int $userId): ?Order;
+
+    public function updateStatus(int $orderId, int $statusId): void;
+
+    public function findWithItems(int $orderId): Order;
+}

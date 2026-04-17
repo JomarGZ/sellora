@@ -17,8 +17,8 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table): void {
             $table->id();
-            $table->foreignIdFor(Brand::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(ProductCategory::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Brand::class)->constrained()->restrictOnDelete();
+            $table->foreignIdFor(ProductCategory::class)->constrained()->restrictOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description');

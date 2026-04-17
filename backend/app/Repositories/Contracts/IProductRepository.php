@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
-use App\DTOs\ProductFilterDTO;
+use App\DTOs\V1\ProductFilterDTO;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;

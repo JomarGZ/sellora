@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\DTOs\ProductFilterDTO;
+use App\DTOs\V1\ProductFilterDTO;
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Requests\ProductFilterRequest;
-use App\Http\Resources\AttributeResource;
-use App\Http\Resources\ProductDetailResource;
-use App\Http\Resources\ProductResource;
+use App\Http\Requests\Api\V1\ProductFilterRequest;
+use App\Http\Resources\V1\AttributeResource;
+use App\Http\Resources\V1\ProductDetailResource;
+use App\Http\Resources\V1\ProductResource;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

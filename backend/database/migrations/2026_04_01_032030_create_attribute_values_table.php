@@ -18,6 +18,8 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Attribute::class)->constrained()->cascadeOnDelete();
             $table->string('value');
+            $table->string('hex_color')->nullable();
+            $table->string('image')->nullable();
             $table->timestamps();
 
             $table->softDeletes();

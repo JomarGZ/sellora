@@ -5,21 +5,37 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Enums\TokenAbility;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
+use Stripe\StripeClient;
 
 final class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void {
+        $this->app->singleton(StripeClient::class, function () {
+            return new StripeClient(
+                config('stripe.secret_key')
+            );
+        });
+    }
 
     public function boot(): void
     {
         $this->configureRateLimiting();
         $this->overrideSanctumConfigurationToSupportRefreshToken();
+        Scramble::configure()
+            ->withDocumentTransformers(function (OpenApi $openApi) {
+                $openApi->secure(
+                    SecurityScheme::http('bearer')
+                );
+            });
     }
 
     private function configureRateLimiting(): void

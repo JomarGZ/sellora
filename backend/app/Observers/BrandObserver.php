@@ -14,7 +14,6 @@ final class BrandObserver
      */
     public function forceDeleted(Brand $brand): void
     {
-        logger('brand', [$brand]);
         if ($brand->logo && Storage::exists($brand->logo)) {
             Storage::delete($brand->logo);
         }

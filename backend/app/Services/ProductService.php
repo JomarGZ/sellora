@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DTOs\AttributeGroupDTO;
-use App\DTOs\ProductFilterDTO;
+use App\DTOs\V1\AttributeGroupDTO;
+use App\DTOs\V1\ProductFilterDTO;
 use App\Models\Product;
 use App\Repositories\Contracts\IProductRepository;
 use Illuminate\Database\Eloquent\Collection;

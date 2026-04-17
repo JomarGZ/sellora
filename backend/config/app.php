@@ -126,5 +126,5 @@ return [
     ],
 
     'fallback_image' => env('APP_FALLBACK_IMAGE', 'https://placehold.co/800x600'),
-
+    'user_max_addresses' => env('USER_ADDRESSES_MAX_ALLOWED', 5),
 ];

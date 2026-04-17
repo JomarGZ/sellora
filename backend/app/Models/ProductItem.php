@@ -29,6 +29,10 @@ final class ProductItem extends Model
         'qty_in_stock',
     ];
 
+    protected $casts = [
+        'price' => 'decimal:2',
+    ];
+
     /**
      * Get the product that owns the item.
      *
@@ -67,5 +71,11 @@ final class ProductItem extends Model
     public function images(): HasMany
     {
         return $this->hasMany(ProductItemImage::class);
+    }
+
+    /** @return HasMany<OrderItem, $this> */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }
