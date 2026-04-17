@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignIdFor(ShippingMethod::class)->constrained()->restrictOnDelete();
             $table->decimal('order_total', 10, 2);
             $table->string('status');
+            $table->string('checkout_type');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('shipping_fee', 10, 2);
             $table->string('idempotency_key', 255)->nullable()->unique();

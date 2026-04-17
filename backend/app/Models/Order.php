@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\CheckoutType;
 use App\Enums\OrderStatus;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,10 +27,12 @@ final class Order extends Model
         'order_total',
         'currency',
         'idempotency_key',
+        'checkout_type'
     ];
 
     protected $casts = [
         'status' => OrderStatus::class,
+        'checkout_type' => CheckoutType::class,
         'subtotal' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
         'order_total' => 'decimal:2',

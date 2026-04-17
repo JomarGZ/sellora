@@ -3,12 +3,16 @@
 namespace App\Services;
 
 use App\DTOs\V1\CheckoutDTO;
+use App\DTOs\V1\CheckoutItemDTO;
+use App\Enums\CheckoutType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
 use App\Repositories\ProductItemRepository;
 use App\Models\ShippingMethod;
+use App\Repositories\CartRepository;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Stripe\StripeClient;
 
@@ -18,6 +22,7 @@ class CheckoutService
         private OrderRepository $orderRepo,
         private PaymentRepository $paymentRepo,
         private ProductItemRepository $productItemRepo,
+        private CartRepository $cartRepository,
         private InventoryService $inventory,
         private StripeClient $stripe,
     ) {}
@@ -34,20 +39,25 @@ class CheckoutService
             return $this->handleExistingOrder($existing);
         }
 
-        return DB::transaction(function () use ($dto) {
+        $resolved = $this->resolveItems($dto);
+
+        $items = $resolved['items'];
+        $type = $resolved['type'];
+
+        return DB::transaction(function () use ($dto, $items, $type) {
 
             // ── Fetch product items from DB (DO NOT TRUST FRONTEND) ────
             $productItems = $this->productItemRepo->findByIds(
-                collect($dto->items)->pluck('productItemId')->toArray()
+                $items->pluck('productItemId')->toArray()
             );
 
             // ── Lock stock ─────────────────────────────────────────────
-            $this->inventory->reserveStock($dto->items);
+            $this->inventory->reserveStock($items);
 
             // ── Compute totals ─────────────────────────────────────────
             $subtotal = 0;
 
-            foreach ($dto->items as $item) {
+            foreach ($items as $item) {
                 $product = $productItems->get($item->productItemId);
                 $subtotal += $product->price * $item->quantity;
             }
@@ -66,12 +76,13 @@ class CheckoutService
                 'currency' => 'USD',
                 'idempotency_key' => $dto->idempotencyKey,
                 'status' => OrderStatus::Pending,
+                'checkout_type' => $type
             ]);
 
             // ── Create Order Items ─────────────────────────────────────
             $this->orderRepo->createItems(
                 $order->id,
-                collect($dto->items)->map(function ($item) use ($productItems) {
+                collect($items)->map(function ($item) use ($productItems) {
                     $product = $productItems->get($item->productItemId);
                     return [
                         'product_item_id' => $product->id,
@@ -86,7 +97,7 @@ class CheckoutService
             // ── Create Stripe session ─────────────────────────────────
             $session = $this->stripe->checkout->sessions->create([
                 'payment_method_types' => ['card'],
-                'line_items' => $this->buildLineItems($dto->items, $productItems),
+                'line_items' => $this->buildLineItems($items, $productItems),
                 'customer_email' => $order->user->email ?? null,
 
                 'shipping_options' => [
@@ -108,7 +119,6 @@ class CheckoutService
                     'order_id' => $order->id,
                 ],
             ]);
-                    logger('sdada', [$session]);
             // ── Create Payment ─────────────────────────────────────────
             $this->paymentRepo->create([
                 'order_id' => $order->id,
@@ -164,6 +174,32 @@ class CheckoutService
             'order' => $order,
             'checkout_url' => null,
             'message' => 'Session expired, create new checkout',
+        ];
+    }
+
+    private function resolveItems(CheckoutDTO $dto): array
+    {
+        if (!empty($dto->items)) {
+            return [
+                'items' => collect($dto->items),
+                'type' => CheckoutType::BuyNow,
+            ];
+        }
+
+        $cart = $this->cartRepository->getUserCartWithItems($dto->userId);
+
+        if (!$cart || $cart->items->isEmpty()) {
+            throw new Exception('Cart is empty.');
+        }
+
+        return [
+            'items' => $cart->items->map(fn ($item) => 
+                new CheckoutItemDTO(
+                    productItemId: $item->product_item_id,
+                    quantity: $item->quantity,
+                )
+            ),
+            'type' => CheckoutType::Cart,
         ];
     }
 

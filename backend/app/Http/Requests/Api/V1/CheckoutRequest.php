@@ -19,7 +19,7 @@ final class CheckoutRequest extends FormRequest
         return [
             'idempotency_key' => ['bail', 'required', 'string', 'max:255'],
 
-            'items' => ['required', 'array', 'min:1'],
+            'items' => ['nullable', 'array', 'min:1'],
 
             'items.*.product_item_id' => [
                 'required',
@@ -43,7 +43,8 @@ final class CheckoutRequest extends FormRequest
                 'required',
                 'integer',
                 Rule::exists('user_addresses', 'id')
-                    ->where('user_id', $this->user()->id),
+                    ->where('user_id', $this->user()->id)
+                    ->where('is_default', true),
             ],
         ];
     }

@@ -49,6 +49,18 @@ class ProcessStripeWebhookJob implements ShouldQueue
                 return;
             }
 
+            if ($this->session->payment_status !== 'paid') {
+                Log::info('Checkout completed but payment not yet confirmed', [
+                    'payment_id' => $payment->id,
+                    'session_id' => $this->session->id,
+                    'status'     => $this->session->payment_status,
+                    'event_id'   => $this->stripeEventId,
+                ]);
+
+                $this->markEventProcessed();
+                return;
+            }
+
             $paymentService->markPaid($payment, $this->session, $this->stripeEventId);
             $this->markEventProcessed();
         });
