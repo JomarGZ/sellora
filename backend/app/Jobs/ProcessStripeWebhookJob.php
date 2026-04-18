@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Enums\PaymentStatus;
-use App\Services\PaymentService;
 use App\Models\Payment;
+use App\Services\PaymentService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -12,12 +14,14 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
-class ProcessStripeWebhookJob implements ShouldQueue
+final class ProcessStripeWebhookJob implements ShouldQueue
 {
-    use Queueable, InteractsWithQueue, SerializesModels, Dispatchable;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries   = 5;
+    public int $tries = 5;
+
     public int $backoff = 30;
 
     public function __construct(
@@ -35,6 +39,7 @@ class ProcessStripeWebhookJob implements ShouldQueue
             // ✅ GOOD: enum identity comparison — no string literals
             if ($payment->status === PaymentStatus::Paid) {
                 $this->markEventProcessed();
+
                 return;
             }
 
@@ -42,10 +47,11 @@ class ProcessStripeWebhookJob implements ShouldQueue
             if ($payment->status->isTerminal()) {
                 Log::warning('Webhook received for terminal payment', [
                     'payment_id' => $payment->id,
-                    'status'     => $payment->status->value,
-                    'event_id'   => $this->stripeEventId,
+                    'status' => $payment->status->value,
+                    'event_id' => $this->stripeEventId,
                 ]);
                 $this->markEventProcessed();
+
                 return;
             }
 
@@ -53,11 +59,12 @@ class ProcessStripeWebhookJob implements ShouldQueue
                 Log::info('Checkout completed but payment not yet confirmed', [
                     'payment_id' => $payment->id,
                     'session_id' => $this->session->id,
-                    'status'     => $this->session->payment_status,
-                    'event_id'   => $this->stripeEventId,
+                    'status' => $this->session->payment_status,
+                    'event_id' => $this->stripeEventId,
                 ]);
 
                 $this->markEventProcessed();
+
                 return;
             }
 
@@ -66,18 +73,18 @@ class ProcessStripeWebhookJob implements ShouldQueue
         });
     }
 
+    public function failed(Throwable $e): void
+    {
+        Log::critical('Webhook job permanently failed', [
+            'event_id' => $this->stripeEventId,
+            'error' => $e->getMessage(),
+        ]);
+    }
+
     private function markEventProcessed(): void
     {
         DB::table('stripe_webhook_events')
             ->where('stripe_event_id', $this->stripeEventId)
             ->update(['processed' => true, 'processed_at' => now()]);
-    }
-
-    public function failed(\Throwable $e): void
-    {
-        Log::critical('Webhook job permanently failed', [
-            'event_id' => $this->stripeEventId,
-            'error'    => $e->getMessage(),
-        ]);
     }
 }

@@ -42,4 +42,9 @@ final class OrderItem extends Model
     {
         return $this->belongsTo(ProductItem::class);
     }
+
+    public function productItemReview()
+    {
+        return $this->hasOne(ProductItemReview::class);
+    }
 }

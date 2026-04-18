@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\Payment;
-use App\Repositories\Contracts\IPaymentRepository;
 
 final class PaymentRepository extends BaseRepository
 {

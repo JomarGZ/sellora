@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\DTOs\V1\CheckoutDTO;
@@ -7,16 +9,16 @@ use App\DTOs\V1\CheckoutItemDTO;
 use App\Enums\CheckoutType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Models\ShippingMethod;
+use App\Repositories\CartRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
 use App\Repositories\ProductItemRepository;
-use App\Models\ShippingMethod;
-use App\Repositories\CartRepository;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Stripe\StripeClient;
 
-class CheckoutService
+final class CheckoutService
 {
     public function __construct(
         private OrderRepository $orderRepo,
@@ -76,7 +78,7 @@ class CheckoutService
                 'currency' => 'USD',
                 'idempotency_key' => $dto->idempotencyKey,
                 'status' => OrderStatus::Pending,
-                'checkout_type' => $type
+                'checkout_type' => $type,
             ]);
 
             // ── Create Order Items ─────────────────────────────────────
@@ -84,6 +86,7 @@ class CheckoutService
                 $order->id,
                 collect($items)->map(function ($item) use ($productItems) {
                     $product = $productItems->get($item->productItemId);
+
                     return [
                         'product_item_id' => $product->id,
                         'quantity' => $item->quantity,
@@ -113,8 +116,8 @@ class CheckoutService
                     ],
                 ],
                 'mode' => 'payment',
-                'success_url' => config('app.frontend_url') . '/checkout/success',
-                'cancel_url' => config('app.frontend_url') . '/checkout/cancel',
+                'success_url' => config('app.frontend_url').'/checkout/success',
+                'cancel_url' => config('app.frontend_url').'/checkout/cancel',
                 'metadata' => [
                     'order_id' => $order->id,
                 ],
@@ -165,7 +168,7 @@ class CheckoutService
                         'message' => 'Reusing existing checkout session',
                     ];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // ignore
             }
         }
@@ -179,7 +182,7 @@ class CheckoutService
 
     private function resolveItems(CheckoutDTO $dto): array
     {
-        if (!empty($dto->items)) {
+        if (! empty($dto->items)) {
             return [
                 'items' => collect($dto->items),
                 'type' => CheckoutType::BuyNow,
@@ -188,16 +191,15 @@ class CheckoutService
 
         $cart = $this->cartRepository->getUserCartWithItems($dto->userId);
 
-        if (!$cart || $cart->items->isEmpty()) {
+        if (! $cart || $cart->items->isEmpty()) {
             throw new Exception('Cart is empty.');
         }
 
         return [
-            'items' => $cart->items->map(fn ($item) => 
-                new CheckoutItemDTO(
-                    productItemId: $item->product_item_id,
-                    quantity: $item->quantity,
-                )
+            'items' => $cart->items->map(fn ($item) => new CheckoutItemDTO(
+                productItemId: $item->product_item_id,
+                quantity: $item->quantity,
+            )
             ),
             'type' => CheckoutType::Cart,
         ];

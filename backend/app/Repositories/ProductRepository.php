@@ -6,14 +6,13 @@ namespace App\Repositories;
 
 use App\DTOs\V1\ProductFilterDTO;
 use App\Models\Product;
-use App\Repositories\Contracts\IProductRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * @extends BaseRepository<Product>
  */
-final class ProductRepository extends BaseRepository implements IProductRepository
+final class ProductRepository extends BaseRepository
 {
     public function __construct(Product $product)
     {
@@ -97,6 +96,8 @@ final class ProductRepository extends BaseRepository implements IProductReposito
                 'productItems.attributeValues:id,attribute_id,value,hex_color,image',
                 'productItems.attributeValues.attribute:id,name',
             ])
+            ->withAvg('productItems.productItemReviews', 'rating')
+            ->withCount('productItems.productItemReviews')
             ->withMin('productItems', 'price')
             ->withMax('productItems', 'price')
             ->withSum('productItems', 'qty_in_stock')

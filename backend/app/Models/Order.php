@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\CheckoutType;
 use App\Enums\OrderStatus;
 use Database\Factories\OrderFactory;
+use DomainException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +28,7 @@ final class Order extends Model
         'order_total',
         'currency',
         'idempotency_key',
-        'checkout_type'
+        'checkout_type',
     ];
 
     protected $casts = [
@@ -73,18 +74,19 @@ final class Order extends Model
         return $this->hasOne(OrderAddress::class);
     }
 
-     public function transitionTo(OrderStatus $next): void
+    public function transitionTo(OrderStatus $next): void
     {
         if (! $this->status->canTransitionTo($next)) {
-            throw new \DomainException(
+            throw new DomainException(
                 "Illegal order transition: {$this->status->value} → {$next->value} "
-                . "(order #{$this->id})"
+                ."(order #{$this->id})"
             );
         }
 
         $this->update(['status' => $next]);
     }
-       public function scopePaid($query)
+
+    public function scopePaid($query)
     {
         return $query->where('status', OrderStatus::Paid);
     }
@@ -93,5 +95,4 @@ final class Order extends Model
     {
         return $query->where('status', OrderStatus::Pending);
     }
-
 }

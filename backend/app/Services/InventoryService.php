@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\ProductItem;
+use DomainException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class InventoryService
+final class InventoryService
 {
     /**
      * Lock stock rows for update within the calling transaction.
@@ -21,9 +24,9 @@ class InventoryService
                 ->findOrFail($item->productItemId);
 
             if ($product->qty_in_stock < $item->quantity) {
-                throw new \DomainException(
+                throw new DomainException(
                     "Insufficient stock for SKU {$product->sku}: "
-                    . "requested {$item['quantity']}, available {$product->qty_in_stock}"
+                    ."requested {$item['quantity']}, available {$product->qty_in_stock}"
                 );
             }
         }

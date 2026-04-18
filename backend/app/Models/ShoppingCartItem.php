@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ShoppingCartItem extends Model
+final class ShoppingCartItem extends Model
 {
     /** @use HasFactory<\Database\Factories\ShoppingCartItemFactory> */
     use HasFactory;
@@ -14,7 +16,7 @@ class ShoppingCartItem extends Model
     protected $fillable = [
         'shopping_cart_id',
         'shopping_cart_item_id',
-        'quantity'
+        'quantity',
     ];
 
     public function cart(): BelongsTo

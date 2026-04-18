@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-final class PaymentResource extends JsonResource
+final class ProductItemReviewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

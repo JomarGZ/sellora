@@ -1,25 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 enum OrderStatus: string
 {
-    case Pending    = 'pending';
+    case Pending = 'pending';
     case Processing = 'processing';
-    case Paid       = 'paid';
-    case Cancelled  = 'cancelled';
-    case Failed     = 'failed';
+    case Paid = 'paid';
+    case Cancelled = 'cancelled';
+    case Failed = 'failed';
 
     // ── Transition guard ──────────────────────────────────────────────
     // Defines which transitions are legal. Call this before every update.
     public function canTransitionTo(self $next): bool
     {
         return match ($this) {
-            self::Pending    => in_array($next, [self::Processing, self::Cancelled]),
+            self::Pending => in_array($next, [self::Processing, self::Cancelled]),
             self::Processing => in_array($next, [self::Paid, self::Failed, self::Cancelled]),
-            self::Paid       => false,   // terminal
-            self::Cancelled  => false,   // terminal
-            self::Failed     => false,   // terminal
+            self::Paid => false,   // terminal
+            self::Cancelled => false,   // terminal
+            self::Failed => false,   // terminal
         };
     }
 
@@ -38,11 +40,11 @@ enum OrderStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending    => 'Awaiting payment',
+            self::Pending => 'Awaiting payment',
             self::Processing => 'Payment processing',
-            self::Paid       => 'Payment confirmed',
-            self::Cancelled  => 'Order cancelled',
-            self::Failed     => 'Payment failed',
+            self::Paid => 'Payment confirmed',
+            self::Cancelled => 'Order cancelled',
+            self::Failed => 'Payment failed',
         };
     }
 }

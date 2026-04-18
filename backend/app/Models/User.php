@@ -59,19 +59,6 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
         'remember_token',
     ];
 
-     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
     public function canAccessPanel(Panel $panel): bool
     {
         return (bool) $this->is_admin;
@@ -97,4 +84,21 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
         return $this->hasOne(ShoppingCart::class);
     }
 
+    public function productItemReviews()
+    {
+        return $this->hasMany(ProductItemReview::class);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
 }

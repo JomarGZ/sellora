@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Enums\OrderStatus;
@@ -8,7 +10,7 @@ use App\Events\OrderPaid;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
 
-class PaymentService
+final class PaymentService
 {
     public function __construct(private InventoryService $inventory) {}
 
@@ -28,9 +30,9 @@ class PaymentService
         $payment->transitionTo(PaymentStatus::Paid);
 
         $payment->update([
-            'stripe_event_id'          => $eventId,
+            'stripe_event_id' => $eventId,
             'stripe_payment_intent_id' => $session->payment_intent,
-            'payment_method'           => $session->payment_method_types,
+            'payment_method' => $session->payment_method_types,
         ]);
 
         // ── Advance order through state machine ───────────────────────
@@ -47,9 +49,9 @@ class PaymentService
         }
 
         // ── Deduct stock ──────────────────────────────────────────────
-        $items = $order->items->map(fn($i) => [
+        $items = $order->items->map(fn ($i) => [
             'product_item_id' => $i->product_item_id,
-            'quantity'        => $i->quantity,
+            'quantity' => $i->quantity,
         ])->toArray();
 
         $this->inventory->deductStock($items);
@@ -70,8 +72,8 @@ class PaymentService
 
         Log::warning('Payment marked failed', [
             'payment_id' => $payment->id,
-            'order_id'   => $order->id,
-            'reason'     => $reason,
+            'order_id' => $order->id,
+            'reason' => $reason,
         ]);
     }
 

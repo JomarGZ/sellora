@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\DTOs\V1;
 
 use Illuminate\Http\Request;
 
-class CheckoutDTO
+final class CheckoutDTO
 {
     public function __construct(
         public int $userId,

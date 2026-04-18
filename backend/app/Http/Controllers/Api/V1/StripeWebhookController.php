@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Jobs\HandleStripeSessionCompleted;
 use App\Jobs\ProcessStripeWebhookJob;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +16,7 @@ use Stripe\Webhook;
 
 final class StripeWebhookController extends ApiController
 {
-    public function handle(Request $request): \Illuminate\Http\JsonResponse
+    public function handle(Request $request): JsonResponse
     {
         // ── 1. Verify Stripe signature (must use raw body) ───────────
         $payload = $request->getContent();
@@ -38,9 +38,9 @@ final class StripeWebhookController extends ApiController
         try {
             DB::table('stripe_webhook_events')->insertOrIgnore([
                 'stripe_event_id' => $event->id,
-                'type'            => $event->type,
-                'processed'       => false,
-                'created_at'      => now(),
+                'type' => $event->type,
+                'processed' => false,
+                'created_at' => now(),
             ]);
 
             $alreadyExists = DB::table('stripe_webhook_events')
@@ -52,14 +52,14 @@ final class StripeWebhookController extends ApiController
                 // Duplicate event — already fully processed. Return 200.
                 return response()->json(['status' => 'duplicate_ignored']);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Webhook event log failed', ['event' => $event->id]);
         }
 
         // ── 3. Dispatch job for async, retry-safe processing ─────────
         if ($event->type === 'checkout.session.completed') {
             ProcessStripeWebhookJob::dispatch($event->data->object, $event->id);
-                
+
         }
 
         // Always return 200 quickly — Stripe retries on non-2xx.

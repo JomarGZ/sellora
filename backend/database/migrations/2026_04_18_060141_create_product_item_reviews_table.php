@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Models\OrderItem;
+use App\Models\ProductItem;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,10 +16,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('shopping_carts', function (Blueprint $table) {
+        Schema::create('product_item_reviews', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(OrderItem::class)->constrained()->restrictOnDelete();
+            $table->foreignIdFor(ProductItem::class)->constrained()->restrictOnDelete();
+            $table->unsignedInteger('rating');
+            $table->text('comment')->nullable();
             $table->timestamps();
+
+            $table->unique(['user_id', 'order_item_id']);
         });
     }
 
@@ -26,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('shopping_carts');
+        Schema::dropIfExists('product_item_reviews');
     }
 };

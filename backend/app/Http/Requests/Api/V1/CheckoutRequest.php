@@ -48,5 +48,4 @@ final class CheckoutRequest extends FormRequest
             ],
         ];
     }
-
 }
