@@ -19,7 +19,7 @@ final class CheckoutRequest extends FormRequest
         return [
             'idempotency_key' => ['bail', 'required', 'string', 'max:255'],
 
-            'items' => ['nullable', 'array', 'min:1'],
+            'items' => ['nullable', 'array'],
 
             'items.*.product_item_id' => [
                 'required',
@@ -48,5 +48,4 @@ final class CheckoutRequest extends FormRequest
             ],
         ];
     }
-
 }

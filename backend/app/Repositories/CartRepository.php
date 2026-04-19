@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Repositories;
 
-use App\Models\Cart;
 use App\Models\ShoppingCart;
 
-class CartRepository extends BaseRepository
+final class CartRepository extends BaseRepository
 {
     /**
      * Create a new class instance.
@@ -20,7 +21,7 @@ class CartRepository extends BaseRepository
         return $this->model->query()
             ->where('user_id', $userId)
             ->with([
-                'items.productItem.product'
+                'items.productItem.product',
             ])
             ->first();
     }

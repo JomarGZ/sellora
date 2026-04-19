@@ -78,4 +78,9 @@ final class ProductItem extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function productItemReviews()
+    {
+        return $this->hasMany(ProductItemReview::class);
+    }
 }

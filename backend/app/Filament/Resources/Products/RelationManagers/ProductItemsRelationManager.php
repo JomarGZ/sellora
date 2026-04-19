@@ -7,7 +7,6 @@ namespace App\Filament\Resources\Products\RelationManagers;
 use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\ProductItem;
-use App\Services\SkuGenerator;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -17,6 +16,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -25,8 +25,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 final class ProductItemsRelationManager extends RelationManager
 {
@@ -42,8 +42,7 @@ final class ProductItemsRelationManager extends RelationManager
                             ->label('SKU')
                             ->placeholder('Auto-generated from product name + attributes')
                             ->disabled()
-                            ->dehydrated(false)
-                            ->visibleOn('edit'),
+                            ->saved(),
 
                         TextInput::make('price')
                             ->required()
@@ -61,11 +60,27 @@ final class ProductItemsRelationManager extends RelationManager
                         Repeater::make('productItemAttributeValues')
                             ->relationship()
                             ->label('Attributes')
+                            ->afterStateUpdated(function (Get $get, Set $set) {
+                                $product = $this->getOwnerRecord();
+                                $baseSku = Str::slug($product->name);
+
+                                $items = $get('productItemAttributeValues') ?? [];
+
+                                $ids = collect($items)
+                                    ->pluck('attribute_value_id')
+                                    ->filter()
+                                    ->all();
+
+                                $attributePart = AttributeValue::whereIn('id', $ids)->orderBy('attribute_id')->pluck('value')->implode('-');
+
+                                $sku = Str::upper($baseSku.'-'.$attributePart);
+                                $set('sku', $sku);
+
+                            })
                             ->schema([
                                 Select::make('attribute_id')
                                     ->label('Attribute')
                                     ->options(Attribute::query()->pluck('name', 'id'))
-                                    ->live()
                                     ->distinct()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                                     ->required()
@@ -89,6 +104,7 @@ final class ProductItemsRelationManager extends RelationManager
                             ->columns(2)
                             ->addActionLabel('Add Attribute')
                             ->minItems(1)
+                            ->live()
                             ->dehydrated(false),
                     ]),
 
@@ -131,37 +147,25 @@ final class ProductItemsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->after(function (ProductItem $record): void {
-                        DB::transaction(function () use ($record): void {
-                            do {
-                                $record->sku = SkuGenerator::generate($record);
+                    ->mutateDataUsing(function (array $data): array {
+                        $exists = ProductItem::where('sku', $data['sku'])->exists();
 
-                                try {
-                                    $record->save();
-                                    break;
+                        if ($exists) {
+                            Notification::make()
+                                ->title('Variant already exists')
+                                ->danger()
+                                ->send();
 
-                                } catch (QueryException) {
-                                }
-                            } while (true);
-                        });
+                            throw ValidationException::withMessages([
+                                'sku' => 'This combination of attributes already exists.',
+                            ]);
+                        }
+
+                        return $data;
                     }),
             ])
             ->recordActions([
-                EditAction::make()
-                    ->after(function (ProductItem $record): void {
-                        DB::transaction(function () use ($record): void {
-                            do {
-                                $record->sku = SkuGenerator::generate($record);
-
-                                try {
-                                    $record->save();
-                                    break;
-
-                                } catch (QueryException) {
-                                }
-                            } while (true);
-                        });
-                    }),
+                EditAction::make(),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),

@@ -12,14 +12,11 @@ use App\Http\Requests\Api\V1\CheckoutRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\V1\CheckoutPreviewResource;
 use App\Models\Order;
-use App\Repositories\Contracts\IOrderRepository;
 use App\Repositories\OrderRepository;
 use App\Services\CheckoutService;
 use App\Services\StripeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 final class CheckoutController extends ApiController
 {
@@ -45,7 +42,6 @@ final class CheckoutController extends ApiController
 
     public function checkout(CheckoutRequest $request): JsonResponse
     {
-        Log::info('tess', [ CheckoutDTO::fromRequest($request)]);
         $result = $this->checkoutService->checkout(
             CheckoutDTO::fromRequest($request)
         );
@@ -73,15 +69,14 @@ final class CheckoutController extends ApiController
         ], message: 'Verifying Checkout process');
     }
 
-   public function cancel(Order $order): JsonResponse
-{
-    if ($order->status->isTerminal()) {
-        return response()->json(['error' => 'Order cannot be cancelled'], 422);
+    public function cancel(Order $order): JsonResponse
+    {
+        if ($order->status->isTerminal()) {
+            return response()->json(['error' => 'Order cannot be cancelled'], 422);
+        }
+
+        $order->transitionTo(OrderStatus::Cancelled);
+
+        return response()->json(['status' => $order->status->value]);
     }
-
-    $order->transitionTo(OrderStatus::Cancelled);
-
-    return response()->json(['status' => $order->status->value]);
-}
-
 }

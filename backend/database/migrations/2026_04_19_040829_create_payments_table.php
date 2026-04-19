@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('payment_provider');
             $table->timestamps();
         });
+
     }
 
     /**

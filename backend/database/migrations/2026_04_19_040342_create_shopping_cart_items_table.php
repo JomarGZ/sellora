@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\ProductItem;
 use App\Models\ShoppingCart;
 use Illuminate\Database\Migrations\Migration;
@@ -14,10 +16,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('shopping_cart_items', function (Blueprint $table) {
+
             $table->id();
+
             $table->foreignIdFor(ShoppingCart::class)->constrained()->cascadeOnDelete();
+
             $table->foreignIdFor(ProductItem::class)->constrained()->cascadeOnDelete();
-            $table->unsignedBigInteger('quantity')->default(1);
+
+            $table->unsignedInteger('quantity');
+
             $table->timestamps();
         });
     }
