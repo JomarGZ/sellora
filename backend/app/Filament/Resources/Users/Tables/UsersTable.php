@@ -21,7 +21,7 @@ final class UsersTable
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('fullName')
                     ->searchable(),
                 TextColumn::make('email')
                     ->label('Email address')

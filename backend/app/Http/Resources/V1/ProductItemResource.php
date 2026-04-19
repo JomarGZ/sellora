@@ -27,11 +27,17 @@ final class ProductItemResource extends JsonResource
             'price' => $this->price,
             'qty_in_stock' => $this->qty_in_stock,
             'in_stock' => $this->qty_in_stock > 0,
-            'attribute_value_ids' => $this->attributeValues->pluck('id'),
-            'images' => $this->images->map(fn ($image): array => [
-                'id' => $image->id,
-                'url' => url(Storage::url($image->image_path)),
-            ]),
+            'product' => ProductResource::make($this->whenLoaded('product')),
+            'attribute_value_ids' => $this->whenLoaded(
+                'attributeValues',
+                fn () => $this->attributeValues->pluck('id')
+            ),
+            'images' => $this->whenLoaded('images', function () {
+                return $this->images->map(fn ($image): array => [
+                    'id' => $image->id,
+                    'url' => url(Storage::url($image->image_path)),
+                ]);
+            }),
         ];
     }
 }

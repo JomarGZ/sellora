@@ -15,7 +15,7 @@ final class ShoppingCartItem extends Model
 
     protected $fillable = [
         'shopping_cart_id',
-        'shopping_cart_item_id',
+        'product_item_id',
         'quantity',
     ];
 

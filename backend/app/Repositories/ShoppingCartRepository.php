@@ -26,6 +26,7 @@ final class ShoppingCartRepository extends BaseRepository
     public function findItemByProduct(int $cartId, int $productItemId)
     {
         return ShoppingCartItem::where('shopping_cart_id', $cartId)
+            ->lockForUpdate()
             ->where('product_item_id', $productItemId)
             ->first();
     }
@@ -50,7 +51,7 @@ final class ShoppingCartRepository extends BaseRepository
         $item = ShoppingCartItem::findOrFail($cartItemId);
         $item->update($data);
 
-        return $item->fresh();
+        return $item;
     }
 
     public function deleteItem(int $cartItemId)
@@ -58,8 +59,10 @@ final class ShoppingCartRepository extends BaseRepository
         return ShoppingCartItem::destroy($cartItemId);
     }
 
-    public function clearCart(int $cartId)
+    public function clearPurchasedItems(int $cartId, array $productItemIds)
     {
-        return ShoppingCartItem::where('shopping_cart_id', $cartId)->delete();
+        return ShoppingCartItem::where('shopping_cart_id', $cartId)
+            ->whereIn('product_item_id', $productItemIds)
+            ->delete();
     }
 }

@@ -14,7 +14,9 @@ use App\Repositories\CartRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
 use App\Repositories\ProductItemRepository;
+use DomainException;
 use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Stripe\StripeClient;
 
@@ -45,8 +47,9 @@ final class CheckoutService
 
         $items = $resolved['items'];
         $type = $resolved['type'];
+        $cartId = $resolved['cart_id'] ?? null;
 
-        return DB::transaction(function () use ($dto, $items, $type) {
+        return DB::transaction(function () use ($dto, $items, $type, $cartId) {
 
             // ── Fetch product items from DB (DO NOT TRUST FRONTEND) ────
             $productItems = $this->productItemRepo->findByIds(
@@ -74,6 +77,7 @@ final class CheckoutService
                 'shipping_method_id' => $dto->shippingMethodId,
                 'subtotal' => $subtotal,
                 'shipping_fee' => $shippingFee,
+                'shopping_cart_id' => $cartId,
                 'order_total' => $orderTotal,
                 'currency' => 'USD',
                 'idempotency_key' => $dto->idempotencyKey,
@@ -202,24 +206,29 @@ final class CheckoutService
             )
             ),
             'type' => CheckoutType::Cart,
+            'cart_id' => $cart->id,
         ];
     }
 
-    private function buildLineItems(array $items, $productItems): array
+    private function buildLineItems(Collection $items, Collection $productItems): array
     {
-        return collect($items)->map(function ($item) use ($productItems) {
+        return $items->map(function ($item) use ($productItems) {
             $product = $productItems->get($item->productItemId);
+
+            if (! $product) {
+                throw new DomainException("Invalid product item ID: {$item->productItemId}");
+            }
 
             return [
                 'price_data' => [
-                    'currency' => 'usd',
-                    'unit_amount' => (int) ($product->price * 100),
+                    'currency' => $product->currency ?? 'usd',
+                    'unit_amount' => (int) round($product->price * 100),
                     'product_data' => [
                         'name' => $product->product->name,
                     ],
                 ],
                 'quantity' => $item->quantity,
             ];
-        })->toArray();
+        })->values()->toArray(); // values() = clean indexed array
     }
 }

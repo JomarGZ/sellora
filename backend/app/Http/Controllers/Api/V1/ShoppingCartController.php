@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Resources\V1\ShoppingCartItemResource;
 use App\Http\Resources\V1\ShoppingCartResource;
 use App\Models\ShoppingCartItem;
 use App\Services\ShoppingCartService;
@@ -41,8 +42,10 @@ final class ShoppingCartController extends ApiController
             $request->quantity
         );
 
+        logger('logger', [$record]);
+
         return $this->created(
-            data: new ShoppingCartResource($record),
+            data: new ShoppingCartItemResource($record),
             message: 'Add to cart successfully.'
         );
     }
@@ -77,19 +80,5 @@ final class ShoppingCartController extends ApiController
         );
 
         return $this->success(data: null, message: 'Cart item deleted successfully.');
-    }
-
-    public function clear(Request $request)
-    {
-        $cart = $this->cartService->getCart($request->user()->id);
-
-        Gate::authorize('clear', $cart);
-
-        $this->cartService->clearCart($request->user()->id);
-
-        return $this->success(
-            data: null,
-            message: 'Cart items deleted successfully.'
-        );
     }
 }

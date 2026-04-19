@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\CheckoutType;
+use App\Models\Order;
 use App\Repositories\ShoppingCartRepository;
 use Illuminate\Support\Facades\DB;
 
@@ -30,15 +32,18 @@ final class ShoppingCartService
             );
 
             if ($item) {
-                return $this->cartRepository->updateItem($item->id, [
+                $item = $this->cartRepository->updateItem($item->id, [
                     'quantity' => $item->quantity + $qty,
+                ]);
+            } else {
+                $item = $this->cartRepository->createItem($cart->id, [
+                    'product_item_id' => $productItemId,
+                    'quantity' => $qty,
                 ]);
             }
 
-            return $this->cartRepository->createItem($cart->id, [
-                'product_item_id' => $productItemId,
-                'quantity' => $qty,
-            ]);
+            return $item->fresh()->load('productItem.product');
+
         });
     }
 
@@ -81,10 +86,14 @@ final class ShoppingCartService
         return $this->cartRepository->deleteItem($item->id);
     }
 
-    public function clearCart(int $userId)
+    public function clearPurchasedItems(Order $order): void
     {
-        $cart = $this->cartRepository->getOrCreateByUserId($userId);
+        if ($order->checkout_type !== CheckoutType::Cart || ! $order->shopping_cart_id) {
+            return;
+        }
 
-        return $this->cartRepository->clearCart($cart->id);
+        $ids = $order->items->pluck('product_item_id')->toArray();
+
+        $this->cartRepository->clearPurchasedItems($order->shopping_cart_id, $ids);
     }
 }

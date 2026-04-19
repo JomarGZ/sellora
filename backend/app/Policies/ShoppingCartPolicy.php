@@ -16,9 +16,4 @@ final class ShoppingCartPolicy
     {
         return $user->id === $shoppingCart->user_id;
     }
-
-    public function clear(User $user, ShoppingCart $shoppingCart): bool
-    {
-        return $user->id === $shoppingCart->user_id;
-    }
 }

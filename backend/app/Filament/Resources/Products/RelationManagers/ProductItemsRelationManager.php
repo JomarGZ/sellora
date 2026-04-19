@@ -165,10 +165,10 @@ final class ProductItemsRelationManager extends RelationManager
                     }),
             ])
             ->recordActions([
-                            EditAction::make(),
-                            DeleteAction::make(),
-                            ForceDeleteAction::make(),
-                            RestoreAction::make(),
-                        ]);
+                EditAction::make(),
+                DeleteAction::make(),
+                ForceDeleteAction::make(),
+                RestoreAction::make(),
+            ]);
     }
 }
