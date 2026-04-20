@@ -57,7 +57,7 @@ final class CheckoutService
             );
 
             // ── Lock stock ─────────────────────────────────────────────
-            $this->inventory->reserveStock($items);
+            $this->inventory->ensureStockAvailable($items);
 
             // ── Compute totals ─────────────────────────────────────────
             $subtotal = 0;

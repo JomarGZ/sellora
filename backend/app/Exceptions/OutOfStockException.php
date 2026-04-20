@@ -8,8 +8,11 @@ use Exception;
 
 final class OutOfStockException extends Exception
 {
-    public function __construct(string $sku, int $requested, int $available)
-    {
+    public function __construct(
+        public string $sku,
+        public int $requested,
+        public int $available,
+    ) {
         parent::__construct(
             sprintf(
                 'Insufficient stock for %s. Requested: %d, Available: %d.',

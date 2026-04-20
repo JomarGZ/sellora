@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Exceptions\OutOfStockException;
 use App\Models\ProductItem;
 use DomainException;
 use Illuminate\Support\Collection;
@@ -17,16 +18,17 @@ final class InventoryService
      * Throws if ANY item is out of stock.
      * Must be called inside a DB::transaction().
      */
-    public function reserveStock(Collection $items): void
+    public function ensureStockAvailable(Collection $items): void
     {
         $items->each(function ($item) {
-            $product = ProductItem::lockForUpdate()
+            $productItem = ProductItem::lockForUpdate()
                 ->findOrFail($item->productItemId);
 
-            if ($product->qty_in_stock < $item->quantity) {
-                throw new DomainException(
-                    "Insufficient stock for SKU {$product->sku}: "
-                    ."requested {$item->quantity}, available {$product->qty_in_stock}"
+            if ($productItem->qty_in_stock < $item->quantity) {
+                throw new OutOfStockException(
+                    sku: $productItem->sku,
+                    requested: $item->quantity,
+                    available: $productItem->qty_in_stock
                 );
             }
         });
