@@ -19,6 +19,8 @@ final class ProductImage extends Model
         'image_path',
         'is_primary',
     ];
+    
+    protected $casts = ['is_primary' => 'boolean'];
 
     /**
      * Get the product that owns the image.

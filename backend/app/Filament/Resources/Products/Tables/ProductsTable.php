@@ -30,7 +30,6 @@ final class ProductsTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->searchable(),
-                ImageColumn::make('primaryImage.image_path'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
