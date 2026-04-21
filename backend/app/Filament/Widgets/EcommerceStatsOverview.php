@@ -15,7 +15,7 @@ final class EcommerceStatsOverview extends StatsOverviewWidget
     {
         return [
             Stat::make('Total Revenue (Paid)', '$ '.number_format(
-                Order::WHERE('status', OrderStatus::Paid)->sum('order_total'),
+                (float) Order::WHERE('status', OrderStatus::Paid)->sum('order_total'),
                 2
             ))
                 ->chart(
@@ -28,7 +28,7 @@ final class EcommerceStatsOverview extends StatsOverviewWidget
                 ->description('Last 7 days revenue trend')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
-            Stat::make('Total Orders', number_format(Order::count()))
+            Stat::make('Total Orders', number_format((int) Order::count()))
                 ->description('Last 7 days order trend')
                 ->descriptionIcon('heroicon-m-shopping-bag')
                 ->chart(
@@ -39,7 +39,7 @@ final class EcommerceStatsOverview extends StatsOverviewWidget
                 )
                 ->color('primary'),
             Stat::make('Active Customers', number_format(
-                Order::whereNotNull('user_id')->distinct('user_id')->count('user_id')
+                (int) Order::whereNotNull('user_id')->distinct('user_id')->count('user_id')
             ))
                 ->description('Customers who placed at least one order')
                 ->descriptionIcon('heroicon-m-user-group')
