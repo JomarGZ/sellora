@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
 use App\Models\ProductItem;
@@ -9,16 +11,8 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 
-class LowStockProducts extends TableWidget
+final class LowStockProducts extends TableWidget
 {
-
-    protected function getTableQuery(): Builder
-    {
-        return ProductItem::query()
-            ->where('qty_in_stock', '<', 10)
-            ->orderBy('qty_in_stock', 'asc');
-    }
-
     public function table(Table $table): Table
     {
         return $table
@@ -63,5 +57,12 @@ class LowStockProducts extends TableWidget
                     //
                 ]),
             ]);
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return ProductItem::query()
+            ->where('qty_in_stock', '<', 10)
+            ->orderBy('qty_in_stock', 'asc');
     }
 }

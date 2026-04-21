@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
 use App\Models\OrderItem;
 use Filament\Widgets\ChartWidget;
 
-class SalesByCategoryChart extends ChartWidget
+final class SalesByCategoryChart extends ChartWidget
 {
     protected ?string $heading = 'Sales By Category Chart';
 

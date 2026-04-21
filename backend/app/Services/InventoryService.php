@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Exceptions\OutOfStockException;
 use App\Models\ProductItem;
-use DomainException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

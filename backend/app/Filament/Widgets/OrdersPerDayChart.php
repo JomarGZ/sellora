@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 
-class OrdersPerDayChart extends ChartWidget
+final class OrdersPerDayChart extends ChartWidget
 {
     protected ?string $heading = 'Orders Per Day';
 

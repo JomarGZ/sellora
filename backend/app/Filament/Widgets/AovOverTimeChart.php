@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 
-class AovOverTimeChart extends ChartWidget
+final class AovOverTimeChart extends ChartWidget
 {
     protected static ?int $sort = 3;
-    
+
     protected ?string $heading = 'Average Order Value (AOV)';
 
     protected function getData(): array
