@@ -29,7 +29,13 @@ final class LowStockProducts extends TableWidget
                 TextColumn::make('qty_in_stock')
                     ->label('Stock')
                     ->badge()
-                    ->color(fn ($state) => $state <= 5 ? 'danger' : 'warning'),
+                    ->color(fn ($state) =>
+                        match (true) {
+                            $state <= 10 => 'danger',
+                            $state <= 30 => 'warning',
+                            default => 'success' 
+                        }
+                    ),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

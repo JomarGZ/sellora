@@ -13,6 +13,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -33,6 +34,12 @@ final class ValuesRelationManager extends RelationManager
                 TextInput::make('value')
                     ->required()
                     ->maxLength(255),
+                TextInput::make('hex_color')
+                    ->hexColor(),
+                FileUpload::make('image')
+                    ->image()
+                    ->visibility('public')
+                    ->disk('public')
             ]);
     }
 
