@@ -9,8 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
 import { useAddresses, useDeleteAddress } from "../../api/address.queries";
-
-export function AddressSection() {
+interface AddressSectionProps {
+  onAdd: () => void;
+  onEdit: (id: number) => void;
+}
+export function AddressSection({ onAdd, onEdit }: AddressSectionProps) {
   const { data: addresses, isLoading } = useAddresses();
   const deleteMutation = useDeleteAddress();
 
@@ -40,12 +43,6 @@ export function AddressSection() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <Button className="rounded-xl shadow-sm hover-elevate">
-          <Plus className="w-4 h-4 mr-2" /> Add New
-        </Button>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {addresses?.map((address) => (
           <div
@@ -111,7 +108,10 @@ export function AddressSection() {
         ))}
 
         {/* Add New Placeholder Card */}
-        <button className="border-2 border-dashed border-border/60 hover:border-primary/50 hover:bg-primary/5 rounded-2xl p-6 flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors min-h-[180px]">
+        <button
+          onClick={onAdd}
+          className="border-2 cursor-pointer border-dashed border-border/60 hover:border-primary/50 hover:bg-primary/5 rounded-2xl p-6 flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors min-h-[180px]"
+        >
           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
             <Plus className="w-6 h-6" />
           </div>

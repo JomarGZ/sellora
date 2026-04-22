@@ -1,5 +1,3 @@
-// src/features/auth/api/register.queries.ts
-
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { registerApi } from "./register.api";
