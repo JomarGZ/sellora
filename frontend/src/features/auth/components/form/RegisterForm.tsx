@@ -1,9 +1,15 @@
-// src/features/auth/components/form/RegisterForm.tsx
-
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  UserCircle,
+} from "lucide-react";
 
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
@@ -25,13 +31,13 @@ import { useRegisterMutation } from "../../api/register.queries";
 const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
-  // ── Replaces the manual useState(isPending) + fake setTimeout ──────────────
   const { mutate: register, isPending } = useRegisterMutation();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
+      first_name: "",
+      last_name: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -42,7 +48,8 @@ const RegisterForm = () => {
   const handleSubmit = (data: RegisterFormValues) => {
     register(
       {
-        name: data.name,
+        first_name: data.first_name,
+        last_name: data.last_name,
         email: data.email,
         password: data.password,
         password_confirmation: data.confirmPassword,
@@ -58,19 +65,39 @@ const RegisterForm = () => {
   return (
     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
       <FieldGroup>
-        {/* Name */}
+        {/* first name */}
         <Controller
-          name="name"
+          name="first_name"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel required>Full name</FieldLabel>
+              <FieldLabel required>First name</FieldLabel>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   {...field}
                   className="h-12 pl-10"
-                  placeholder="John Doe"
+                  placeholder="John"
+                  disabled={isPending}
+                />
+              </div>
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+        {/* last name */}
+        <Controller
+          name="last_name"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field data-invalid={fieldState.invalid}>
+              <FieldLabel required>Last name</FieldLabel>
+              <div className="relative">
+                <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  {...field}
+                  className="h-12 pl-10"
+                  placeholder="Doe"
                   disabled={isPending}
                 />
               </div>
@@ -171,7 +198,12 @@ const RegisterForm = () => {
         />
       </FieldGroup>
 
-      <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full cursor-pointer disabled:opacity-70"
+        disabled={isPending}
+      >
         {isPending ? "Creating account..." : "Create account"}
         <ArrowRight className="h-4 w-4 ml-2" />
       </Button>

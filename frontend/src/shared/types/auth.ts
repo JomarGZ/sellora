@@ -32,7 +32,8 @@ export type LoginResponse = ApiResponse<AuthPayload>;
 // ── Register ──────────────────────────────────────────────────────────────────
 
 export interface RegisterPayload {
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   password: string;
   password_confirmation: string;
