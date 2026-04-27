@@ -9,7 +9,7 @@ use App\Http\Requests\V1\StoreUserAddressRequest;
 use App\Http\Requests\V1\UpdateUserAddressRequest;
 use App\Http\Resources\V1\UserAddressResource;
 use App\Models\UserAddress;
-use App\Repositories\Contracts\IUserAddressRepository;
+use App\Repositories\UserAddressRepository;
 use App\Services\UserAddressService;
 use Illuminate\Support\Facades\Gate;
 
@@ -17,7 +17,7 @@ final class UserAddressController extends ApiController
 {
     public function __construct(
         private readonly UserAddressService $service,
-        private readonly IUserAddressRepository $repository
+        private readonly UserAddressRepository $repository
     ) {}
 
     public function index()
@@ -27,6 +27,16 @@ final class UserAddressController extends ApiController
             message: 'User addresses retrieved successfully'
         );
 
+    }
+
+    public function show(UserAddress $userAddress)
+    {
+        // Gate::authorize('view', $address);
+        logger("test", [$userAddress]);
+        return $this->success(
+            data: UserAddressResource::make($userAddress),
+            message: 'User address retrieved successfully.'
+        );
     }
 
     public function store(StoreUserAddressRequest $request)

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Repositories\Contracts\IUserAddressRepository;
+use App\Repositories\UserAddressRepository;
 use DomainException;
 use Illuminate\Support\Facades\DB;
 
@@ -14,7 +14,7 @@ final class UserAddressService
      * Create a new class instance.
      */
     public function __construct(
-        private IUserAddressRepository $repository
+        private UserAddressRepository $repository
     ) {}
 
     public function setDefault(int $userId, int $addressId)

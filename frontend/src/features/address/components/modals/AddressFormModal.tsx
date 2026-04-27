@@ -18,7 +18,7 @@ import { useCreateUserAddress } from "../../api/address.queries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   addressSchema,
-  type AddressFormValues,
+  type AddressFormInput,
 } from "../../validation/address.schema";
 import { useCountries } from "@/features/location/api/country.queries";
 import { useState } from "react";
@@ -41,7 +41,7 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
   const { mutate: createAddress, isPending } = useCreateUserAddress();
   const [countrySearch, setCountrySearch] = useState("");
 
-  const form = useForm<AddressFormValues>({
+  const form = useForm<AddressFormInput>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
       first_name: "",
@@ -64,24 +64,14 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
 
   const countries = countriesData?.data ?? [];
 
-  const handleSubmit = (data: AddressFormValues) => {
-    createAddress(
-      {
-        first_name: data.first_name,
-        last_name: data.last_name,
-        phone: data.phone,
-        country_id: data.country_id,
-        city_id: data.city_id,
-        street_address: data.street_address,
-        is_default: data.is_default,
+  const handleSubmit = (data: AddressFormInput) => {
+    const parsed = addressSchema.parse(data);
+    createAddress(parsed, {
+      onSuccess: () => {
+        form.reset();
+        onClose();
       },
-      {
-        onSuccess: () => {
-          form.reset();
-          onClose();
-        },
-      },
-    );
+    });
   };
 
   return (
@@ -174,7 +164,7 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel required>Country</FieldLabel>
                   <Select
-                    value={field.value}
+                    value={field.value as string}
                     onValueChange={(value) => {
                       field.onChange(value);
                       form.setValue("city_id", "");
@@ -233,9 +223,9 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel required>City</FieldLabel>
                   <CityComboBox
-                    value={field.value}
+                    value={field.value as string}
                     onChange={field.onChange}
-                    countryId={selectedCountryId}
+                    countryId={selectedCountryId as string}
                     disabled={isPending}
                     invalid={fieldState.invalid}
                   />

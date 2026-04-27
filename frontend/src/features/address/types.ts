@@ -1,4 +1,5 @@
 import type { ApiResponse } from "@/shared/types";
+import { number } from "zod";
 
 export interface Country {
   id: string;
@@ -32,6 +33,8 @@ export interface UserAddress {
   user: AddressUser;
   first_name: string;
   last_name: string;
+  country_id: string;
+  city_id: string;
   phone: string;
   country: Country;
   city: City;

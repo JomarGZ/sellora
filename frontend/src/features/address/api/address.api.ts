@@ -1,18 +1,22 @@
 import type {
   DeleteUserAddressesResponse,
   UserAddressesResponse,
-  UserAddressPayload,
   UserAddressResponse,
 } from "../types";
 import { client } from "@/shared/api/client";
+import type { AddressFormValues } from "../validation/address.schema";
 
 export async function createUserAddress(
-  payload: UserAddressPayload,
+  payload: AddressFormValues,
 ): Promise<UserAddressResponse> {
   const { data } = await client.post<UserAddressResponse>(
     "/v1/user/address",
     payload,
   );
+  return data;
+}
+export async function getUserAddress(id: number): Promise<UserAddressResponse> {
+  const { data } = await client.get(`/v1/user/address/${id}`);
   return data;
 }
 
@@ -24,7 +28,7 @@ export async function getUserAddresses(): Promise<UserAddressesResponse> {
 export async function updateUserAddress({
   id,
   ...payload
-}: UserAddressPayload & { id: number }): Promise<UserAddressResponse> {
+}: AddressFormValues & { id: number }): Promise<UserAddressResponse> {
   const { data } = await client.put(`/v1/user/address/${id}`, payload);
   return data;
 }

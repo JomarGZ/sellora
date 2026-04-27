@@ -8,21 +8,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import { useAddresses, useDeleteAddress } from "../../api/address.queries";
+import {
+  useDeleteAddress,
+  useSetDefaultUserAddress,
+  useUserAddresses,
+} from "../../api/address.queries";
 interface AddressSectionProps {
   onAdd: () => void;
   onEdit: (id: number) => void;
 }
 export function AddressSection({ onAdd, onEdit }: AddressSectionProps) {
-  const { data: addresses, isLoading } = useAddresses();
+  const { data: addresses, isLoading } = useUserAddresses();
   const deleteMutation = useDeleteAddress();
+  const setDefaultMutation = useSetDefaultUserAddress();
+  const handleDelete = (id: number) => {
+    deleteMutation.mutate(id);
+  };
 
-  const handleDelete = (id: string) => {
-    deleteMutation.mutate(id, {
-      onSuccess: () => {
-        // toast({ title: "Address deleted successfully" });
-      },
-    });
+  const handleSetDefault = (id: number) => {
+    setDefaultMutation.mutate(id);
   };
 
   if (isLoading) {
@@ -44,7 +48,7 @@ export function AddressSection({ onAdd, onEdit }: AddressSectionProps) {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {addresses?.map((address) => (
+        {addresses?.data.map((address) => (
           <div
             key={address.id}
             className="bg-white dark:bg-card relative p-6 rounded-2xl border border-border/60 shadow-sm hover:shadow-md transition-all group flex flex-col"
@@ -55,9 +59,9 @@ export function AddressSection({ onAdd, onEdit }: AddressSectionProps) {
                   <MapPin className="w-4 h-4" />
                 </div>
                 <h4 className="font-semibold text-foreground">
-                  {address.label}
+                  {address.first_name} {address.last_name}
                 </h4>
-                {address.isDefault && (
+                {address.is_default && (
                   <Badge
                     variant="secondary"
                     className="ml-2 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-none"
@@ -78,17 +82,24 @@ export function AddressSection({ onAdd, onEdit }: AddressSectionProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="rounded-xl">
-                  <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg">
+                  <DropdownMenuItem
+                    onClick={() => onEdit(address.id)}
+                    className="cursor-pointer gap-2 rounded-lg"
+                  >
                     <Edit2 className="w-4 h-4" /> Edit
                   </DropdownMenuItem>
-                  {!address.isDefault && (
-                    <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg">
+                  {!address.is_default && (
+                    <DropdownMenuItem
+                      onClick={() => handleSetDefault(address.id)}
+                      disabled={setDefaultMutation.isPending}
+                      className="cursor-pointer gap-2 rounded-lg"
+                    >
                       <MapPin className="w-4 h-4" /> Set as Default
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem
-                    className="cursor-pointer gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-lg"
                     onClick={() => handleDelete(address.id)}
+                    className="cursor-pointer gap-2 text-destructive focus:bg-destructive/10 focus:text-destructive rounded-lg"
                     disabled={deleteMutation.isPending}
                   >
                     <Trash2 className="w-4 h-4" /> Delete
@@ -98,25 +109,24 @@ export function AddressSection({ onAdd, onEdit }: AddressSectionProps) {
             </div>
 
             <div className="text-muted-foreground text-sm leading-relaxed flex-1">
-              <p>{address.street}</p>
-              <p>
-                {address.city}, {address.state} {address.zip}
-              </p>
-              <p>{address.country}</p>
+              <p>{address.street_address}</p>
+              <p>{address.city.name}</p>
+              <p>{address.country.name}</p>
             </div>
           </div>
         ))}
-
         {/* Add New Placeholder Card */}
-        <button
-          onClick={onAdd}
-          className="border-2 cursor-pointer border-dashed border-border/60 hover:border-primary/50 hover:bg-primary/5 rounded-2xl p-6 flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors min-h-[180px]"
-        >
-          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
-            <Plus className="w-6 h-6" />
-          </div>
-          <span className="font-medium">Add New Address</span>
-        </button>
+        {addresses?.data.length !== 5 && (
+          <button
+            onClick={onAdd}
+            className="border-2 cursor-pointer border-dashed border-border/60 hover:border-primary/50 hover:bg-primary/5 rounded-2xl p-6 flex flex-col items-center justify-center text-muted-foreground hover:text-primary transition-colors min-h-[180px]"
+          >
+            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <Plus className="w-6 h-6" />
+            </div>
+            <span className="font-medium">Add New Address</span>
+          </button>
+        )}
       </div>
     </div>
   );
