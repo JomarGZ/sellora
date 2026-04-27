@@ -83,12 +83,13 @@ Route::name('api.v1.')->group(function () {
         /*
         |--------------------------------------------------------------------------
         | User Address
-        |--------------------------------------------------------------------------
+    |--------------------------------------------------------------------------
         */
         Route::prefix('user/address')->name('user.address.')->group(function () {
             Route::get('/', [UserAddressController::class, 'index'])->name('index');
             Route::post('/', [UserAddressController::class, 'store'])->name('store');
             Route::put('/{userAddress}', [UserAddressController::class, 'update'])->name('update');
+            Route::get('/{userAddress}', [UserAddressController::class, 'show'])->name('show');
             Route::delete('/{userAddress}', [UserAddressController::class, 'destroy'])->name('destroy');
             Route::put('/{userAddress}/default', [UserAddressController::class, 'setDefault'])->name('default');
         });

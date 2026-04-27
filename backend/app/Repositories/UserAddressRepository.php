@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\UserAddress;
-use App\Repositories\Contracts\IUserAddressRepository;
 use Illuminate\Support\Collection;
 
-final class UserAddressRepository extends BaseRepository implements IUserAddressRepository
+final class UserAddressRepository extends BaseRepository
 {
     public function __construct(UserAddress $userAddress)
     {
@@ -18,6 +17,7 @@ final class UserAddressRepository extends BaseRepository implements IUserAddress
     public function list(int $userId): Collection
     {
         return $this->model->query()
+            ->with(['country', 'city'])
             ->where('user_id', $userId)
             ->get();
     }

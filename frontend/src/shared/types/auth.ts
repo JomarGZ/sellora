@@ -1,9 +1,5 @@
-// src/features/auth/types.ts
-export interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-}
+import type { ApiResponse } from ".";
+
 export interface AuthPayload {
   user: User;
   accessToken: string;

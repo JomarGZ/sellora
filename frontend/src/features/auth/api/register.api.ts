@@ -15,20 +15,3 @@ export async function registerApi(
   const { data } = await client.post<RegisterResponse>("/v1/register", payload);
   return data;
 }
-
-// export async function registerApi(
-//   payload: RegisterPayload,
-// ): Promise<RegisterResponse> {
-//   // Simulate network delay
-//   await new Promise((r) => setTimeout(r, 500));
-
-//   // Return dummy user
-//   return {
-//     user: {
-//       id: Math.floor(Math.random() * 1000) + 1,
-//       name: payload.name,
-//       email: payload.email,
-//     },
-//     message: "Account created successfully",
-//   };
-// }

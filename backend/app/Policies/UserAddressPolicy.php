@@ -10,6 +10,12 @@ use Illuminate\Auth\Access\Response;
 
 final class UserAddressPolicy
 {
+    public function view(User $user, UserAddress $userAddress): Response
+    {
+        return $user->id === $userAddress->user_id
+            ? Response::allow()
+            : Response::deny('You do not own this address');
+    }
     /**
      * Determine whether the user can update the model.
      */

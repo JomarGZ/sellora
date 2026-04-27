@@ -39,7 +39,7 @@ final class ValuesRelationManager extends RelationManager
                 FileUpload::make('image')
                     ->image()
                     ->visibility('public')
-                    ->disk('public')
+                    ->disk('public'),
             ]);
     }
 
