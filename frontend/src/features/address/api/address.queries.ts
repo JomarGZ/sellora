@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   Address,
   UserAddressesResponse,
-  UserAddressPayload,
   UserAddressResponse,
 } from "../types";
 import { mockAddresses } from "@/data";
@@ -103,7 +102,7 @@ export function useUpdateUserAddress() {
   return useMutation<
     UserAddressResponse,
     Error,
-    UserAddressPayload & { id: number },
+    AddressFormValues & { id: number },
     { previous?: UserAddressesResponse }
   >({
     mutationFn: updateUserAddress,

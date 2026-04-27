@@ -33,23 +33,13 @@ export interface UserAddress {
   user: AddressUser;
   first_name: string;
   last_name: string;
-  country_id: string;
-  city_id: string;
+  country_id: number;
+  city_id: number;
   phone: string;
   country: Country;
   city: City;
   street_address: string;
   is_default: boolean;
-}
-
-export interface UserAddressPayload {
-  first_name: string;
-  last_name: string;
-  phone: string;
-  country_id: string;
-  city_id: string;
-  street_address: string;
-  is_default: boolean | undefined;
 }
 
 export type UserAddressResponse = ApiResponse<UserAddress>;
