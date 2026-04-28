@@ -66,7 +66,8 @@ final class ProductRepository extends BaseRepository
                     });
                 }
             ])
-            ->orderBy('sold_count')
+            ->having('sold_count', '>=', config('shop.best_seller_min_sales'))
+            ->orderByDesc('sold_count')
             ->withMin('productItems', 'price')
             ->limit($limit)
             ->get();
