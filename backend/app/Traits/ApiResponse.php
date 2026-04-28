@@ -75,4 +75,5 @@ trait ApiResponse
     {
         return $this->error($message, Response::HTTP_UNPROCESSABLE_ENTITY, $errors);
     }
+
 }

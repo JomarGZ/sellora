@@ -1,6 +1,6 @@
-import type { Product } from "../../../../data/products";
 import { ProductCard } from "../ui/ProductCard";
 import { ProductCardSkeleton } from "../../states/ProductCardSkeleton";
+import type { Product } from "@/shared/types";
 
 interface ProductGridProps {
   products: Product[];

@@ -1,9 +1,14 @@
 import { ProductGrid } from "../../../product/components/sections/ProductGrid";
-import { bestSellers } from "../../../../data/products";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { EntityFallback } from "../../../../shared/components/feedback/EntityFallback";
+import { useBestSellerProducts } from "../../api/home.queries";
 
 export function BestSellerSection() {
+  const {
+    data: bestSellerProducts,
+    refetch,
+    isLoading,
+  } = useBestSellerProducts();
   return (
     <section className="border-t border-gray-100 bg-gray-50/50">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -18,11 +23,13 @@ export function BestSellerSection() {
               error={error}
             />
           )}
-          onReset={() => {
-            //Refetch data
-          }}
+          onReset={() => refetch()}
         >
-          <ProductGrid products={bestSellers} showBestSellerBadge />
+          <ProductGrid
+            products={bestSellerProducts?.data ?? []}
+            showBestSellerBadge
+            isLoading={isLoading}
+          />
         </ErrorBoundary>
       </div>
     </section>
