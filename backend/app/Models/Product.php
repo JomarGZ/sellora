@@ -46,6 +46,36 @@ final class Product extends Model
             ->generateSlugsFrom('name')
             ->saveSlugsTo('slug');
     }
+    public function productItemReviews()
+    {
+        return $this->hasManyThrough(
+            ProductItemReview::class,
+            ProductItem::class,
+            'product_id',        // FK on product_items
+            'product_item_id',   // FK on reviews
+            'id',                // products.id
+            'id'                 // product_items.id
+        );
+    }
+
+    public function isNew(): bool
+    {
+        return $this->created_at
+            ? $this->created_at->gt(now()->subDays(config('shop.new_product_days')))
+            : false;
+    }
+
+    public function orderItems()
+    {
+        return $this->hasManyThrough(
+            OrderItem::class,
+            ProductItem::class,
+            'product_id',      // FK on product_items
+            'product_item_id', // FK on order_items
+            'id',              // products.id
+            'id'               // product_items.id
+        );
+    }
 
     /**
      * This product belongs to a brand

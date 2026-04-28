@@ -11,6 +11,7 @@ enum OrderStatus: string
     case Paid = 'paid';
     case Cancelled = 'cancelled';
     case Failed = 'failed';
+    case Completed = 'completed';
 
     // ── Transition guard ──────────────────────────────────────────────
     // Defines which transitions are legal. Call this before every update.
@@ -20,6 +21,7 @@ enum OrderStatus: string
             self::Pending => in_array($next, [self::Processing, self::Cancelled]),
             self::Processing => in_array($next, [self::Paid, self::Failed, self::Cancelled]),
             self::Paid => false,   // terminal
+            self::Completed => false,
             self::Cancelled => false,   // terminal
             self::Failed => false,   // terminal
         };
@@ -28,12 +30,17 @@ enum OrderStatus: string
     // ── Convenience predicates ────────────────────────────────────────
     public function isTerminal(): bool
     {
-        return in_array($this, [self::Paid, self::Cancelled, self::Failed]);
+        return in_array($this, [self::Paid, self::Cancelled, self::Failed, self::Completed]);
     }
 
     public function isPaid(): bool
     {
-        return $this === self::Paid;
+        return in_array($this, [self::Paid, self::Completed]);
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this === self::Completed;
     }
 
     // ── Human-readable label (for APIs / logs) ────────────────────────
@@ -45,6 +52,7 @@ enum OrderStatus: string
             self::Paid => 'Payment confirmed',
             self::Cancelled => 'Order cancelled',
             self::Failed => 'Payment failed',
+            self::Completed => 'Order completed'
         };
     }
 }

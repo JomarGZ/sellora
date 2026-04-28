@@ -24,6 +24,13 @@ final class ProductResource extends JsonResource
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
+           'rating' => [
+                'average' => round($this->avg_rating ?? 0, 1),
+                'count' => $this->reviews_count ?? 0,
+            ],
+            'is_bestseller' => ($this->sold_count ?? 0) >= 50,
+            'is_new' => $product->isNew(),
+            'min_price' => $product->product_items_min_price,
             'description' => $product->description,
             'created_at' => $product->created_at?->toIso8601String(),
             'updated_at' => $product->updated_at?->toIso8601String(),

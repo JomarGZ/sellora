@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import type { Product } from "../../../../data/products";
 import { ProductBadge } from "./ProductBadge";
 import { RatingStars } from "./RatingStars";
+import type { Product } from "@/shared/types";
 
 interface ProductCardProps {
   product: Product;
@@ -14,12 +14,11 @@ export function ProductCard({
   showBestSellerBadge = false,
 }: ProductCardProps) {
   const [wishlisted, setWishlisted] = useState(false);
-
   const showBadge =
-    (showBestSellerBadge && product.isBestSeller) || product.isNew;
-  const badgeLabel = product.isBestSeller
+    (showBestSellerBadge && product.is_bestseller) || product.is_new;
+  const badgeLabel = product.is_bestseller
     ? "Best Seller"
-    : product.isNew
+    : product.is_new
       ? "New"
       : null;
 
@@ -59,40 +58,40 @@ export function ProductCard({
               </svg>
             </button>
             <img
-              src={product.image}
-              alt={product.name}
+              src={product.primary_image?.url}
+              alt={product?.name}
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>
           <div className="flex flex-1 flex-col gap-2 p-4">
             <div className="flex flex-wrap gap-1.5 text-xs text-gray-500">
               <span className="rounded bg-gray-100 px-1.5 py-0.5">
-                {product.category}
+                {product.category?.name}
               </span>
               <span className="rounded bg-gray-100 px-1.5 py-0.5">
-                {product.brand}
+                {product.brand?.name}
               </span>
             </div>
             <h3 className="font-medium text-gray-900 line-clamp-2 group-hover:text-sky-600">
               {product.name}
             </h3>
-            {"rating" in product && product.reviewCount != null && (
+            {"rating" in product && product.rating.count != null && (
               <div className="flex items-center gap-2">
-                <RatingStars rating={product.rating} />
+                <RatingStars rating={product.rating.average} />
                 <span className="text-sm text-gray-500">
-                  {product.rating.toFixed(1)} ({product.reviewCount})
+                  {product.rating.average.toFixed(1)} ({product.rating.count})
                 </span>
               </div>
             )}
             <div className="mt-auto flex items-baseline gap-2">
               <span className="text-lg font-semibold text-gray-900">
-                ${product.price.toFixed(2)}
+                ${product.min_price}
               </span>
-              {product.oldPrice != null && product.oldPrice > product.price && (
+              {/* {product.oldPrice != null && product.oldPrice > product.price && (
                 <span className="text-sm text-gray-400 line-through">
                   ${product.oldPrice.toFixed(2)}
                 </span>
-              )}
+              )} */}
             </div>
           </div>
         </Link>

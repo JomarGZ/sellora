@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\DTOs\V1\ProductFilterDTO;
+use App\Enums\OrderStatus;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -25,11 +26,21 @@ final class ProductRepository extends BaseRepository
      * @param  int  $limit  Number of results to return
      * @return Collection<int, Product>
      */
-    public function getNewArrivals(array $columns = ['*'], array|string $relations = [], int $limit = 10): Collection
+    public function getNewArrivals(array $columns = ['*'], int $limit = 10): Collection
     {
         return $this->model->query()
             ->select($columns)
-            ->with($relations)
+            ->with(['primaryImage', 'brand', 'category'])
+            ->withAvg('productItemReviews as avg_rating', 'rating')
+            ->withCount('productItemReviews as reviews_count')
+            ->withCount([
+                'orderItems as sold_count' => function ($query) {
+                    $query->whereHas('order', function ($q) {
+                        $q->where('status', OrderStatus::Completed);
+                    });
+                }
+            ])
+            ->withMin('productItems', 'price')
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();
@@ -41,13 +52,23 @@ final class ProductRepository extends BaseRepository
      * @param  int  $limit  Number of results to return
      * @return Collection<int, Product>
      */
-    public function getBestSellers(array $columns = ['*'], array|string $relations = [], int $limit = 10): Collection
+    public function getBestSellers(array $columns = ['*'], int $limit = 10): Collection
     {
         return $this->model->query()
             ->select($columns)
-            ->with($relations)
-            // ->withCount('orders') // Assuming there's an 'orders' relationship
-            // ->orderBy('orders_count', 'desc')
+            ->with(['primaryImage', 'brand', 'category'])
+            ->withAvg('productItemReviews as avg_rating', 'rating')
+            ->withCount('productItemReviews as reviews_count')
+            ->withCount([
+                'orderItems as sold_count' => function ($query) {
+                    $query->whereHas('order', function ($q) {
+                        $q->where('status', OrderStatus::Completed);
+                    });
+                }
+            ])
+            ->having('sold_count', '>=', config('shop.best_seller_min_sales'))
+            ->orderByDesc('sold_count')
+            ->withMin('productItems', 'price')
             ->limit($limit)
             ->get();
     }
@@ -96,8 +117,8 @@ final class ProductRepository extends BaseRepository
                 'productItems.attributeValues:id,attribute_id,value,hex_color,image',
                 'productItems.attributeValues.attribute:id,name',
             ])
-            ->withAvg('productItems.productItemReviews', 'rating')
-            ->withCount('productItems.productItemReviews')
+            ->withAvg('productItemReviews as avg_rating', 'rating')
+            ->withCount('productItemReviews as reviews_count')
             ->withMin('productItems', 'price')
             ->withMax('productItems', 'price')
             ->withSum('productItems', 'qty_in_stock')
