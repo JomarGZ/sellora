@@ -10,24 +10,23 @@ import { EntityFallback } from "@/shared/components/feedback/EntityFallback";
 import { useProducts } from "../api/shop.queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "../api/shop.api";
+import { useDebouncedCallback } from "use-debounce";
 import { shopRoute } from "@/app/routers/router";
 type SortOption = "default" | "price-asc" | "price-desc" | "newest" | "rating";
 type Filters = {
-  search: string;
-  sort: SortOption;
-  minPrice: string;
-  maxPrice: string;
-  category: string[];
-  brand: string[];
-  page: number;
+  search?: string;
+  sort?: SortOption;
+  minPrice?: string;
+  maxPrice?: string;
+  category?: string[];
+  brand?: string[];
+  page?: number;
 };
-function clearFilters() {}
 
 export function ShopPage() {
-  // In ShopPage - provide fallbacks when reading
   const { page = 1, search: searchParam = "" } = shopRoute.useSearch();
   const navigate = shopRoute.useNavigate();
-
+  const [searchInput, setSearchInput] = useState(searchParam);
   const {
     data: products,
     isLoading,
@@ -46,7 +45,7 @@ export function ShopPage() {
   const brandsList = useMemo(() => getBrands(), []);
   const setPage = (newPage: number) => {
     navigate({
-      search: (prev) => {
+      search: (prev: Filters) => {
         const next = { ...prev };
         if (newPage === 1) {
           delete next.page;
@@ -57,28 +56,59 @@ export function ShopPage() {
       },
     });
   };
-  const handleSearchChange = (v: string) => {
+  const handleSearchChange = useDebouncedCallback((value: string) => {
     navigate({
-      search: (prev) => {
+      search: (prev: Filters) => {
         const next = { ...prev };
-        if (!v) delete next.search;
-        else next.search = v;
+
+        const cleaned = value.trim();
+
+        if (cleaned) {
+          next.search = cleaned;
+        } else {
+          delete next.search;
+        }
+
         delete next.page;
+
         return next;
       },
     });
+  }, 500);
+
+  const clearFilters = () => {
+    // reset local states
+    setSearchInput("");
+    setSort("default");
+    setMinPrice("");
+    setMaxPrice("");
+    setSelectedCategories([]);
+    setSelectedBrands([]);
+
+    // clear URL query params
+    navigate({
+      search: {},
+    });
   };
+
   useEffect(() => {
     queryClient.prefetchQuery({
       queryKey: ["products", page + 1],
       queryFn: () => getProducts(page + 1),
     });
   }, [page, queryClient]);
+
+  useEffect(() => {
+    setSearchInput(searchParam);
+  }, [searchParam]);
   return (
     <div className="min-h-screen bg-gray-50/50">
       <FilterBar
-        searchValue={searchParam}
-        onSearchChange={handleSearchChange}
+        searchValue={searchInput}
+        onSearchChange={(value) => {
+          setSearchInput(value);
+          handleSearchChange(value);
+        }}
         sortValue={sort}
         onSortChange={setSort}
         rangeStart={products?.meta.from ?? 0}
@@ -126,8 +156,8 @@ export function ShopPage() {
                 </p>
                 <button
                   type="button"
-                  // onClick={clearFilters}
-                  className="mt-4 text-sky-600 hover:text-sky-700"
+                  onClick={clearFilters}
+                  className="mt-4 text-sky-600 cursor-pointer hover:text-sky-700"
                 >
                   Clear all filters
                 </button>
