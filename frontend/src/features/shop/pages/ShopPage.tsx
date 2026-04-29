@@ -16,27 +16,38 @@ type SortOption = "default" | "price-asc" | "price-desc" | "newest" | "rating";
 type Filters = {
   search?: string;
   sort?: SortOption;
-  minPrice?: string;
-  maxPrice?: string;
+  minPrice?: number;
+  maxPrice?: number;
   category?: string[];
   brand?: string[];
   page?: number;
 };
 
 export function ShopPage() {
-  const { page = 1, search: searchParam = "" } = shopRoute.useSearch();
+  const {
+    page = 1,
+    search: searchParam = "",
+    minPrice = undefined,
+    maxPrice = undefined,
+    category = "",
+    brand = "",
+  } = shopRoute.useSearch();
   const navigate = shopRoute.useNavigate();
   const [searchInput, setSearchInput] = useState(searchParam);
+  const [minPriceInput, setMinPriceInput] = useState(
+    minPrice?.toString() ?? "",
+  );
+  const [maxPriceInput, setMaxPriceInput] = useState(
+    maxPrice?.toString() ?? "",
+  );
   const {
     data: products,
     isLoading,
     refetch,
     isFetching,
-  } = useProducts(page, searchParam);
+  } = useProducts(page, searchParam, maxPrice, minPrice, category, brand);
   const queryClient = useQueryClient();
   const [sort, setSort] = useState<SortOption>("default");
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -76,16 +87,45 @@ export function ShopPage() {
     });
   }, 500);
 
+  const handleMinPriceChange = useDebouncedCallback((value: string) => {
+    navigate({
+      search: (prev: Filters) => {
+        const next = { ...prev };
+        const num = Number(value);
+        if (value && !isNaN(num)) {
+          next.minPrice = num;
+        } else {
+          delete next.minPrice;
+        }
+        delete next.page;
+        return next;
+      },
+    });
+  }, 500);
+
+  const handleMaxPriceChange = useDebouncedCallback((value: string) => {
+    navigate({
+      search: (prev: Filters) => {
+        const next = { ...prev };
+        const num = Number(value);
+        if (value && !isNaN(num)) {
+          next.maxPrice = num;
+        } else {
+          delete next.maxPrice;
+        }
+        delete next.page;
+        return next;
+      },
+    });
+  }, 500);
+
   const clearFilters = () => {
-    // reset local states
-    setSearchInput("");
     setSort("default");
-    setMinPrice("");
-    setMaxPrice("");
     setSelectedCategories([]);
     setSelectedBrands([]);
-
-    // clear URL query params
+    setMinPriceInput(""); // ← add these
+    setMaxPriceInput(""); // ← add these
+    setSearchInput(""); // ← already handled by the useEffect but be explicit
     navigate({
       search: {},
     });
@@ -101,6 +141,14 @@ export function ShopPage() {
   useEffect(() => {
     setSearchInput(searchParam);
   }, [searchParam]);
+
+  useEffect(() => {
+    setMinPriceInput(minPrice?.toString() ?? "");
+  }, [minPrice]);
+
+  useEffect(() => {
+    setMaxPriceInput(maxPrice?.toString() ?? "");
+  }, [maxPrice]);
   return (
     <div className="min-h-screen bg-gray-50/50">
       <FilterBar
@@ -121,15 +169,15 @@ export function ShopPage() {
         <div className="flex gap-8">
           <div className="hidden lg:block">
             <SidebarFilters
-              minPrice={minPrice}
-              maxPrice={maxPrice}
+              minPrice={minPriceInput} // pass local state, not URL value
+              maxPrice={maxPriceInput}
               onMinPriceChange={(v) => {
-                setMinPrice(v);
-                setPage(1);
+                setMinPriceInput(v);
+                handleMinPriceChange(v);
               }}
               onMaxPriceChange={(v) => {
-                setMaxPrice(v);
-                setPage(1);
+                setMaxPriceInput(v);
+                handleMaxPriceChange(v);
               }}
               categories={categories}
               selectedCategories={selectedCategories}
@@ -199,15 +247,15 @@ export function ShopPage() {
       <MobileFilterDrawer
         isOpen={mobileFiltersOpen}
         onClose={() => setMobileFiltersOpen(false)}
-        minPrice={minPrice}
-        maxPrice={maxPrice}
+        minPrice={minPriceInput}
+        maxPrice={maxPriceInput}
         onMinPriceChange={(v) => {
-          setMinPrice(v);
-          setPage(1);
+          setMinPriceInput(v);
+          handleMinPriceChange(v);
         }}
         onMaxPriceChange={(v) => {
-          setMaxPrice(v);
-          setPage(1);
+          setMaxPriceInput(v);
+          handleMaxPriceChange(v);
         }}
         categories={categories}
         selectedCategories={selectedCategories}

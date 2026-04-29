@@ -76,8 +76,11 @@ export const shopRoute = createRoute({
   validateSearch: (search) => ({
     page: search.page ? Number(search.page) : undefined,
     search: search.search ? String(search.search) : undefined,
+    maxPrice: search.maxPrice ? Number(search.maxPrice) : undefined,
+    minPrice: search.minPrice ? Number(search.minPrice) : undefined,
+    category: search.category ? String(search.category) : undefined,
+    brand: search.brand ? String(search.brand) : undefined,
   }),
-
   head: () => ({
     meta: [{ title: "Sellora | Shop" }],
   }),

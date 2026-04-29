@@ -21,7 +21,7 @@ final readonly class ProductFilterDTO
     public static function fromRequest(ProductFilterRequest $request): self
     {
         return new self(
-            search: $request->str('search')->trim()->value() ?: null,
+            search: $request->string('search')->trim()->value() ?: null,
             category: $request->string('category')->value() ?: null,
             brand: $request->string('brand')->value() ?: null,
             minPrice: $request->filled('min_price') ? (float) $request->string('min_price')->value() : null,
