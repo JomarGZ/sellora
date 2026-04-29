@@ -69,10 +69,15 @@ const registerRoute = createRoute({
   }),
 });
 
-const shopRoute = createRoute({
+export const shopRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/shop",
   component: ShopPage,
+  validateSearch: (search) => ({
+    page: Number(search.page ?? 1),
+    search: String(search.search ?? ""),
+  }),
+
   head: () => ({
     meta: [{ title: "Sellora | Shop" }],
   }),

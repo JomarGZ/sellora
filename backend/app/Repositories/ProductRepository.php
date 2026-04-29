@@ -94,7 +94,18 @@ final class ProductRepository extends BaseRepository
             ->filterByBrand($filters->brand)
             ->filterByPriceRange($filters->minPrice, $filters->maxPrice)
             ->sortBy($filters->sort)
-            ->paginate($filters->perPage);
+            ->withMin('productItems', 'price')
+            ->withAvg('productItemReviews as avg_rating', 'rating')
+            ->withCount('productItemReviews as reviews_count')
+            ->withCount([
+                'orderItems as sold_count' => function ($query) {
+                    $query->whereHas('order', function ($q) {
+                        $q->where('status', OrderStatus::Completed);
+                    });
+                }
+            ])
+            ->orderByDesc('sold_count')
+            ->paginate(1);
     }
 
     public function findBySlug(string $slug): ?Product
