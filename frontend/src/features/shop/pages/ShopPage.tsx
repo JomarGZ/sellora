@@ -6,13 +6,11 @@ import { MobileFilterDrawer } from "@/features/shop/components/layout/MobileFilt
 import { ProductGrid } from "@/features/product/components/sections/ProductGrid";
 import { Pagination } from "@/features/product/components/ui/Pagination";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-
 import { EntityFallback } from "@/shared/components/feedback/EntityFallback";
 import { useProducts } from "../api/shop.queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "../api/shop.api";
 import { shopRoute } from "@/app/routers/router";
-
 type SortOption = "default" | "price-asc" | "price-desc" | "newest" | "rating";
 type Filters = {
   search: string;
@@ -26,12 +24,17 @@ type Filters = {
 function clearFilters() {}
 
 export function ShopPage() {
-  const { page } = shopRoute.useSearch();
+  // In ShopPage - provide fallbacks when reading
+  const { page = 1, search: searchParam = "" } = shopRoute.useSearch();
   const navigate = shopRoute.useNavigate();
 
-  const { data: products, isLoading, refetch, isFetching } = useProducts(page);
+  const {
+    data: products,
+    isLoading,
+    refetch,
+    isFetching,
+  } = useProducts(page, searchParam);
   const queryClient = useQueryClient();
-  const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOption>("default");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
@@ -45,13 +48,22 @@ export function ShopPage() {
     navigate({
       search: (prev) => {
         const next = { ...prev };
-
         if (newPage === 1) {
           delete next.page;
         } else {
           next.page = newPage;
         }
-
+        return next;
+      },
+    });
+  };
+  const handleSearchChange = (v: string) => {
+    navigate({
+      search: (prev) => {
+        const next = { ...prev };
+        if (!v) delete next.search;
+        else next.search = v;
+        delete next.page;
         return next;
       },
     });
@@ -65,8 +77,8 @@ export function ShopPage() {
   return (
     <div className="min-h-screen bg-gray-50/50">
       <FilterBar
-        searchValue={search}
-        onSearchChange={(v) => {}}
+        searchValue={searchParam}
+        onSearchChange={handleSearchChange}
         sortValue={sort}
         onSortChange={setSort}
         rangeStart={products?.meta.from ?? 0}
@@ -138,6 +150,7 @@ export function ShopPage() {
                   <ProductGrid
                     products={products?.data ?? []}
                     isLoading={isLoading}
+                    isFetching={isFetching}
                     showBestSellerBadge
                   />
                 </ErrorBoundary>

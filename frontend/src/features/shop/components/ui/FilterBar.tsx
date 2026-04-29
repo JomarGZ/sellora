@@ -65,7 +65,7 @@ export function FilterBar({
             )}
             <SearchBox value={searchValue} onChange={onSearchChange} />
           </div>
-          <div className="flex flex-shrink-0 flex-wrap items-center gap-3">
+          <div className="flex shrink-0 flex-wrap items-center gap-3">
             <select
               value={sortValue}
               onChange={(e) => onSortChange(e.target.value as SortOption)}

@@ -74,8 +74,8 @@ export const shopRoute = createRoute({
   path: "/shop",
   component: ShopPage,
   validateSearch: (search) => ({
-    page: Number(search.page ?? 1),
-    search: String(search.search ?? ""),
+    page: search.page ? Number(search.page) : undefined,
+    search: search.search ? String(search.search) : undefined,
   }),
 
   head: () => ({
