@@ -10,8 +10,8 @@ final readonly class ProductFilterDTO
 {
     public function __construct(
         public ?string $search,
-        public ?string $category,
-        public ?string $brand,
+        public ?array $categories,
+        public ?array $brands,
         public ?float $minPrice,
         public ?float $maxPrice,
         public ?string $sort,
@@ -22,8 +22,8 @@ final readonly class ProductFilterDTO
     {
         return new self(
             search: $request->string('search')->trim()->value() ?: null,
-            category: $request->string('category')->value() ?: null,
-            brand: $request->string('brand')->value() ?: null,
+            categories: $request->has('categories') ? \Illuminate\Support\Arr::wrap($request->input('categories')) : null,
+            brands: $request->has('brands') ? \Illuminate\Support\Arr::wrap($request->input('categories')) : null,
             minPrice: $request->filled('min_price') ? (float) $request->string('min_price')->value() : null,
             maxPrice: $request->filled('max_price') ? (float) $request->string('max_price')->value() : null,
             sort: $request->string('sort')->value() ?: null,

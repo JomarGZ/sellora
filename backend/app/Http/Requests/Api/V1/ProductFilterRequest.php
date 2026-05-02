@@ -26,12 +26,13 @@ final class ProductFilterRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:255'],
-            'category' => ['nullable', 'string'],
-            'brand' => ['nullable', 'string'],
+            'categories' => ['nullable', 'array'],
+            'brands' => ['nullable', 'array'],
             'min_price' => ['nullable', 'numeric', 'min:0'],
             'max_price' => ['nullable', 'numeric', 'min:0'],
             'sort' => ['nullable', 'string', 'in:default,price_asc,price_desc,newest,rating'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
+
 }

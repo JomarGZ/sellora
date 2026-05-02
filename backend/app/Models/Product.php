@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
@@ -145,14 +144,14 @@ final class Product extends Model
      * @return Builder<Product>
      */
     #[Scope]
-    protected function filterByCategory(Builder $query, ?string $categorySlug): Builder
+    protected function filterByCategory(Builder $query, ?array $categorySlugs): Builder
     {
         return $query->when(
-            $categorySlug,
+            $categorySlugs,
             fn (Builder $q) => $q->whereHas(
                 'category',
-                fn (Builder $q) => $q->where('slug', $categorySlug)
-                    ->orWhereHas('parent', fn (Builder $q) => $q->where('slug', $categorySlug))
+                fn (Builder $q) => $q->whereIn('slug', $categorySlugs)
+                    ->orWhereHas('parent', fn (Builder $q) => $q->whereIn('slug', $categorySlugs))
             )
         );
     }
@@ -162,13 +161,13 @@ final class Product extends Model
      * @return Builder<Product>
      */
     #[Scope]
-    protected function filterByBrand(Builder $query, ?string $brandSlug): Builder
+    protected function filterByBrand(Builder $query, ?array $brandSlugs): Builder
     {
         return $query->when(
-            $brandSlug,
+            $brandSlugs,
             fn (Builder $q) => $q->whereHas(
                 'brand',
-                fn (Builder $q) => $q->where('slug', $brandSlug)
+                fn (Builder $q) => $q->whereIn('slug', $brandSlugs)
             )
         );
     }
