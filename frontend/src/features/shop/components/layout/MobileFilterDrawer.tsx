@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { SidebarFilters } from "./SidebarFilters";
+import type { Brand, Category } from "../../types";
 
 interface MobileFilterDrawerProps {
   isOpen: boolean;
@@ -8,10 +9,10 @@ interface MobileFilterDrawerProps {
   maxPrice: string;
   onMinPriceChange: (v: string) => void;
   onMaxPriceChange: (v: string) => void;
-  categories: string[];
+  categories: Category[];
   selectedCategories: string[];
   onCategoriesChange: (v: string[]) => void;
-  brands: string[];
+  brands: Brand[];
   selectedBrands: string[];
   onBrandsChange: (v: string[]) => void;
   onClearFilters: () => void;

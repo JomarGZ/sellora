@@ -16,7 +16,7 @@ final class ProductFilterController extends ApiController
         private readonly IProductFilterRepository $repository
     ) {}
 
-    public function index(): JsonResponse
+    public function getFilterOptions(): JsonResponse
     {
         return $this->success(data: [
             'categories' => CategoryResource::collection(

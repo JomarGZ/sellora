@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "./shop.api";
+import { getFilterOptions, getProducts } from "./shop.api";
+import type { FilterResponse } from "../types";
 
 export function useProducts(
   page: number,
   search?: string,
   maxPrice?: number,
   minPrice?: number,
-  category?: string,
-  brand?: string,
+  categories?: string[],
+  brands?: string[],
   sort?: string,
 ) {
   return useQuery({
@@ -17,13 +18,21 @@ export function useProducts(
       search,
       maxPrice,
       minPrice,
-      category,
-      brand,
+      categories,
+      brands,
       sort,
     ],
     queryFn: () =>
-      getProducts(page, search, maxPrice, minPrice, category, brand, sort),
+      getProducts(page, search, maxPrice, minPrice, categories, brands, sort),
     placeholderData: (prev) => prev,
     staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useProductFilters() {
+  return useQuery<FilterResponse>({
+    queryKey: ["productFilters"],
+    queryFn: () => getFilterOptions(),
+    staleTime: 1000 * 60 * 60,
   });
 }

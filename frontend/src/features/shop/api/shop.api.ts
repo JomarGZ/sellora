@@ -6,8 +6,8 @@ export async function getProducts(
   search?: string,
   maxPrice?: number,
   minPrice?: number,
-  category?: string,
-  brand?: string,
+  categories?: string[],
+  brands?: string[],
   sort?: string,
 ): Promise<ProductResponse> {
   const { data } = await client.get("/v1/products", {
@@ -16,10 +16,15 @@ export async function getProducts(
       search: search || undefined,
       max_price: maxPrice || undefined,
       min_price: minPrice || undefined,
-      category: category || undefined,
-      brand: brand || undefined,
+      categories: categories || undefined,
+      brands: brands || undefined,
       sort: sort || undefined,
     },
   });
+  return data;
+}
+
+export async function getFilterOptions() {
+  const { data } = await client.get("/v1/products/filters");
   return data;
 }

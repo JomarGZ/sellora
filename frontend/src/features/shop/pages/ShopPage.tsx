@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
-import { getCategories, getBrands } from "@/data/products";
+import { useEffect, useState } from "react";
 import { FilterBar } from "@/features/shop/components/ui/FilterBar";
 import { SidebarFilters } from "@/features/shop/components/layout/SidebarFilters";
 import { MobileFilterDrawer } from "@/features/shop/components/layout/MobileFilterDrawer";
@@ -7,19 +6,19 @@ import { ProductGrid } from "@/features/product/components/sections/ProductGrid"
 import { Pagination } from "@/features/product/components/ui/Pagination";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
 import { EntityFallback } from "@/shared/components/feedback/EntityFallback";
-import { useProducts } from "../api/shop.queries";
+import { useProductFilters, useProducts } from "../api/shop.queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "../api/shop.api";
 import { useDebouncedCallback } from "use-debounce";
 import { shopRoute } from "@/app/routers/router";
-import type { SortOption } from "../type";
+import type { Brand, Category, SortOption } from "../types";
 type Filters = {
   search?: string;
   sort?: SortOption;
   minPrice?: number;
   maxPrice?: number;
-  category?: string[];
-  brand?: string[];
+  categories?: string;
+  brands?: string;
   page?: number;
 };
 
@@ -29,8 +28,8 @@ export function ShopPage() {
     search: searchParam = "",
     minPrice = undefined,
     maxPrice = undefined,
-    category = "",
-    brand = "",
+    categories = undefined,
+    brands = undefined,
     sort = undefined,
   } = shopRoute.useSearch();
   const navigate = shopRoute.useNavigate();
@@ -42,21 +41,37 @@ export function ShopPage() {
     maxPrice?.toString() ?? "",
   );
   const [selectedSort, setSelectedSort] = useState<SortOption>(sort);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    categories ? categories.split(",") : [],
+  );
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(
+    brands ? brands.split(",") : [],
+  );
 
   const {
     data: products,
     isLoading,
     refetch,
     isFetching,
-  } = useProducts(page, searchParam, maxPrice, minPrice, category, brand, sort);
+  } = useProducts(
+    page,
+    searchParam,
+    maxPrice,
+    minPrice,
+    selectedCategories,
+    selectedBrands,
+    sort,
+  );
+
+  const { data: filters } = useProductFilters();
+
+  const categoriesOption: Category[] = filters?.data?.categories || [];
+  const brandsOption: Brand[] = filters?.data?.brands || [];
 
   const queryClient = useQueryClient();
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const categories = useMemo(() => getCategories(), []);
-  const brandsList = useMemo(() => getBrands(), []);
   const setPage = (newPage: number) => {
     navigate({
       search: (prev: Filters) => {
@@ -87,6 +102,31 @@ export function ShopPage() {
       },
     });
   }, 500);
+
+  const setCategoryFilter = useDebouncedCallback((categories: string[]) => {
+    navigate({
+      search: (prev: Filters) => {
+        const next = { ...prev };
+        next.categories =
+          categories.length > 0 ? categories.join(",") : undefined;
+        delete next.page;
+
+        return next;
+      },
+    });
+  }, 300);
+
+  const setBrandFilter = useDebouncedCallback((brands: string[]) => {
+    navigate({
+      search: (prev: Filters) => {
+        const next = { ...prev };
+        next.brands = brands.length > 0 ? brands.join(",") : undefined;
+        delete next.page;
+
+        return next;
+      },
+    });
+  }, 300);
 
   const handleSearchChange = useDebouncedCallback((value: string) => {
     navigate({
@@ -202,17 +242,17 @@ export function ShopPage() {
                 setMaxPriceInput(v);
                 handleMaxPriceChange(v);
               }}
-              categories={categories}
+              categories={categoriesOption}
               selectedCategories={selectedCategories}
               onCategoriesChange={(v) => {
                 setSelectedCategories(v);
-                setPage(1);
+                setCategoryFilter(v);
               }}
-              brands={brandsList}
+              brands={brandsOption}
               selectedBrands={selectedBrands}
               onBrandsChange={(v) => {
                 setSelectedBrands(v);
-                setPage(1);
+                setBrandFilter(v);
               }}
               onClearFilters={clearFilters}
             />
@@ -280,17 +320,17 @@ export function ShopPage() {
           setMaxPriceInput(v);
           handleMaxPriceChange(v);
         }}
-        categories={categories}
+        categories={categoriesOption}
         selectedCategories={selectedCategories}
         onCategoriesChange={(v) => {
           setSelectedCategories(v);
-          setPage(1);
+          setCategoryFilter(v);
         }}
-        brands={brandsList}
+        brands={brandsOption}
         selectedBrands={selectedBrands}
         onBrandsChange={(v) => {
           setSelectedBrands(v);
-          setPage(1);
+          setBrandFilter(v);
         }}
         onClearFilters={clearFilters}
       />

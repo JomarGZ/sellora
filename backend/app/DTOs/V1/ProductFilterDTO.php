@@ -22,8 +22,8 @@ final readonly class ProductFilterDTO
     {
         return new self(
             search: $request->string('search')->trim()->value() ?: null,
-            categories: $request->has('categories') ? \Illuminate\Support\Arr::wrap($request->input('categories')) : null,
-            brands: $request->has('brands') ? \Illuminate\Support\Arr::wrap($request->input('categories')) : null,
+            categories: $request->array('categories') ?: null,
+            brands: $request->array('brands') ?: null,
             minPrice: $request->filled('min_price') ? (float) $request->string('min_price')->value() : null,
             maxPrice: $request->filled('max_price') ? (float) $request->string('max_price')->value() : null,
             sort: $request->string('sort')->value() ?: null,

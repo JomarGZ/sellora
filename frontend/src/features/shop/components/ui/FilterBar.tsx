@@ -1,4 +1,4 @@
-import type { SortOption } from "../../type";
+import type { SortOption } from "../../types";
 import { SearchBox } from "./SearchBox";
 
 interface FilterBarProps {

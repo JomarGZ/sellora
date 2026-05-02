@@ -78,8 +78,9 @@ export const shopRoute = createRoute({
     search: search.search ? String(search.search) : undefined,
     maxPrice: search.maxPrice ? Number(search.maxPrice) : undefined,
     minPrice: search.minPrice ? Number(search.minPrice) : undefined,
-    category: search.category ? String(search.category) : undefined,
-    brand: search.brand ? String(search.brand) : undefined,
+    categories: search.categories ?? undefined,
+    brands: search.brands ?? undefined,
+
     sort: search.sort ? String(search.sort) : undefined,
   }),
   head: () => ({
