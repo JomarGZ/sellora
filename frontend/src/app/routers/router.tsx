@@ -80,6 +80,7 @@ export const shopRoute = createRoute({
     minPrice: search.minPrice ? Number(search.minPrice) : undefined,
     category: search.category ? String(search.category) : undefined,
     brand: search.brand ? String(search.brand) : undefined,
+    sort: search.sort ? String(search.sort) : undefined,
   }),
   head: () => ({
     meta: [{ title: "Sellora | Shop" }],

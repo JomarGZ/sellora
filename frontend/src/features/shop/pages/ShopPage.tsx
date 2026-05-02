@@ -12,7 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getProducts } from "../api/shop.api";
 import { useDebouncedCallback } from "use-debounce";
 import { shopRoute } from "@/app/routers/router";
-type SortOption = "default" | "price-asc" | "price-desc" | "newest" | "rating";
+import type { SortOption } from "../type";
 type Filters = {
   search?: string;
   sort?: SortOption;
@@ -31,6 +31,7 @@ export function ShopPage() {
     maxPrice = undefined,
     category = "",
     brand = "",
+    sort = undefined,
   } = shopRoute.useSearch();
   const navigate = shopRoute.useNavigate();
   const [searchInput, setSearchInput] = useState(searchParam);
@@ -40,14 +41,16 @@ export function ShopPage() {
   const [maxPriceInput, setMaxPriceInput] = useState(
     maxPrice?.toString() ?? "",
   );
+  const [selectedSort, setSelectedSort] = useState<SortOption>(sort);
+
   const {
     data: products,
     isLoading,
     refetch,
     isFetching,
-  } = useProducts(page, searchParam, maxPrice, minPrice, category, brand);
+  } = useProducts(page, searchParam, maxPrice, minPrice, category, brand, sort);
+
   const queryClient = useQueryClient();
-  const [sort, setSort] = useState<SortOption>("default");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -67,6 +70,24 @@ export function ShopPage() {
       },
     });
   };
+
+  const setSort = useDebouncedCallback((sort: SortOption) => {
+    navigate({
+      search: (prev: Filters) => {
+        const next = { ...prev };
+        if (sort) {
+          next.sort = sort;
+        } else {
+          delete next.sort;
+        }
+
+        delete next.page;
+
+        return next;
+      },
+    });
+  }, 500);
+
   const handleSearchChange = useDebouncedCallback((value: string) => {
     navigate({
       search: (prev: Filters) => {
@@ -120,12 +141,12 @@ export function ShopPage() {
   }, 500);
 
   const clearFilters = () => {
-    setSort("default");
+    setSelectedSort("default");
     setSelectedCategories([]);
     setSelectedBrands([]);
-    setMinPriceInput(""); // ← add these
-    setMaxPriceInput(""); // ← add these
-    setSearchInput(""); // ← already handled by the useEffect but be explicit
+    setMinPriceInput("");
+    setMaxPriceInput("");
+    setSearchInput("");
     navigate({
       search: {},
     });
@@ -141,7 +162,9 @@ export function ShopPage() {
   useEffect(() => {
     setSearchInput(searchParam);
   }, [searchParam]);
-
+  useEffect(() => {
+    setSelectedSort(sort);
+  }, [sort]);
   useEffect(() => {
     setMinPriceInput(minPrice?.toString() ?? "");
   }, [minPrice]);
@@ -157,7 +180,7 @@ export function ShopPage() {
           setSearchInput(value);
           handleSearchChange(value);
         }}
-        sortValue={sort}
+        sortValue={selectedSort}
         onSortChange={setSort}
         rangeStart={products?.meta.from ?? 0}
         rangeEnd={products?.meta.to ?? 0}
@@ -169,7 +192,7 @@ export function ShopPage() {
         <div className="flex gap-8">
           <div className="hidden lg:block">
             <SidebarFilters
-              minPrice={minPriceInput} // pass local state, not URL value
+              minPrice={minPriceInput}
               maxPrice={maxPriceInput}
               onMinPriceChange={(v) => {
                 setMinPriceInput(v);

@@ -8,6 +8,7 @@ export async function getProducts(
   minPrice?: number,
   category?: string,
   brand?: string,
+  sort?: string,
 ): Promise<ProductResponse> {
   const { data } = await client.get("/v1/products", {
     params: {
@@ -17,6 +18,7 @@ export async function getProducts(
       min_price: minPrice || undefined,
       category: category || undefined,
       brand: brand || undefined,
+      sort: sort || undefined,
     },
   });
   return data;

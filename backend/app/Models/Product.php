@@ -197,30 +197,32 @@ final class Product extends Model
      * @return Builder<Product>
      */
     #[Scope]
-protected function sortBy(Builder $query, ?string $sort): Builder
-{
-    $query->select('products.*');
+    protected function sortBy(Builder $query, ?string $sort): Builder
+    {
+        $query->select('products.*');
 
-    return match ($sort) {
+        return match ($sort) {
 
-        'price_asc' => $query
-            ->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
-            ->groupBy('products.id')
-            ->orderByRaw('MIN(product_items.price) ASC')
-            ->orderBy('products.id'),
+            'default' => $query
+                ->OrderBy('products.id'),
+            'price_asc' => $query
+                ->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
+                ->groupBy('products.id')
+                ->orderByRaw('MIN(product_items.price) ASC')
+                ->orderBy('products.id'),
 
-        'price_desc' => $query
-            ->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
-            ->groupBy('products.id')
-            ->orderByRaw('MIN(product_items.price) DESC')
-            ->orderBy('products.id'),
+            'price_desc' => $query
+                ->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
+                ->groupBy('products.id')
+                ->orderByRaw('MIN(product_items.price) DESC')
+                ->orderBy('products.id'),
 
-        'newest' => $query
-            ->orderByDesc('products.created_at')
-            ->orderBy('products.id'),
+            'newest' => $query
+                ->orderByDesc('products.created_at')
+                ->orderBy('products.id'),
 
-        default => $query
-            ->orderBy('products.id'), // ❗ NEVER random in pagination
-    };
-}
+            default => $query
+                ->orderBy('products.id'),
+        };
+    }
 }
