@@ -105,7 +105,7 @@ final class ProductRepository extends BaseRepository
                 }
             ])
             ->orderByDesc('sold_count')
-            ->paginate(1);
+            ->paginate($filters->perPage);
     }
 
     public function findBySlug(string $slug): ?Product
