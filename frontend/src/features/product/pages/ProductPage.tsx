@@ -21,6 +21,7 @@ import { PurchaseActions } from "@/features/product/components/sections/Purchase
 import { ProductReviews } from "@/features/product/components/sections/ProductReviews";
 import { useSearch } from "@tanstack/react-router";
 import type { ProductDetail, ProductItem } from "../types";
+import { useProductShow } from "../api/product.queries";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
@@ -54,6 +55,8 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 }
 
 function ProductPageSkeleton() {
+  const { data: product } = useProductShow("classic-crewneck-tee");
+  console.log("ProductPageSkeleton product:", product);
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">

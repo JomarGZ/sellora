@@ -1,3 +1,5 @@
+import type { Brand, Category, Product } from "@/shared/types";
+
 export interface ProductImage {
   id: number;
   imageUrl: string;
@@ -5,13 +7,18 @@ export interface ProductImage {
   displayOrder: number;
 }
 
+export interface ProductItemImage {
+  id: number;
+  url: string;
+}
+
 export interface ProductItem {
   id: number;
   sku: string;
   price: number;
-  originalPrice: number | null;
-  qtyInStock: number;
-  images: ProductImage[];
+  in_stock: boolean;
+  qty_in_stock: number;
+  images: ProductItemImage[];
   attributeValues: AttributeValue[];
 }
 
@@ -51,6 +58,13 @@ export interface AttributeGroup {
 export interface AttributeValueSimple {
   id: number;
   value: string;
+  hex_color: string;
+  label: string;
+  swatch: {
+    type: string;
+    value: string;
+  };
+  image: string;
 }
 
 export interface ReviewsResponse {
@@ -59,14 +73,12 @@ export interface ReviewsResponse {
   totalReviews: number;
 }
 
-export interface Brand {
-  id: number;
-  name: string;
-  logo: string | null;
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  parentId: number | null;
+export interface ProductDetails extends Product {
+  attributes: AttributeGroup[];
+  images: ProductImage[];
+  price_range: {
+    min: string;
+    max: string;
+  };
+  variants: ProductItem[];
 }

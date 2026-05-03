@@ -24,6 +24,8 @@ final class ProductDetailResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'is_new' => $this->isNew(),
+            'is_bestseller' => ($this->sold_count ?? 0) >= 50,
             'description' => $this->description,
             'price_range' => [
                 'min' => $this->product_items_min_price,
