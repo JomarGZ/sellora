@@ -4,6 +4,36 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  links: PaginationLinks;
+  meta: PaginationMeta;
+}
+
+export interface PaginationLinks {
+  first: string | null;
+  last: string | null;
+  prev: string | null;
+  next: string | null;
+}
+
+export interface PaginationMeta {
+  current_page: number;
+  from: number | null;
+  last_page: number;
+  links: PaginationLink[];
+  path: string;
+  per_page: number;
+  to: number | null;
+  total: number;
+}
+
+export interface PaginationLink {
+  url: string | null;
+  label: string;
+  active: boolean;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -97,5 +127,8 @@ export interface Category {
   name: string;
   parentId: number | null;
 }
+
+export type ProductResponse = ApiResponse<Product[]> &
+  PaginatedResponse<Product>;
 
 export * from "./auth";

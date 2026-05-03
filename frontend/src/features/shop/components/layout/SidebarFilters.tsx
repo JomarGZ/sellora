@@ -1,16 +1,17 @@
 import { PriceRangeFilter } from "../filters/PriceRangeFilter";
 import { CategoryFilter } from "../filters/CategoryFilter";
 import { BrandFilter } from "../filters/BrandFilter";
+import type { Brand, Category } from "../../types";
 
 interface SidebarFiltersProps {
   minPrice: string;
   maxPrice: string;
   onMinPriceChange: (v: string) => void;
   onMaxPriceChange: (v: string) => void;
-  categories: string[];
+  categories: Category[];
   selectedCategories: string[];
   onCategoriesChange: (v: string[]) => void;
-  brands: string[];
+  brands: Brand[];
   selectedBrands: string[];
   onBrandsChange: (v: string[]) => void;
   onClearFilters: () => void;
@@ -29,14 +30,15 @@ export function SidebarFilters({
   onBrandsChange,
   onClearFilters,
 }: SidebarFiltersProps) {
+  console.log(selectedCategories);
   const hasActiveFilters =
     minPrice !== "" ||
     maxPrice !== "" ||
-    selectedCategories.length > 0 ||
-    selectedBrands.length > 0;
+    selectedCategories?.length > 0 ||
+    selectedBrands?.length > 0;
 
   return (
-    <aside className="flex w-full flex-col gap-6 lg:w-64 lg:flex-shrink-0">
+    <aside className="flex w-full flex-col gap-6 lg:w-64 lg:shrink-0">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-gray-900">Filters</h2>
         {hasActiveFilters && (

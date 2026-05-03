@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 
@@ -145,14 +144,14 @@ final class Product extends Model
      * @return Builder<Product>
      */
     #[Scope]
-    protected function filterByCategory(Builder $query, ?string $categorySlug): Builder
+    protected function filterByCategory(Builder $query, ?array $categorySlugs): Builder
     {
         return $query->when(
-            $categorySlug,
+            $categorySlugs,
             fn (Builder $q) => $q->whereHas(
                 'category',
-                fn (Builder $q) => $q->where('slug', $categorySlug)
-                    ->orWhereHas('parent', fn (Builder $q) => $q->where('slug', $categorySlug))
+                fn (Builder $q) => $q->whereIn('slug', $categorySlugs)
+                    ->orWhereHas('parent', fn (Builder $q) => $q->whereIn('slug', $categorySlugs))
             )
         );
     }
@@ -162,13 +161,13 @@ final class Product extends Model
      * @return Builder<Product>
      */
     #[Scope]
-    protected function filterByBrand(Builder $query, ?string $brandSlug): Builder
+    protected function filterByBrand(Builder $query, ?array $brandSlugs): Builder
     {
         return $query->when(
-            $brandSlug,
+            $brandSlugs,
             fn (Builder $q) => $q->whereHas(
                 'brand',
-                fn (Builder $q) => $q->where('slug', $brandSlug)
+                fn (Builder $q) => $q->whereIn('slug', $brandSlugs)
             )
         );
     }
@@ -199,20 +198,30 @@ final class Product extends Model
     #[Scope]
     protected function sortBy(Builder $query, ?string $sort): Builder
     {
+        $query->select('products.*');
+
         return match ($sort) {
-            'price_asc' => $query->select('products.*')
+
+            'default' => $query
+                ->OrderBy('products.id'),
+            'price_asc' => $query
                 ->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
                 ->groupBy('products.id')
-                ->orderBy(DB::raw('MIN(product_items.price)'), 'asc'),
+                ->orderByRaw('MIN(product_items.price) ASC')
+                ->orderBy('products.id'),
 
-            'price_desc' => $query->select('products.*')
+            'price_desc' => $query
                 ->leftJoin('product_items', 'products.id', '=', 'product_items.product_id')
                 ->groupBy('products.id')
-                ->orderBy(DB::raw('MIN(product_items.price)'), 'desc'),
+                ->orderByRaw('MIN(product_items.price) DESC')
+                ->orderBy('products.id'),
 
-            'newest' => $query->latest(),
+            'newest' => $query
+                ->orderByDesc('products.created_at')
+                ->orderBy('products.id'),
 
-            default => $query->inRandomOrder(),
+            default => $query
+                ->orderBy('products.id'),
         };
     }
 }

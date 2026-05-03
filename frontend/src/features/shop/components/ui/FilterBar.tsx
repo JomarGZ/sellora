@@ -1,6 +1,5 @@
+import type { SortOption } from "../../types";
 import { SearchBox } from "./SearchBox";
-
-type SortOption = "default" | "price-asc" | "price-desc" | "newest" | "rating";
 
 interface FilterBarProps {
   searchValue: string;
@@ -15,8 +14,8 @@ interface FilterBarProps {
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: "default", label: "Default" },
-  { value: "price-asc", label: "Price: Low to High" },
-  { value: "price-desc", label: "Price: High to Low" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
   { value: "newest", label: "Newest" },
   { value: "rating", label: "Rating" },
 ];
@@ -65,7 +64,7 @@ export function FilterBar({
             )}
             <SearchBox value={searchValue} onChange={onSearchChange} />
           </div>
-          <div className="flex flex-shrink-0 flex-wrap items-center gap-3">
+          <div className="flex shrink-0 flex-wrap items-center gap-3">
             <select
               value={sortValue}
               onChange={(e) => onSortChange(e.target.value as SortOption)}

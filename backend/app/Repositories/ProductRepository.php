@@ -90,10 +90,21 @@ final class ProductRepository extends BaseRepository
             ])
             ->with(['brand', 'category', 'primaryImage'])
             ->search($filters->search)
-            ->filterByCategory($filters->category)
-            ->filterByBrand($filters->brand)
+            ->filterByCategory($filters->categories)
+            ->filterByBrand($filters->brands)
             ->filterByPriceRange($filters->minPrice, $filters->maxPrice)
             ->sortBy($filters->sort)
+            ->withMin('productItems', 'price')
+            ->withAvg('productItemReviews as avg_rating', 'rating')
+            ->withCount('productItemReviews as reviews_count')
+            ->withCount([
+                'orderItems as sold_count' => function ($query) {
+                    $query->whereHas('order', function ($q) {
+                        $q->where('status', OrderStatus::Completed);
+                    });
+                }
+            ])
+            ->orderByDesc('sold_count')
             ->paginate($filters->perPage);
     }
 

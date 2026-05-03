@@ -41,7 +41,7 @@ Route::name('api.v1.')->group(function () {
         // Products
         Route::prefix('products')->name('products.')->group(function () {
             Route::get('/', [ProductController::class, 'index'])->name('index');
-            Route::get('/filters', [ProductFilterController::class, 'index'])->name('filters');
+            Route::get('/filters', [ProductFilterController::class, 'getFilterOptions'])->name('filters');
             Route::get('/new-arrivals', [ProductController::class, 'newArrivals'])->name('new-arrivals');
             Route::get('/best-sellers', [ProductController::class, 'bestSellers'])->name('best-sellers');
             Route::get('/{slug}', [ProductController::class, 'show'])->name('show');
