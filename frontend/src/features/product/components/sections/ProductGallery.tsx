@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
-import type { ProductImage } from "../../types";
+import type { ProductImage, ProductItemImage } from "../../types";
 
 interface ProductGalleryProps {
-  images: ProductImage[];
+  images: ProductImage[] | ProductItemImage[];
   productName: string;
 }
 
@@ -33,8 +33,8 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
         <AnimatePresence mode="wait">
           <motion.img
             key={activeImage.id}
-            src={activeImage.imageUrl}
-            alt={activeImage.altText || productName}
+            src={activeImage.url}
+            alt={productName}
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
@@ -59,7 +59,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
               )}
             >
               <img
-                src={img.imageUrl}
+                src={img.url}
                 alt={`Thumbnail ${idx + 1}`}
                 className="w-full h-full object-cover"
               />

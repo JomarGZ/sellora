@@ -28,9 +28,16 @@ final class ProductItemResource extends JsonResource
             'qty_in_stock' => $this->qty_in_stock,
             'in_stock' => $this->qty_in_stock > 0,
             'product' => ProductResource::make($this->whenLoaded('product')),
-            'attribute_value_ids' => $this->whenLoaded(
+            'attribute_values' => $this->whenLoaded(
                 'attributeValues',
-                fn () => $this->attributeValues->pluck('id')
+                fn () => $this->attributeValues->map(function ($value) {
+                    return [
+                        'attribute_id' => $value->attribute_id,
+                        'attribute_name' => $value->attribute->name ?? null,
+                        'value_id' => $value->id,
+                        'value' => $value->value,
+                    ];
+                })
             ),
             'images' => $this->whenLoaded('images', function () {
                 return $this->images->map(fn ($image): array => [

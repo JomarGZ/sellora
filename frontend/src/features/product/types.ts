@@ -1,10 +1,9 @@
-import type { Brand, Category, Product } from "@/shared/types";
+import type { ApiResponse, Brand, Category, Product } from "@/shared/types";
 
 export interface ProductImage {
   id: number;
-  imageUrl: string;
-  altText: string | null;
-  displayOrder: number;
+  url: string;
+  is_primary: boolean;
 }
 
 export interface ProductItemImage {
@@ -19,26 +18,14 @@ export interface ProductItem {
   in_stock: boolean;
   qty_in_stock: number;
   images: ProductItemImage[];
-  attributeValues: AttributeValue[];
+  attribute_values: AttributeValue[];
 }
 
 export interface AttributeValue {
-  attributeId: number;
-  attributeName: string;
-  valueId: number;
+  attribute_id: number;
+  attribute_name: string;
+  value_id: number;
   value: string;
-}
-
-export interface ProductDetail {
-  id: number;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  brand: Brand;
-  categories: Category[];
-  images: ProductImage[];
-  attributes: AttributeGroup[];
-  ordersCount: number;
 }
 
 export interface Review {
@@ -82,3 +69,5 @@ export interface ProductDetails extends Product {
   };
   variants: ProductItem[];
 }
+
+export type ProductDetailResponse = ApiResponse<ProductDetails>;

@@ -26,8 +26,8 @@ export function ProductCard({
     <article className="group relative flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative flex flex-col flex-1">
         <Link
-          to="/product/$productId"
-          params={{ productId: product.id }}
+          to="/product/$slug"
+          params={{ slug: product.slug }}
           className="flex flex-col flex-1"
         >
           <div className="relative aspect-square overflow-hidden bg-gray-50">
