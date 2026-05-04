@@ -89,6 +89,7 @@ export function ProductOptions({
                   return (
                     <button
                       key={val.id}
+                      disabled={!isAvailable && !isSelected}
                       onClick={() => onAttributeSelect(group.name, val.value)}
                       title={`${val.value}${!isAvailable ? " (Out of Stock)" : ""}`}
                       className={cn(

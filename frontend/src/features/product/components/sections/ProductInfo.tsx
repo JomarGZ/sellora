@@ -30,10 +30,18 @@ export function ProductInfo({
       : `${formatPrice(minPrice)} – ${formatPrice(maxPrice)}`;
 
   const originalPrice = 1231;
+  const hasStock = selectedItem
+    ? selectedItem.in_stock
+    : items.some((i) => i.in_stock);
 
-  const isOutOfStock = selectedItem
-    ? selectedItem.qty_in_stock === 0
-    : items.every((i) => i.qty_in_stock === 0);
+  const isOutOfStock = !hasStock;
+  console.log("selected", selectedItem);
+  console.log("items", items);
+  console.log(
+    "is out of stock",
+    items.every((i) => !i.in_stock),
+  );
+  console.log("out of stock", isOutOfStock);
 
   return (
     <div className="flex flex-col gap-6">
@@ -91,7 +99,7 @@ export function ProductInfo({
               Out of Stock
             </Badge>
           )}
-          {product.is_new && !!isOutOfStock && (
+          {product.is_new && !isOutOfStock && (
             <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none font-semibold uppercase tracking-wider text-xs px-2 py-0.5 rounded-md shadow-none">
               New Arrival
             </Badge>

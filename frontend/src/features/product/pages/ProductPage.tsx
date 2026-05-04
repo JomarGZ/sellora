@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ErrorBoundary,
   getErrorMessage,
@@ -87,6 +87,7 @@ function ProductPageContent({
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, string>
   >({});
+
   const [selectedItem, setSelectedItem] = useState<ProductItem | null>(null);
 
   if (isLoading) return <ProductPageSkeleton />;
@@ -95,6 +96,32 @@ function ProductPageContent({
     throw new Error(`Product not found.`);
   }
   const productData = product?.data;
+
+  const handleAttributeChange = (attributeName: string, value: string) => {
+    console.log("trigger here");
+    const updatedAttributes = {
+      ...selectedAttributes,
+      [attributeName]: value,
+    };
+    setSelectedAttributes(updatedAttributes);
+
+    const hasSelectedAllAttributes = productData.attributes.every(
+      (attr) => updatedAttributes[attr.name],
+    );
+
+    if (!hasSelectedAllAttributes) {
+      setSelectedItem(null);
+      return;
+    }
+
+    const matchingItem = productData.variants.find((item) =>
+      item.attribute_values.every(
+        (av) => updatedAttributes[av.attribute_name] === av.value,
+      ),
+    );
+    console.log(updatedAttributes, matchingItem);
+    setSelectedItem(matchingItem || null);
+  };
 
   const galleryImages = selectedItem?.images?.length
     ? selectedItem.images
@@ -129,7 +156,7 @@ function ProductPageContent({
                 product={productData}
                 items={productData.variants}
                 selectedAttributes={selectedAttributes}
-                onAttributeSelect={() => {}}
+                onAttributeSelect={handleAttributeChange}
               />
             </div>
 
@@ -302,7 +329,6 @@ function ProductPageContent({
 export default function ProductPage() {
   const { slug } = useParams({ from: "/product/$slug" });
   const { data: product, isLoading, error } = useProductShow(slug);
-  console.log("ProductPage render", product);
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
