@@ -22,6 +22,7 @@ import { ProductReviews } from "@/features/product/components/sections/ProductRe
 import { useParams } from "@tanstack/react-router";
 import type { ProductDetailResponse, ProductItem } from "../types";
 import { useProductShow } from "../api/product.queries";
+import { useAuth } from "@/providers/AuthProvider";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
@@ -81,9 +82,11 @@ function ProductPageSkeleton() {
 function ProductPageContent({
   product,
   isLoading,
+  isLoggedIn,
 }: {
   product: ProductDetailResponse | undefined;
   isLoading: boolean;
+  isLoggedIn: boolean;
 }) {
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, string>
@@ -161,11 +164,13 @@ function ProductPageContent({
               />
             </div>
 
-            <PurchaseActions
-              productId={productData.id}
-              selectedItem={selectedItem}
-              hasAttributes={hasAttributes}
-            />
+            {isLoggedIn && (
+              <PurchaseActions
+                productId={productData.id}
+                selectedItem={selectedItem}
+                hasAttributes={hasAttributes}
+              />
+            )}
 
             {/* Trust Badges */}
             <div className="mt-8 grid grid-cols-2 gap-4 pt-6 border-t border-border/50 text-sm text-muted-foreground">
@@ -336,13 +341,18 @@ function ProductPageContent({
 
 export default function ProductPage() {
   const { slug } = useParams({ from: "/product/$slug" });
+  const { user } = useAuth();
   const { data: product, isLoading, error } = useProductShow(slug);
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onReset={() => window.location.reload()}
     >
-      <ProductPageContent product={product} isLoading={isLoading} />
+      <ProductPageContent
+        product={product}
+        isLoggedIn={!!user}
+        isLoading={isLoading}
+      />
     </ErrorBoundary>
   );
 }
