@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ErrorBoundary,
   getErrorMessage,
@@ -6,7 +6,6 @@ import {
 } from "react-error-boundary";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { MOCK_PRODUCTS, MOCK_PRODUCT_ITEMS } from "@/data/mock-data";
 import { Button } from "@/shared/components/ui/button";
 import {
   Tabs,
@@ -14,13 +13,16 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
+import DOMPurify from "dompurify";
 import { ProductGallery } from "@/features/product/components/sections/ProductGallery";
 import { ProductInfo } from "@/features/product/components/sections/ProductInfo";
 import { ProductOptions } from "@/features/product/components/sections/ProductOptions";
 import { PurchaseActions } from "@/features/product/components/sections/PurchaseActions";
 import { ProductReviews } from "@/features/product/components/sections/ProductReviews";
-import { useSearch } from "@tanstack/react-router";
-import type { ProductDetail, ProductItem } from "../types";
+import { useParams } from "@tanstack/react-router";
+import type { ProductDetailResponse, ProductItem } from "../types";
+import { useProductShow } from "../api/product.queries";
+import { useAuth } from "@/providers/AuthProvider";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
@@ -77,67 +79,58 @@ function ProductPageSkeleton() {
   );
 }
 
-function ProductPageContent({ productId }: { productId: number }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [product, setProduct] = useState<ProductDetail | null>(null);
-  const [items, setItems] = useState<ProductItem[]>([]);
+function ProductPageContent({
+  product,
+  isLoading,
+  isLoggedIn,
+}: {
+  product: ProductDetailResponse | undefined;
+  isLoading: boolean;
+  isLoggedIn: boolean;
+}) {
   const [selectedAttributes, setSelectedAttributes] = useState<
     Record<string, string>
   >({});
+
   const [selectedItem, setSelectedItem] = useState<ProductItem | null>(null);
-
-  // Simulate async data fetch — swap this block for real API calls when ready
-  useEffect(() => {
-    setIsLoading(true);
-    setSelectedAttributes({});
-    setSelectedItem(null);
-
-    const timer = setTimeout(() => {
-      const p = MOCK_PRODUCTS[productId] ?? null;
-      const its = MOCK_PRODUCT_ITEMS[productId] ?? [];
-      setProduct(p);
-      setItems(its);
-      setIsLoading(false);
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, [productId]);
-
-  // Auto-select first available SKU once items load
-  useEffect(() => {
-    if (items.length > 0 && Object.keys(selectedAttributes).length === 0) {
-      const defaultItem = items.find((i) => i.qtyInStock > 0) ?? items[0];
-      const initialAttrs: Record<string, string> = {};
-      defaultItem.attributeValues.forEach((av) => {
-        initialAttrs[av.attributeName] = av.value;
-      });
-      setSelectedAttributes(initialAttrs);
-      setSelectedItem(defaultItem);
-    }
-  }, [items]);
-
-  const handleAttributeSelect = (attributeName: string, value: string) => {
-    const newAttributes = { ...selectedAttributes, [attributeName]: value };
-    setSelectedAttributes(newAttributes);
-
-    const matchingItem = items.find((item) =>
-      item.attributeValues.every(
-        (av) => newAttributes[av.attributeName] === av.value,
-      ),
-    );
-    setSelectedItem(matchingItem ?? null);
-  };
 
   if (isLoading) return <ProductPageSkeleton />;
 
   if (!product) {
-    throw new Error(`Product #${productId} not found.`);
+    throw new Error(`Product not found.`);
   }
+  const productData = product?.data;
+
+  const handleAttributeChange = (attributeName: string, value: string) => {
+    console.log("trigger here");
+    const updatedAttributes = {
+      ...selectedAttributes,
+      [attributeName]: value,
+    };
+    setSelectedAttributes(updatedAttributes);
+
+    const hasSelectedAllAttributes = productData.attributes.every(
+      (attr) => updatedAttributes[attr.name],
+    );
+
+    if (!hasSelectedAllAttributes) {
+      setSelectedItem(null);
+      return;
+    }
+
+    const matchingItem = productData.variants.find((item) =>
+      item.attribute_values.every(
+        (av) => updatedAttributes[av.attribute_name] === av.value,
+      ),
+    );
+    console.log(updatedAttributes, matchingItem);
+    setSelectedItem(matchingItem || null);
+  };
 
   const galleryImages = selectedItem?.images?.length
     ? selectedItem.images
-    : product.images;
-  const hasAttributes = product.attributes.length > 0;
+    : productData.images;
+  const hasAttributes = productData.attributes.length > 0;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -149,7 +142,7 @@ function ProductPageContent({ productId }: { productId: number }) {
             <div className="lg:sticky lg:top-8">
               <ProductGallery
                 images={galleryImages}
-                productName={product.name}
+                productName={productData.name}
               />
             </div>
           </div>
@@ -157,25 +150,27 @@ function ProductPageContent({ productId }: { productId: number }) {
           {/* Right: Info + Options + Actions */}
           <div className="w-full flex flex-col pt-2 lg:pt-4">
             <ProductInfo
-              product={product}
+              product={productData}
               selectedItem={selectedItem}
-              items={items}
+              items={productData.variants}
             />
 
             <div className="mt-8">
               <ProductOptions
-                product={product}
-                items={items}
+                product={productData}
+                items={productData.variants}
                 selectedAttributes={selectedAttributes}
-                onAttributeSelect={handleAttributeSelect}
+                onAttributeSelect={handleAttributeChange}
               />
             </div>
 
-            <PurchaseActions
-              productId={product.id}
-              selectedItem={selectedItem}
-              hasAttributes={hasAttributes}
-            />
+            {isLoggedIn && (
+              <PurchaseActions
+                productId={productData.id}
+                selectedItem={selectedItem}
+                hasAttributes={hasAttributes}
+              />
+            )}
 
             {/* Trust Badges */}
             <div className="mt-8 grid grid-cols-2 gap-4 pt-6 border-t border-border/50 text-sm text-muted-foreground">
@@ -275,17 +270,24 @@ function ProductPageContent({ productId }: { productId: number }) {
               value="description"
               className="focus-visible:outline-none focus-visible:ring-0"
             >
-              <div className="prose prose-slate max-w-4xl text-muted-foreground leading-relaxed">
-                <p>
-                  {product.description ??
-                    "No description available for this product."}
+              {productData.description ? (
+                <div
+                  className="prose prose-sm sm:prose-base prose-slate max-w-none text-muted-foreground leading-relaxed"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(productData.description),
+                  }}
+                />
+              ) : (
+                <p className="text-muted-foreground">
+                  No description available for this product.
                 </p>
-                <p className="mt-4">
-                  Carefully crafted with premium materials and designed for
-                  everyday use. This product embodies our commitment to quality
-                  and sustainable practices.
-                </p>
-              </div>
+              )}
+
+              <p className="mt-4">
+                Carefully crafted with premium materials and designed for
+                everyday use. This product embodies our commitment to quality
+                and sustainable practices.
+              </p>
             </TabsContent>
 
             <TabsContent
@@ -297,7 +299,7 @@ function ProductPageContent({ productId }: { productId: number }) {
                   Product Specifications
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
-                  {product.attributes.map((attr) => (
+                  {productData.attributes.map((attr) => (
                     <div
                       key={attr.id}
                       className="flex flex-col py-3 border-b border-border/50"
@@ -315,7 +317,7 @@ function ProductPageContent({ productId }: { productId: number }) {
                       Brand
                     </span>
                     <span className="text-muted-foreground mt-1">
-                      {product.brand.name}
+                      {productData.brand.name}
                     </span>
                   </div>
                 </div>
@@ -327,7 +329,7 @@ function ProductPageContent({ productId }: { productId: number }) {
               className="focus-visible:outline-none focus-visible:ring-0"
             >
               <div className="max-w-5xl">
-                <ProductReviews productId={product.id} />
+                <ProductReviews productId={productData.id} />
               </div>
             </TabsContent>
           </Tabs>
@@ -338,17 +340,19 @@ function ProductPageContent({ productId }: { productId: number }) {
 }
 
 export default function ProductPage() {
-  const searchString = useSearch({ from: "/product/$productId" });
-  const params = new URLSearchParams(searchString);
-  const productIdStr = params.get("productId");
-  const productId = productIdStr ? parseInt(productIdStr, 10) : 1;
-
+  const { slug } = useParams({ from: "/product/$slug" });
+  const { user } = useAuth();
+  const { data: product, isLoading, error } = useProductShow(slug);
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}
       onReset={() => window.location.reload()}
     >
-      <ProductPageContent productId={productId} />
+      <ProductPageContent
+        product={product}
+        isLoggedIn={!!user}
+        isLoading={isLoading}
+      />
     </ErrorBoundary>
   );
 }

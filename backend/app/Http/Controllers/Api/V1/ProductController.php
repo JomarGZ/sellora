@@ -10,6 +10,7 @@ use App\Http\Requests\Api\V1\ProductFilterRequest;
 use App\Http\Resources\V1\AttributeResource;
 use App\Http\Resources\V1\ProductDetailResource;
 use App\Http\Resources\V1\ProductResource;
+use App\Models\Product;
 use App\Services\ProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,12 +31,23 @@ final class ProductController extends ApiController
         return ProductResource::collection($products)->additional(['message' => 'Paginated products retrieved successfully.', 'success' => true]);
     }
 
-    public function show(string $slug): JsonResponse
+    public function show(Product $product): JsonResponse
     {
-        $product = $this->service->findBySlug($slug);
-        if (is_null($product)) {
-            return $this->notFound('Product not found.');
-        }
+        $product->load([
+            'images:id,product_id,image_path,is_primary',
+            'brand:id,name,slug,logo',
+            'category:id,name,slug',
+            'productItems:id,product_id,sku,price,qty_in_stock',
+            'productItems.images:id,product_item_id,image_path',
+            'productItems.attributeValues:id,attribute_id,value,hex_color,image',
+            'productItems.attributeValues.attribute:id,name',
+        ]);
+
+        $product->loadAvg('productItemReviews as avg_rating', 'rating')
+            ->loadCount('productItemReviews as reviews_count')
+            ->loadMin('productItems', 'price')
+            ->loadMax('productItems', 'price')
+            ->loadSum('productItems', 'qty_in_stock');
 
         $attributes = $this->service->resolveAttributes($product);
 

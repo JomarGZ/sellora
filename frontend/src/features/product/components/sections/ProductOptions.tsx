@@ -1,8 +1,8 @@
 import { cn } from "@/shared/lib/utils";
-import type { ProductDetail, ProductItem } from "../../types";
+import type { ProductDetails, ProductItem } from "../../types";
 
 interface ProductOptionsProps {
-  product: ProductDetail;
+  product: ProductDetails;
   items: ProductItem[];
   selectedAttributes: Record<string, string>;
   onAttributeSelect: (attributeName: string, value: string) => void;
@@ -42,51 +42,43 @@ export function ProductOptions({
                 const isSelected = selectedAttributes[group.name] === val.value;
 
                 const isAvailable = items.some((item) => {
-                  const hasThisValue = item.attributeValues.some(
+                  const hasThisValue = item.attribute_values.some(
                     (av) =>
-                      av.attributeName === group.name && av.value === val.value,
+                      av.attribute_name === group.name &&
+                      av.value === val.value,
                   );
                   if (!hasThisValue) return false;
                   return (
                     Object.entries(selectedAttributes).every(
                       ([key, selectedVal]) => {
                         if (key === group.name) return true;
-                        return item.attributeValues.some(
+                        return item.attribute_values.some(
                           (av) =>
-                            av.attributeName === key &&
+                            av.attribute_name === key &&
                             av.value === selectedVal,
                         );
                       },
-                    ) && item.qtyInStock > 0
+                    ) && item.qty_in_stock > 0
                   );
                 });
 
                 const exists = items.some((item) =>
-                  item.attributeValues.some(
+                  item.attribute_values.some(
                     (av) =>
-                      av.attributeName === group.name && av.value === val.value,
+                      av.attribute_name === group.name &&
+                      av.value === val.value,
                   ),
                 );
 
                 if (!exists) return null;
 
                 if (isColor) {
-                  const colorMap: Record<string, string> = {
-                    Black: "#111827",
-                    White: "#f9fafb",
-                    Red: "#ef4444",
-                    Blue: "#3b82f6",
-                    Green: "#10b981",
-                    Navy: "#1e3a8a",
-                    Gray: "#6b7280",
-                    Silver: "#9ca3af",
-                  };
-                  const namePart = val.value.split("/")[0].trim();
-                  const hex = colorMap[namePart] ?? "#e5e7eb";
+                  const hex = val.hex_color ?? val.swatch?.value ?? "#e5e7eb";
 
                   return (
                     <button
                       key={val.id}
+                      disabled={!isAvailable && !isSelected}
                       onClick={() => onAttributeSelect(group.name, val.value)}
                       title={`${val.value}${!isAvailable ? " (Out of Stock)" : ""}`}
                       className={cn(

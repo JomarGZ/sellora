@@ -90,7 +90,7 @@ export const shopRoute = createRoute({
 
 const productRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/product/$productId",
+  path: "/product/$slug",
   component: ProductPage,
   head: () => ({
     meta: [{ title: "Sellora | product" }],

@@ -18,11 +18,6 @@ final readonly class ProductService
         private ProductRepository $repository
     ) {}
 
-    public function findBySlug(string $slug): ?Product
-    {
-        return $this->repository->findBySlug($slug);
-    }
-
     /**
      * @param  array<int, string>  $columns
      * @param  array<int, string>|string  $relations

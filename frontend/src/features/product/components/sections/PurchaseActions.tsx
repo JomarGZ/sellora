@@ -19,7 +19,7 @@ export function PurchaseActions({
   const [wishlisted, setWishlisted] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
 
-  const isOutOfStock = selectedItem ? selectedItem.qtyInStock === 0 : false;
+  const isOutOfStock = selectedItem ? selectedItem.qty_in_stock === 0 : false;
   const isSelectionIncomplete = hasAttributes && !selectedItem;
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ export function PurchaseActions({
     <div className="flex flex-col gap-4 mt-4 pt-6 border-t border-border/60">
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Quantity Selector */}
-        <div className="flex items-center h-14 bg-muted/50 rounded-xl border border-border/80 px-2 flex-shrink-0">
+        <div className="flex items-center h-14 bg-muted/50 rounded-xl border border-border/80 px-2 shrink-0">
           <button
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
             disabled={quantity <= 1 || isOutOfStock}
@@ -84,12 +84,14 @@ export function PurchaseActions({
           <button
             onClick={() =>
               setQuantity((q) =>
-                selectedItem ? Math.min(selectedItem.qtyInStock, q + 1) : q + 1,
+                selectedItem
+                  ? Math.min(selectedItem.qty_in_stock, q + 1)
+                  : q + 1,
               )
             }
             disabled={
               isOutOfStock ||
-              (selectedItem !== null && quantity >= selectedItem.qtyInStock)
+              (selectedItem !== null && quantity >= selectedItem.qty_in_stock)
             }
             className="w-10 h-10 rounded-lg flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background disabled:opacity-40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
@@ -109,9 +111,7 @@ export function PurchaseActions({
             ? "Adding..."
             : isOutOfStock
               ? "Out of Stock"
-              : isSelectionIncomplete
-                ? "Select Options"
-                : "Add to Cart"}
+              : "Add to Cart"}
         </Button>
         <Button
           size="lg"
@@ -121,12 +121,10 @@ export function PurchaseActions({
         >
           <ShoppingBag className="w-5 h-5 mr-2" />
           {addingToCart
-            ? "Checking out..."
+            ? "Buying out..."
             : isOutOfStock
               ? "Out of Stock"
-              : isSelectionIncomplete
-                ? "Select Options"
-                : "Checkout"}
+              : "Buy Now"}
         </Button>
 
         {/* Wishlist */}
@@ -151,10 +149,10 @@ export function PurchaseActions({
       </div>
 
       {selectedItem &&
-        selectedItem.qtyInStock > 0 &&
-        selectedItem.qtyInStock <= 5 && (
+        selectedItem.qty_in_stock > 0 &&
+        selectedItem.qty_in_stock <= 5 && (
           <p className="text-sm text-amber-600 font-medium">
-            Hurry! Only {selectedItem.qtyInStock} left in stock.
+            Hurry! Only {selectedItem.qty_in_stock} left in stock.
           </p>
         )}
     </div>

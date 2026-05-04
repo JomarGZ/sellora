@@ -30,7 +30,6 @@ export function SidebarFilters({
   onBrandsChange,
   onClearFilters,
 }: SidebarFiltersProps) {
-  console.log(selectedCategories);
   const hasActiveFilters =
     minPrice !== "" ||
     maxPrice !== "" ||

@@ -1,11 +1,11 @@
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
-import { subDays } from "date-fns";
 import { ChevronRight } from "lucide-react";
-import type { ProductDetail, ProductItem } from "../../types";
+import type { ProductDetails, ProductItem } from "../../types";
+import DOMPurify from "dompurify";
 
 interface ProductInfoProps {
-  product: ProductDetail;
+  product: ProductDetails;
   selectedItem: ProductItem | null;
   items: ProductItem[];
 }
@@ -30,38 +30,26 @@ export function ProductInfo({
       ? formatPrice(minPrice)
       : `${formatPrice(minPrice)} – ${formatPrice(maxPrice)}`;
 
-  const originalPrice = selectedItem?.originalPrice;
+  const originalPrice = 1231;
+  const hasStock = selectedItem
+    ? selectedItem.in_stock
+    : items.some((i) => i.in_stock);
 
-  const isNewArrival = new Date(product.createdAt) > subDays(new Date(), 30);
-  const isBestSeller = product.ordersCount > 50;
-  const isOutOfStock = selectedItem
-    ? selectedItem.qtyInStock === 0
-    : items.every((i) => i.qtyInStock === 0);
-
+  const isOutOfStock = !hasStock;
   return (
     <div className="flex flex-col gap-6">
       {/* Breadcrumbs */}
-      {product.categories.length > 0 && (
-        <nav className="flex items-center flex-wrap gap-y-1 text-sm text-muted-foreground">
-          <span className="hover:text-foreground transition-colors cursor-pointer">
-            Home
+      <nav className="flex items-center flex-wrap gap-y-1 text-sm text-muted-foreground">
+        <span className="hover:text-foreground transition-colors cursor-pointer">
+          Home
+        </span>
+        <div key={product.category.id} className="flex items-center">
+          <ChevronRight className="w-4 h-4 mx-1 shrink-0" />
+          <span className="text-foreground font-medium">
+            {product.category.name}
           </span>
-          {product.categories.map((cat, idx) => (
-            <div key={cat.id} className="flex items-center">
-              <ChevronRight className="w-4 h-4 mx-1 flex-shrink-0" />
-              <span
-                className={
-                  idx === product.categories.length - 1
-                    ? "text-foreground font-medium"
-                    : "hover:text-foreground transition-colors cursor-pointer"
-                }
-              >
-                {cat.name}
-              </span>
-            </div>
-          ))}
-        </nav>
-      )}
+        </div>
+      </nav>
 
       {/* Brand & Title */}
       <div className="space-y-2">
@@ -104,12 +92,12 @@ export function ProductInfo({
               Out of Stock
             </Badge>
           )}
-          {isNewArrival && !isOutOfStock && (
+          {product.is_new && !isOutOfStock && (
             <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100 border-none font-semibold uppercase tracking-wider text-xs px-2 py-0.5 rounded-md shadow-none">
               New Arrival
             </Badge>
           )}
-          {isBestSeller && (
+          {product.is_bestseller && (
             <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100 border-none font-semibold uppercase tracking-wider text-xs px-2 py-0.5 rounded-md shadow-none">
               Best Seller
             </Badge>
@@ -120,11 +108,13 @@ export function ProductInfo({
       <Separator className="bg-border/60" />
 
       {/* Description */}
-      {product.description && (
-        <div className="prose prose-sm sm:prose-base prose-slate max-w-none text-muted-foreground leading-relaxed">
-          <p>{product.description}</p>
-        </div>
-      )}
+
+      <div
+        className="prose prose-sm sm:prose-base prose-slate max-w-none text-muted-foreground leading-relaxed"
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(product.description),
+        }}
+      />
     </div>
   );
 }

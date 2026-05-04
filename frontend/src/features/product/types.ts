@@ -1,37 +1,31 @@
+import type { ApiResponse, Brand, Category, Product } from "@/shared/types";
+
 export interface ProductImage {
   id: number;
-  imageUrl: string;
-  altText: string | null;
-  displayOrder: number;
+  url: string;
+  is_primary: boolean;
+}
+
+export interface ProductItemImage {
+  id: number;
+  url: string;
 }
 
 export interface ProductItem {
   id: number;
   sku: string;
   price: number;
-  originalPrice: number | null;
-  qtyInStock: number;
-  images: ProductImage[];
-  attributeValues: AttributeValue[];
+  in_stock: boolean;
+  qty_in_stock: number;
+  images: ProductItemImage[];
+  attribute_values: AttributeValue[];
 }
 
 export interface AttributeValue {
-  attributeId: number;
-  attributeName: string;
-  valueId: number;
+  attribute_id: number;
+  attribute_name: string;
+  value_id: number;
   value: string;
-}
-
-export interface ProductDetail {
-  id: number;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  brand: Brand;
-  categories: Category[];
-  images: ProductImage[];
-  attributes: AttributeGroup[];
-  ordersCount: number;
 }
 
 export interface Review {
@@ -51,6 +45,13 @@ export interface AttributeGroup {
 export interface AttributeValueSimple {
   id: number;
   value: string;
+  hex_color: string;
+  label: string;
+  swatch: {
+    type: string;
+    value: string;
+  };
+  image: string;
 }
 
 export interface ReviewsResponse {
@@ -59,14 +60,14 @@ export interface ReviewsResponse {
   totalReviews: number;
 }
 
-export interface Brand {
-  id: number;
-  name: string;
-  logo: string | null;
+export interface ProductDetails extends Product {
+  attributes: AttributeGroup[];
+  images: ProductImage[];
+  price_range: {
+    min: string;
+    max: string;
+  };
+  variants: ProductItem[];
 }
 
-export interface Category {
-  id: number;
-  name: string;
-  parentId: number | null;
-}
+export type ProductDetailResponse = ApiResponse<ProductDetails>;
