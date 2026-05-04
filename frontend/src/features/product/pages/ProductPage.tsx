@@ -13,6 +13,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
+import DOMPurify from "dompurify";
 import { ProductGallery } from "@/features/product/components/sections/ProductGallery";
 import { ProductInfo } from "@/features/product/components/sections/ProductInfo";
 import { ProductOptions } from "@/features/product/components/sections/ProductOptions";
@@ -264,17 +265,24 @@ function ProductPageContent({
               value="description"
               className="focus-visible:outline-none focus-visible:ring-0"
             >
-              <div className="prose prose-slate max-w-4xl text-muted-foreground leading-relaxed">
-                <p>
-                  {productData.description ??
-                    "No description available for this product."}
+              {productData.description ? (
+                <div
+                  className="prose prose-sm sm:prose-base prose-slate max-w-none text-muted-foreground leading-relaxed"
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(productData.description),
+                  }}
+                />
+              ) : (
+                <p className="text-muted-foreground">
+                  No description available for this product.
                 </p>
-                <p className="mt-4">
-                  Carefully crafted with premium materials and designed for
-                  everyday use. This product embodies our commitment to quality
-                  and sustainable practices.
-                </p>
-              </div>
+              )}
+
+              <p className="mt-4">
+                Carefully crafted with premium materials and designed for
+                everyday use. This product embodies our commitment to quality
+                and sustainable practices.
+              </p>
             </TabsContent>
 
             <TabsContent

@@ -2,6 +2,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import { ChevronRight } from "lucide-react";
 import type { ProductDetails, ProductItem } from "../../types";
+import DOMPurify from "dompurify";
 
 interface ProductInfoProps {
   product: ProductDetails;
@@ -35,14 +36,6 @@ export function ProductInfo({
     : items.some((i) => i.in_stock);
 
   const isOutOfStock = !hasStock;
-  console.log("selected", selectedItem);
-  console.log("items", items);
-  console.log(
-    "is out of stock",
-    items.every((i) => !i.in_stock),
-  );
-  console.log("out of stock", isOutOfStock);
-
   return (
     <div className="flex flex-col gap-6">
       {/* Breadcrumbs */}
@@ -115,11 +108,13 @@ export function ProductInfo({
       <Separator className="bg-border/60" />
 
       {/* Description */}
-      {product.description && (
-        <div className="prose prose-sm sm:prose-base prose-slate max-w-none text-muted-foreground leading-relaxed">
-          <p>{product.description}</p>
-        </div>
-      )}
+
+      <div
+        className="prose prose-sm sm:prose-base prose-slate max-w-none text-muted-foreground leading-relaxed"
+        dangerouslySetInnerHTML={{
+          __html: DOMPurify.sanitize(product.description),
+        }}
+      />
     </div>
   );
 }
