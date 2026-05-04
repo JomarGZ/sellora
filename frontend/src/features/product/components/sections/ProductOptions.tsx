@@ -73,18 +73,7 @@ export function ProductOptions({
                 if (!exists) return null;
 
                 if (isColor) {
-                  const colorMap: Record<string, string> = {
-                    Black: "#111827",
-                    White: "#f9fafb",
-                    Red: "#ef4444",
-                    Blue: "#3b82f6",
-                    Green: "#10b981",
-                    Navy: "#1e3a8a",
-                    Gray: "#6b7280",
-                    Silver: "#9ca3af",
-                  };
-                  const namePart = val.value.split("/")[0].trim();
-                  const hex = colorMap[namePart] ?? "#e5e7eb";
+                  const hex = val.hex_color ?? val.swatch?.value ?? "#e5e7eb";
 
                   return (
                     <button
