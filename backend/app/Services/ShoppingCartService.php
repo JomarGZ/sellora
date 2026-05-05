@@ -96,4 +96,27 @@ final class ShoppingCartService
 
         $this->cartRepository->clearPurchasedItems($order->shopping_cart_id, $ids);
     }
+
+    public function buyNow(int $userId, int $productItemId, int $qty)
+    {
+        $cart = $this->cartRepository->getOrCreateByUserId($userId);
+
+        $item = $this->cartRepository->findItemByProduct(
+            $cart->id,
+            $productItemId
+        );
+
+        if ($item) {
+            $item = $this->cartRepository->updateItem($item->id, [
+                'quantity' => $item->quantity + $qty,
+            ]);
+        } else {
+            $item = $this->cartRepository->createItem($cart->id, [
+                'product_item_id' => $productItemId,
+                'quantity' => $qty,
+            ]);
+        }
+
+        return $cart->fresh()->load('items.productItem.product');
+    }
 }

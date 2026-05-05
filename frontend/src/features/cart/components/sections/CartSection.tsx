@@ -3,8 +3,13 @@ import Skeleton from "react-loading-skeleton";
 import { useCartUI } from "../../hooks/useCartUI";
 import { CartItemList } from "../list/CartItemList";
 import { CartSummary } from "../ui/CartSummary";
+import { useLocation } from "@tanstack/react-router";
 
 export function CartSection() {
+  const location = useLocation();
+  const selectedItemId = (location.state as any)?.buyNow?.selectedItemId;
+
+  console.log(selectedItemId);
   const { items, updateQuantity, removeItem, subtotal, shipping, total } =
     useCartUI();
   const [mounted, setMounted] = useState(false);

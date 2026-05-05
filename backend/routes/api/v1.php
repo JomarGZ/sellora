@@ -102,6 +102,7 @@ Route::name('api.v1.')->group(function () {
         Route::prefix('shopping-cart')->name('cart.')->group(function () {
             Route::get('/', [ShoppingCartController::class, 'index'])->name('index');
             Route::post('/', [ShoppingCartController::class, 'store'])->name('store');
+            Route::post('/buy-now', [ShoppingCartController::class, 'buyNow'])->name('buy-now');
             Route::delete('/clear', [ShoppingCartController::class, 'clear'])->name('clear');
             Route::put('/{shoppingCartItem}', [ShoppingCartController::class, 'update'])->name('update');
             Route::delete('/{shoppingCartItem}', [ShoppingCartController::class, 'destroy'])->name('destroy');

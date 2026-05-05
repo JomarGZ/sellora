@@ -38,14 +38,6 @@ final class CheckoutRequest extends FormRequest
                 'integer',
                 'exists:shipping_methods,id',
             ],
-
-            'address_id' => [
-                'required',
-                'integer',
-                Rule::exists('user_addresses', 'id')
-                    ->where('user_id', $this->user()->id)
-                    ->where('is_default', true),
-            ],
         ];
     }
 }

@@ -42,25 +42,23 @@ final class ShoppingCartController extends ApiController
             $request->quantity
         );
 
-        logger('logger', [$record]);
-
         return $this->created(
             data: new ShoppingCartItemResource($record),
             message: 'Add to cart successfully.'
         );
     }
 
-    public function update(Request $request, ShoppingCartItem $item)
+    public function update(Request $request, ShoppingCartItem $shoppingCartItem)
     {
         $request->validate([
             'quantity' => ['required', 'integer', 'min:0'],
         ]);
-
-        Gate::authorize('update', $item);
+        $shoppingCartItem->load('cart');
+        Gate::authorize('update', $shoppingCartItem);
 
         $record = $this->cartService->updateItemQuantity(
             $request->user()->id,
-            $item->id,
+            $shoppingCartItem->id,
             $request->quantity
         );
 
@@ -70,13 +68,32 @@ final class ShoppingCartController extends ApiController
         );
     }
 
-    public function destroy(Request $request, ShoppingCartItem $item)
+    public function buyNow(Request $request)
     {
-        Gate::authorize('delete', $item);
+        $request->validate([
+            'product_item_id' => ['required', 'integer', 'exists:product_items,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $record = $this->cartService->buyNow(
+            $request->user()->id,
+            $request->product_item_id,
+            $request->quantity
+        );
+
+        return $this->created(
+            data: new ShoppingCartResource($record),
+            message: 'Add to cart successfully.'
+        );
+    }
+
+    public function destroy(Request $request, ShoppingCartItem $shoppingCartItem)
+    {
+        Gate::authorize('delete', $shoppingCartItem);
 
         $this->cartService->removeItem(
             $request->user()->id,
-            $item->id
+            $shoppingCartItem->id
         );
 
         return $this->success(data: null, message: 'Cart item deleted successfully.');

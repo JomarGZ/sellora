@@ -75,6 +75,11 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
         return $this->hasMany(UserAddress::class);
     }
 
+    public function defaultAddress()
+    {
+        return $this->hasOne(UserAddress::class)->where('is_default', true);
+    }
+
     public function orders()
     {
         return $this->hasMany(Order::class);

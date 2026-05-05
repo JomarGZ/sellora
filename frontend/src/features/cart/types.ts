@@ -6,3 +6,8 @@ export interface CartItem {
   quantity: number;
   image: string;
 }
+
+export interface CartPayload {
+  product_item_id: number;
+  quantity: number;
+}
