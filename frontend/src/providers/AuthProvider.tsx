@@ -1,5 +1,3 @@
-// src/providers/AuthProvider.tsx
-
 import { router } from "@/app/routers/router";
 import {
   client,

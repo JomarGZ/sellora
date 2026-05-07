@@ -34,5 +34,4 @@ final class ProductFilterRequest extends FormRequest
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
-
 }

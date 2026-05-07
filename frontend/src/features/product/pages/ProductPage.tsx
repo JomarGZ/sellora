@@ -20,9 +20,10 @@ import { ProductOptions } from "@/features/product/components/sections/ProductOp
 import { PurchaseActions } from "@/features/product/components/sections/PurchaseActions";
 import { ProductReviews } from "@/features/product/components/sections/ProductReviews";
 import { useParams } from "@tanstack/react-router";
-import type { ProductDetailResponse, ProductItem } from "../types";
+import type { ProductDetailResponse } from "../types";
 import { useProductShow } from "../api/product.queries";
 import { useAuth } from "@/providers/AuthProvider";
+import type { ProductItem } from "@/shared/types";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
@@ -102,7 +103,6 @@ function ProductPageContent({
   const productData = product?.data;
 
   const handleAttributeChange = (attributeName: string, value: string) => {
-    console.log("trigger here");
     const updatedAttributes = {
       ...selectedAttributes,
       [attributeName]: value,
@@ -123,7 +123,6 @@ function ProductPageContent({
         (av) => updatedAttributes[av.attribute_name] === av.value,
       ),
     );
-    console.log(updatedAttributes, matchingItem);
     setSelectedItem(matchingItem || null);
   };
 
@@ -342,7 +341,7 @@ function ProductPageContent({
 export default function ProductPage() {
   const { slug } = useParams({ from: "/product/$slug" });
   const { user } = useAuth();
-  const { data: product, isLoading, error } = useProductShow(slug);
+  const { data: product, isLoading } = useProductShow(slug);
   return (
     <ErrorBoundary
       FallbackComponent={ErrorFallback}

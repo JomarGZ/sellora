@@ -1,8 +1,8 @@
 import { client } from "@/shared/api/client";
 import type { CartPayload } from "../types";
 
-export async function getCart() {
-  const { data } = await client.get("/v1/shopping-cart");
+export async function getCart({ page = 1 }: { page?: number }) {
+  const { data } = await client.get("/v1/shopping-cart", { params: { page } });
   return data;
 }
 
@@ -27,7 +27,7 @@ export async function updateCartItemQuantity({
   return data;
 }
 
-export async function deleteCartItem({ id }: { id: number }) {
+export async function deleteCartItem(id: number) {
   const { data } = await client.delete(`/v1/shopping-cart/${id}`);
 
   return data;

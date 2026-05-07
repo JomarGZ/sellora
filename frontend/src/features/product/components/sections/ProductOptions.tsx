@@ -1,5 +1,6 @@
 import { cn } from "@/shared/lib/utils";
-import type { ProductDetails, ProductItem } from "../../types";
+import type { ProductDetails } from "../../types";
+import type { ProductItem } from "@/shared/types";
 
 interface ProductOptionsProps {
   product: ProductDetails;

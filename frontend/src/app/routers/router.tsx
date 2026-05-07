@@ -30,7 +30,12 @@ const rootRoute = createRootRoute({
 
 function RootLayout() {
   const { isInitializing, user, logout } = useAuth();
-  if (isInitializing) return <AppSkeleton />;
+  if (isInitializing)
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="rounded-full border-2 border-gray-300 border-t-sky-500 animate-spin h-10 w-10" />
+      </div>
+    );
   return (
     <>
       <HeadContent />
@@ -150,10 +155,13 @@ const accountAddressRoute = createRoute({
   }),
 });
 
-const accountCartRoute = createRoute({
+export const accountCartRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "cart",
   component: CartPage,
+  validateSearch: (search) => ({
+    page: search.page ? Number(search.page) : undefined,
+  }),
   context: () => ({ pageTitle: "My Cart" }),
   head: () => ({
     meta: [{ title: "Sellora | My Cart" }],

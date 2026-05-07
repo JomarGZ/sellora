@@ -45,6 +45,7 @@ final class Product extends Model
             ->generateSlugsFrom('name')
             ->saveSlugsTo('slug');
     }
+
     public function productItemReviews()
     {
         return $this->hasManyThrough(

@@ -38,7 +38,7 @@ final class CheckoutService
         $authUserDefaultAddress = User::find($dto->userId)?->defaultAddress()->first();
 
         if (! $authUserDefaultAddress) {
-            throw new Exception('User must have a default address to proceed with checkout.');  
+            throw new Exception('User must have a default address to proceed with checkout.');
         }
         // ── Idempotency guard ─────────────────────────────────────────
         $existing = $this->orderRepo->findByIdempotencyKey(
@@ -48,8 +48,6 @@ final class CheckoutService
         if ($existing) {
             return $this->handleExistingOrder($existing);
         }
-
-
 
         $resolved = $this->resolveItems($dto);
 

@@ -1,12 +1,13 @@
 import Skeleton from "react-loading-skeleton";
 import { Package, Heart, MapPin, CreditCard } from "lucide-react";
-import { useAddresses } from "@/features/address/api/address.queries";
 import { useOrders } from "@/features/order/api/order.queries";
 import { useRemoveFromWishlist } from "@/features/wishlist/api/wishlist.queries";
+import { useUserAddresses } from "@/features/address/api/address.queries";
 
 export function ProfileOverviewCard() {
   const { data: orders, isLoading: ordersLoading } = useOrders();
-  const { data: addresses, isLoading: addressesLoading } = useAddresses();
+  const { data: addresses, isLoading: addressesLoading } = useUserAddresses();
+  console.log("address", addresses);
   const { data: wishlist, isLoading: wishlistLoading } =
     useRemoveFromWishlist();
 
@@ -39,7 +40,7 @@ export function ProfileOverviewCard() {
     },
     {
       label: "Saved Addresses",
-      value: addresses?.length || 0,
+      value: addresses?.data.length || 0,
       icon: MapPin,
       color: "text-purple-500",
       bg: "bg-purple-500/10",

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ApiController;
 use App\Http\Resources\V1\ShoppingCartItemResource;
 use App\Http\Resources\V1\ShoppingCartResource;
 use App\Models\ShoppingCartItem;
+use App\Repositories\ShoppingCartItemRepository;
 use App\Services\ShoppingCartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -15,18 +16,20 @@ use Illuminate\Support\Facades\Gate;
 final class ShoppingCartController extends ApiController
 {
     public function __construct(
-        private ShoppingCartService $cartService
+        private ShoppingCartService $cartService,
+        private ShoppingCartItemRepository $cartItemRepository
     ) {}
 
     public function index(Request $request)
     {
         $cart = $this->cartService->getCart($request->user()->id);
         Gate::authorize('view', $cart);
+        $cartItems = $this->cartItemRepository->paginateByCartId($cart->id);
 
-        return $this->success(
-            data: ShoppingCartResource::make($cart),
-            message: 'Retrieved cart successfully.'
-        );
+        return ShoppingCartItemResource::collection($cartItems)->additional([
+            'message' => 'Cart retrieved successfully.',
+            'success' => true,
+        ]);
     }
 
     public function store(Request $request)

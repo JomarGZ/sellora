@@ -2,13 +2,12 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Heart, ShoppingCart, Minus, Plus, ShoppingBag } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import type { ProductItem } from "../../types";
 import {
   useAddToCartMutation,
   useBuyNowMutation,
 } from "@/features/cart/api/cart.queries";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
-import { useNavigate } from "@tanstack/react-router";
+import type { ProductItem } from "@/shared/types";
 
 interface PurchaseActionsProps {
   productId: number;
@@ -23,7 +22,6 @@ export function PurchaseActions({
 }: PurchaseActionsProps) {
   const [quantity, setQuantity] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
-  const [addingToCart, setAddingToCart] = useState(false);
   const { showToast } = useAppToast();
   const addToCart = useAddToCartMutation();
   const buyNow = useBuyNowMutation();

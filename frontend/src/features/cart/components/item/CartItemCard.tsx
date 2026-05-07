@@ -1,37 +1,49 @@
 import { Button } from "@/shared/components/ui/button";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
-import type { CartItem } from "@/data/mockProfile";
+import type { CartItem } from "../../types";
+import { Link } from "@tanstack/react-router";
 
 interface CartItemCardProps {
   item: CartItem;
-  onUpdateQuantity: (id: string, quantity: number) => void;
-  onRemove: (id: string) => void;
+  onUpdateQuantity: (id: number, quantity: number) => void;
+  onRemove: (id: number) => void;
+  isRemoving?: boolean;
 }
 
 export function CartItemCard({
   item,
   onUpdateQuantity,
   onRemove,
+  isRemoving = false,
 }: CartItemCardProps) {
+  const attributeDescription = item.product_item.attribute_values
+    .map((av) => `${av.attribute_name}: ${av.value}`)
+    .join(", ");
   return (
     <div className="flex gap-4 p-4 bg-white dark:bg-card rounded-2xl border border-border/50 shadow-sm relative group">
-      <div className="w-24 h-24 rounded-xl overflow-hidden bg-muted flex-shrink-0">
+      <div className="w-24 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
         <img
-          src={item.image}
-          alt={item.name}
+          src={item.product_item.images[0]?.url}
+          alt={item.product_item.product?.name}
           className="w-full h-full object-cover"
         />
       </div>
       <div className="flex flex-col flex-1 py-1">
         <div className="flex justify-between items-start pr-8">
           <div>
-            <h4 className="font-semibold text-foreground line-clamp-1">
-              {item.name}
-            </h4>
-            <p className="text-sm text-muted-foreground">{item.variant}</p>
+            <Link
+              to="/product/$slug"
+              params={{ slug: item.product_item.product?.slug }}
+              className="font-semibold text-foreground line-clamp-1 hover:underline"
+            >
+              {item.product_item.product?.name}
+            </Link>
+            <p className="text-sm text-muted-foreground">
+              {attributeDescription}
+            </p>
           </div>
-          <p className="font-bold font-display">${item.price.toFixed(2)}</p>
+          <p className="font-bold font-display">${item.product_item.price}</p>
         </div>
 
         <div className="mt-auto flex items-center justify-between">
@@ -67,7 +79,8 @@ export function CartItemCard({
       <Button
         variant="ghost"
         size="icon"
-        className="absolute top-3 right-3 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
+        disabled={isRemoving}
+        className="absolute cursor-pointer top-3 right-3 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
         onClick={() => onRemove(item.id)}
       >
         <Trash2 className="w-4 h-4" />

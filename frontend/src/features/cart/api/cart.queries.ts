@@ -10,10 +10,10 @@ import {
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import { useNavigate, type HistoryState } from "@tanstack/react-router";
 
-export function useCartQuery() {
+export function useCartQuery(page: number) {
   return useQuery({
-    queryKey: ["cart"],
-    queryFn: getCart,
+    queryKey: ["cart", page],
+    queryFn: () => getCart({ page: page }),
   });
 }
 
@@ -94,11 +94,51 @@ export function useUpdateCartItemQuantityMutation() {
 
 export function useDeleteCartItemMutation() {
   const queryClient = useQueryClient();
-
+  const { showToast } = useAppToast();
   return useMutation({
     mutationFn: deleteCartItem,
+    onMutate: async (id: number) => {
+      await queryClient.cancelQueries({ queryKey: ["cart"] });
 
+      const previousQueries = queryClient.getQueriesData({
+        queryKey: ["cart"],
+      });
+
+      queryClient.setQueriesData({ queryKey: ["cart"] }, (old: any) => {
+        if (!old?.data) return old;
+
+        return {
+          ...old,
+          data: old.data.filter((item: any) => item.id !== id),
+          meta: old.meta
+            ? {
+                ...old.meta,
+                total: Math.max(0, old.meta.total - 1),
+              }
+            : old.meta,
+        };
+      });
+
+      return { previousQueries };
+    },
+    onError(error, _, context) {
+      context?.previousQueries?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
+      showToast({
+        severity: "error",
+        summary: "Failed",
+        detail: error?.message ?? "Unable to delete address.",
+      });
+    },
     onSuccess: () => {
+      showToast({
+        severity: "success",
+        summary: "Removed",
+        detail: "Item removed from cart.",
+      });
+    },
+    onSettled() {
       queryClient.invalidateQueries({
         queryKey: ["cart"],
       });
