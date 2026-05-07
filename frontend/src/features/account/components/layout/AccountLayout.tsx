@@ -23,7 +23,6 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 
 export function AccountLayout() {
   const { logout, user, isInitializing } = useAuth();
-  console.log("user", user);
   const matches = useMatches();
   const lastMatch = matches[matches.length - 1];
   const pageTitle = lastMatch.context?.pageTitle;

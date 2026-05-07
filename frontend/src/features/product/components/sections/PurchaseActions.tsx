@@ -8,6 +8,7 @@ import {
 } from "@/features/cart/api/cart.queries";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import type { ProductItem } from "@/shared/types";
+import { useNavigate, type HistoryState } from "@tanstack/react-router";
 
 interface PurchaseActionsProps {
   productId: number;
@@ -25,7 +26,7 @@ export function PurchaseActions({
   const { showToast } = useAppToast();
   const addToCart = useAddToCartMutation();
   const buyNow = useBuyNowMutation();
-
+  const navigate = useNavigate();
   const isOutOfStock = selectedItem ? selectedItem.qty_in_stock === 0 : false;
   const isSelectionIncomplete = hasAttributes && !selectedItem;
 
@@ -49,7 +50,7 @@ export function PurchaseActions({
     });
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!selectedItem) {
       showToast({
         severity: "error",
@@ -59,9 +60,17 @@ export function PurchaseActions({
       return;
     }
 
-    buyNow.mutate({
+    buyNow.mutateAsync({
       product_item_id: selectedItem.id,
       quantity,
+    });
+    navigate({
+      to: "/account/cart",
+      state: {
+        buyNow: {
+          itemId: selectedItem.id,
+        },
+      } as unknown as HistoryState,
     });
   };
 

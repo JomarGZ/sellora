@@ -7,7 +7,6 @@ import { useUserAddresses } from "@/features/address/api/address.queries";
 export function ProfileOverviewCard() {
   const { data: orders, isLoading: ordersLoading } = useOrders();
   const { data: addresses, isLoading: addressesLoading } = useUserAddresses();
-  console.log("address", addresses);
   const { data: wishlist, isLoading: wishlistLoading } =
     useRemoveFromWishlist();
 

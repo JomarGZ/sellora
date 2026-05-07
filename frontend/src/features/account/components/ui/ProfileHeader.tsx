@@ -10,7 +10,6 @@ type ProfileHeaderProps = {
   isLoading?: boolean;
 };
 export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
-  console.log(user);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
 

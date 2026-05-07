@@ -9,6 +9,7 @@ import {
 
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import { useNavigate, type HistoryState } from "@tanstack/react-router";
+import type { CartItem, CartItemResponse } from "../types";
 
 export function useCartQuery(page: number) {
   return useQuery({
@@ -54,17 +55,9 @@ export function useBuyNowMutation() {
   return useMutation({
     mutationFn: buyNowItem,
 
-    onSuccess(_, variables) {
+    onSuccess() {
       queryClient.invalidateQueries({
         queryKey: ["cart"],
-      });
-      navigate({
-        to: "/account/cart",
-        state: {
-          buyNow: {
-            selectedItemId: variables.product_item_id,
-          },
-        } as unknown as HistoryState,
       });
     },
 
@@ -83,8 +76,36 @@ export function useUpdateCartItemQuantityMutation() {
 
   return useMutation({
     mutationFn: updateCartItemQuantity,
+    onMutate: async ({ id, quantity }) => {
+      await queryClient.cancelQueries({ queryKey: ["cart"] });
 
-    onSuccess: () => {
+      const previousQueries = queryClient.getQueriesData({
+        queryKey: ["cart"],
+      });
+
+      queryClient.setQueriesData(
+        { queryKey: ["cart"] },
+        (old: CartItemResponse | undefined) => {
+          if (!old?.data) return old;
+
+          return {
+            ...old,
+            data: old.data.map((item: CartItem) =>
+              item.id === id ? { ...item, quantity } : item,
+            ),
+          };
+        },
+      );
+
+      return { previousQueries };
+    },
+    onError: (_error, _variables, context) => {
+      // rollback
+      context?.previousQueries?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["cart"],
       });
@@ -104,20 +125,23 @@ export function useDeleteCartItemMutation() {
         queryKey: ["cart"],
       });
 
-      queryClient.setQueriesData({ queryKey: ["cart"] }, (old: any) => {
-        if (!old?.data) return old;
+      queryClient.setQueriesData(
+        { queryKey: ["cart"] },
+        (old: CartItemResponse | undefined) => {
+          if (!old?.data) return old;
 
-        return {
-          ...old,
-          data: old.data.filter((item: any) => item.id !== id),
-          meta: old.meta
-            ? {
-                ...old.meta,
-                total: Math.max(0, old.meta.total - 1),
-              }
-            : old.meta,
-        };
-      });
+          return {
+            ...old,
+            data: old.data.filter((item: any) => item.id !== id),
+            meta: old.meta
+              ? {
+                  ...old.meta,
+                  total: Math.max(0, old.meta.total - 1),
+                }
+              : old.meta,
+          };
+        },
+      );
 
       return { previousQueries };
     },

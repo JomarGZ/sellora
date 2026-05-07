@@ -1,47 +1,44 @@
-import { useCartUI } from "../../hooks/useCartUI";
+// features/cart/components/section/CartSection.tsx
+import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useCartSelection } from "../../hooks/useCartSelection";
 import { CartItemList } from "../list/CartItemList";
 import { CartSummary } from "../ui/CartSummary";
-import { useLocation } from "@tanstack/react-router";
-import {
-  useCartQuery,
-  useDeleteCartItemMutation,
-} from "../../api/cart.queries";
-import { accountCartRoute } from "@/app/routers/router";
+
+type BuyNowState = {
+  buyNow?: { itemId: number };
+};
 
 export function CartSection() {
-  const { page = 1 } = accountCartRoute.useSearch();
-  const { data: cartItems, isLoading: isCartLoading } = useCartQuery(page);
   const location = useLocation();
-  const selectedItemId = (location.state as any)?.buyNow?.selectedItemId;
 
-  console.log(selectedItemId);
-  const { items, updateQuantity, removeItem, subtotal, shipping, total } =
-    useCartUI();
+  // Read once — location.state is never re-read after mount.
+  // On refresh, location.state is null → no preselection. ✓
+  const buyNowId = (location.state as BuyNowState)?.buyNow?.itemId ?? null;
 
-  const deleteCartItem = useDeleteCartItemMutation();
-  const handleRemove = (id: number) => {
-    deleteCartItem.mutate(id);
-  };
-
-  const handleUpdateQuantity = (id: number, qty: number) => {
-    updateQuantity(id, qty);
-    // toast({ title: "Quantity updated" });
-  };
+  const {
+    selectedArray,
+    selectedCount,
+    isSelected,
+    selectItem,
+    selectAll,
+    deselectAll,
+  } = useCartSelection(buyNowId ? [buyNowId] : []);
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1">
         <CartItemList
-          items={cartItems}
-          isRemoving={deleteCartItem.isPending}
-          isLoading={isCartLoading}
-          onUpdateQuantity={handleUpdateQuantity}
-          onRemove={handleRemove}
+          isSelected={isSelected}
+          onSelectItem={selectItem}
+          onSelectAll={selectAll}
+          onDeselectAll={deselectAll}
+          buyNowItemId={buyNowId}
         />
       </div>
-      {items.length > 0 && (
+
+      {selectedCount > 0 && (
         <div className="w-full lg:w-80 shrink-0">
-          <CartSummary subtotal={subtotal} shipping={shipping} total={total} />
+          {/* <CartSummary selectedItemIds={selectedArray} /> */}
         </div>
       )}
     </div>
