@@ -2,12 +2,14 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Separator } from "@/shared/components/ui/separator";
 import type { Summary } from "../../types";
+import { cn } from "@/shared/lib/utils";
 
 interface CartSummaryProps {
-  summary: Summary;
+  summary: Summary | undefined;
+  isLoading: boolean;
 }
 
-export function CartSummary({ summary }: CartSummaryProps) {
+export function CartSummary({ summary, isLoading = false }: CartSummaryProps) {
   return (
     <div className="bg-white dark:bg-card rounded-2xl border border-border/50 p-6 shadow-sm sticky top-8">
       <h3 className="text-lg font-bold font-display mb-4">Order Summary</h3>
@@ -15,12 +17,16 @@ export function CartSummary({ summary }: CartSummaryProps) {
       <div className="space-y-3 text-sm mb-6">
         <div className="flex justify-between text-muted-foreground">
           <span>Items</span>
-          <span className="text-foreground font-medium">{summary.count}</span>
+          <span className="text-foreground font-medium">
+            {summary?.count || 0}
+          </span>
         </div>
         <Separator className="my-2" />
         <div className="flex justify-between text-base font-bold font-display">
           <span>Total</span>
-          <span className="text-primary">${summary.total.toFixed(2)}</span>
+          <span className={cn("text-primary", isLoading && "opacity-60")}>
+            ${summary?.total.toFixed(2) || 0}
+          </span>
         </div>
       </div>
 

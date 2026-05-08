@@ -6,18 +6,16 @@ import { CartSummary } from "../ui/CartSummary";
 export function CartSection() {
   const selectItem = useCartSelection((s) => s.selectItem);
   const isSelected = useCartSelection((s) => s.isSelected);
-  const { data: summary } = useCartSummaryQuery();
+  const { data: summary, isFetching } = useCartSummaryQuery();
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       <div className="flex-1">
         <CartItemList isSelected={isSelected} onSelectItem={selectItem} />
       </div>
 
-      {summary?.data.count && (
-        <div className="w-full lg:w-80 shrink-0">
-          <CartSummary summary={summary.data} />
-        </div>
-      )}
+      <div className="w-full lg:w-80 shrink-0">
+        <CartSummary summary={summary?.data} isLoading={isFetching} />
+      </div>
     </div>
   );
 }

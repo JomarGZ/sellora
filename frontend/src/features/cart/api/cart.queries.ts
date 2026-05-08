@@ -175,6 +175,5 @@ export function useCartSummaryQuery() {
     queryKey: ["cart-summary", ids.sort()],
     queryFn: () => getSummary(ids),
     enabled: ids.length > 0,
-    placeholderData: (previousData, _) => previousData,
   });
 }
