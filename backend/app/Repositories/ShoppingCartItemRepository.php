@@ -14,7 +14,7 @@ final class ShoppingCartItemRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function paginateByCartId(int $cartId, int $perPage = 10): LengthAwarePaginator
+    public function paginateByCartId(int $cartId, int $perPage = 2): LengthAwarePaginator
     {
         return $this->model
             ->where('shopping_cart_id', $cartId)
@@ -52,5 +52,14 @@ final class ShoppingCartItemRepository extends BaseRepository
             ->where('shopping_cart_id', $cartId)
             ->whereIn('product_item_id', $productItemIds)
             ->delete();
+    }
+
+    public function getByIdsAndCartId(int $cartId, array $ids)
+    {
+        return $this->model
+            ->where('shopping_cart_id', $cartId)
+            ->whereIn('id', $ids)
+            ->with('productItem')
+            ->get();
     }
 }

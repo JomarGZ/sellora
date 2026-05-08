@@ -15,19 +15,13 @@ import type { CartItem } from "../../types";
 type CartItemListProps = {
   isSelected: (id: number) => boolean;
   onSelectItem: (id: number, checked: boolean) => void;
-  onSelectAll: (ids: number[]) => void;
-  onDeselectAll: (ids: number[]) => void;
 };
 
-export function CartItemList({
-  isSelected,
-  onSelectItem,
-  onSelectAll,
-  onDeselectAll,
-}: CartItemListProps) {
+export function CartItemList({ isSelected, onSelectItem }: CartItemListProps) {
   const { page = 1 } = accountCartRoute.useSearch();
   const navigate = accountCartRoute.useNavigate();
   const { data: cartData, isLoading } = useCartQuery(page);
+
   const deleteCartItem = useDeleteCartItemMutation();
   const updateQuantity = useUpdateCartItemQuantityMutation();
 
@@ -42,41 +36,12 @@ export function CartItemList({
     });
   };
 
-  const pageIds =
-    cartData?.data.map((item: CartItem) => item.product_item.id) ?? [];
-
-  const allPageSelected =
-    pageIds.length > 0 && pageIds.every((id) => isSelected(id));
-
-  const handleSelectPage = (checked: boolean) => {
-    checked ? onSelectAll(pageIds) : onDeselectAll(pageIds);
-  };
-
   if (!isLoading && cartData?.data.length === 0) {
     return <EmptyCart />;
   }
 
   return (
     <div className="space-y-4">
-      {/* Per-page select-all — mirrors Shopee/Lazada behaviour */}
-      {!isLoading && pageIds.length > 0 && (
-        <div className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-card rounded-xl border border-border/50">
-          <input
-            type="checkbox"
-            checked={allPageSelected}
-            onChange={(e) => handleSelectPage(e.target.checked)}
-            className="w-4 h-4 rounded"
-            id="select-page"
-          />
-          <label
-            htmlFor="select-page"
-            className="text-sm text-muted-foreground cursor-pointer"
-          >
-            Select all on this page
-          </label>
-        </div>
-      )}
-
       {isLoading ? (
         <CartSkeleton />
       ) : (
@@ -84,7 +49,7 @@ export function CartItemList({
           <CartItemCard
             key={item.id}
             item={item}
-            isSelected={isSelected(item.product_item.id)}
+            isSelected={isSelected(item.id)}
             onSelect={onSelectItem}
             onUpdateQuantity={(id, quantity) =>
               updateQuantity.mutate({ id, quantity })

@@ -85,7 +85,7 @@ final class ShoppingCartController extends ApiController
         );
 
         return $this->created(
-            data: new ShoppingCartResource($record),
+            data: new ShoppingCartItemResource($record),
             message: 'Add to cart successfully.'
         );
     }
@@ -100,5 +100,28 @@ final class ShoppingCartController extends ApiController
         );
 
         return $this->success(data: null, message: 'Cart item deleted successfully.');
+    }
+    
+    public function summary(Request $request)
+    {
+        $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:shopping_cart_items,id'],
+        ]);
+
+        $cart = $this->cartService->getCart($request->user()->id);
+
+        $items = $this->cartItemRepository
+            ->getByIdsAndCartId($cart->id, $request->ids);
+
+        $total = $items->sum(fn ($item) =>
+            $item->productItem->price * $item->quantity
+        );
+
+        return $this->success([
+            'items' => ShoppingCartItemResource::collection($items),
+            'total' => $total,
+            'count' => $items->count(),
+        ], 'Cart summary retrieved successfully.');
     }
 }

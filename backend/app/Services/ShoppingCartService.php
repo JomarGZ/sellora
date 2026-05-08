@@ -123,6 +123,6 @@ final class ShoppingCartService
             ]);
         }
 
-        return $cart->fresh()->load('items.productItem.product');
+        return $item->load('productItem');
     }
 }

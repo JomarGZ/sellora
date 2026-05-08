@@ -4,12 +4,18 @@ import {
   buyNowItem,
   deleteCartItem,
   getCart,
+  getSummary,
   updateCartItemQuantity,
 } from "./cart.api";
 
 import { useAppToast } from "@/shared/components/feedback/AppToast";
-import { useNavigate, type HistoryState } from "@tanstack/react-router";
 import type { CartItem, CartItemResponse } from "../types";
+import { useCartSelection } from "../store/cartSelection.store";
+
+function invalidateCartRelated(queryClient: any) {
+  queryClient.invalidateQueries({ queryKey: ["cart"] });
+  queryClient.invalidateQueries({ queryKey: ["cart-summary"] });
+}
 
 export function useCartQuery(page: number) {
   return useQuery({
@@ -32,9 +38,7 @@ export function useAddToCartMutation() {
         detail: "Successfully added to cart.",
       });
 
-      queryClient.invalidateQueries({
-        queryKey: ["cart"],
-      });
+      invalidateCartRelated(queryClient);
     },
 
     onError(error: any) {
@@ -55,9 +59,7 @@ export function useBuyNowMutation() {
     mutationFn: buyNowItem,
 
     onSuccess() {
-      queryClient.invalidateQueries({
-        queryKey: ["cart"],
-      });
+      invalidateCartRelated(queryClient);
     },
 
     onError(error: any) {
@@ -105,9 +107,7 @@ export function useUpdateCartItemQuantityMutation() {
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["cart"],
-      });
+      invalidateCartRelated(queryClient);
     },
   });
 }
@@ -162,9 +162,19 @@ export function useDeleteCartItemMutation() {
       });
     },
     onSettled() {
-      queryClient.invalidateQueries({
-        queryKey: ["cart"],
-      });
+      invalidateCartRelated(queryClient);
     },
+  });
+}
+
+export function useCartSummaryQuery() {
+  const selectedIds = useCartSelection((s) => s.selectedIds);
+  const ids = Array.from(selectedIds);
+
+  return useQuery({
+    queryKey: ["cart-summary", ids.sort()],
+    queryFn: () => getSummary(ids),
+    enabled: ids.length > 0,
+    placeholderData: (previousData, _) => previousData,
   });
 }

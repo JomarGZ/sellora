@@ -56,7 +56,7 @@ export function CartItemCard({
           type="checkbox"
           checked={isSelected}
           disabled={isOutOfStock}
-          onChange={(e) => onSelect?.(item.product_item.id, e.target.checked)}
+          onChange={(e) => onSelect?.(item.id, e.target.checked)}
           className="h-4 w-4 accent-primary cursor-pointer"
         />
       </div>

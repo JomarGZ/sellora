@@ -9,6 +9,7 @@ import {
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import type { ProductItem } from "@/shared/types";
 import { useNavigate, type HistoryState } from "@tanstack/react-router";
+import { useCartSelection } from "@/features/cart/store/cartSelection.store";
 
 interface PurchaseActionsProps {
   productId: number;
@@ -29,6 +30,7 @@ export function PurchaseActions({
   const navigate = useNavigate();
   const isOutOfStock = selectedItem ? selectedItem.qty_in_stock === 0 : false;
   const isSelectionIncomplete = hasAttributes && !selectedItem;
+  const selectItem = useCartSelection((s) => s.selectItem);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // When you have your real API ready, replace the bodies of these two handlers
@@ -61,18 +63,15 @@ export function PurchaseActions({
     }
 
     try {
-      await buyNow.mutateAsync({
+      const response = await buyNow.mutateAsync({
         product_item_id: selectedItem.id,
         quantity,
       });
-
+      const cartItem = response.data;
+      const isChecked = true;
+      selectItem(cartItem.id, isChecked);
       navigate({
         to: "/account/cart",
-        state: {
-          buyNow: {
-            itemId: selectedItem.id,
-          },
-        } as unknown as HistoryState,
       });
     } catch (error) {
       console.error("Failed to add to cart a for buy now");
