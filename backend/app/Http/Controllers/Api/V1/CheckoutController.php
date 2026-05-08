@@ -28,14 +28,14 @@ final class CheckoutController extends ApiController
 
     public function preview(CheckoutPreviewRequest $request): JsonResponse
     {
-        // $result = $this->checkoutService->preview(
-        //     PreviewDTO::fromRequest($request)
-        // );
+        $result = $this->checkoutService->preview(
+            PreviewDTO::fromRequest($request)
+        );
 
-        // return $this->success(
-        //     data: new CheckoutPreviewResource($result),
-        //     message: 'Checkout preview retrieved successfully.'
-        // );
+        return $this->success(
+            data: new CheckoutPreviewResource($result),
+            message: 'Checkout preview retrieved successfully.'
+        );
 
         return response()->json(['sds' => 'asdsad']);
     }
@@ -46,14 +46,14 @@ final class CheckoutController extends ApiController
             CheckoutDTO::fromRequest($request)
         );
 
-        return response()->json([
-            'success' => true,
-            'message' => $result['message'] ?? 'Checkout processed successfully.',
-            'data' => [
+        return $this->success(
+            data: [
                 'order' => $result['order'],
                 'checkout_url' => $result['checkout_url'],
             ],
-        ]);
+            message: $result['message'] ?? 'Checkout processed successfully.'
+        );
+
     }
 
     public function verifySession(Request $request)

@@ -27,7 +27,6 @@ export interface CartItem extends CheckoutItem {
 }
 
 export interface CheckoutPayload {
-  address_id: number;
   shipping_method_id: number;
   items: {
     product_item_id: number;

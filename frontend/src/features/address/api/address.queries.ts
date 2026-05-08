@@ -1,10 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type {
-  Address,
-  UserAddressesResponse,
-  UserAddressResponse,
-} from "../types";
-import { mockAddresses } from "@/data";
+import type { UserAddressesResponse, UserAddressResponse } from "../types";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 import {
   createUserAddress,
@@ -15,17 +10,6 @@ import {
   updateUserAddress,
 } from "./address.api";
 import type { AddressFormValues } from "../validation/address.schema";
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-export function useAddresses() {
-  return useQuery({
-    queryKey: ["profile", "addresses"],
-    queryFn: async (): Promise<Address[]> => {
-      await delay(1000);
-      return mockAddresses;
-    },
-  });
-}
 
 export function useCreateUserAddress() {
   const { showToast } = useAppToast();
@@ -54,7 +38,7 @@ export function useCreateUserAddress() {
   });
 }
 
-export function useUserAddress1(id: number, options?: { enabled?: boolean }) {
+export function useUserAddress(id: number, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["user", "address", id],
     queryFn: () => getUserAddress(id),

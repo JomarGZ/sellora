@@ -32,7 +32,6 @@ final class UserAddressController extends ApiController
     public function show(UserAddress $userAddress)
     {
         // Gate::authorize('view', $address);
-        logger("test", [$userAddress]);
         return $this->success(
             data: UserAddressResource::make($userAddress),
             message: 'User address retrieved successfully.'

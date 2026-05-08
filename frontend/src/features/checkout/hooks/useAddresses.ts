@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import type { Address } from "@/types/checkout";
 import { MOCK_ADDRESSES } from "@/data/mock-data";
 
 export function useAddresses() {

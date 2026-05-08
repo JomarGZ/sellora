@@ -10,6 +10,24 @@ export interface PaginatedResponse<T> {
   meta: PaginationMeta;
 }
 
+export interface SimplePaginatedResponse<T> {
+  data: T[];
+  links: {
+    first: string;
+    last: string | null;
+    prev: string | null;
+    next: string | null;
+  };
+  meta: {
+    current_page: number;
+    current_page_url: string;
+    from: number | null;
+    path: string;
+    per_page: number;
+    to: number | null;
+  };
+}
+
 export interface PaginationLinks {
   first: string | null;
   last: string | null;
@@ -55,40 +73,11 @@ export interface Product {
   };
 }
 
-export interface ProductImage {
-  id: number;
-  imageUrl: string;
-  altText: string | null;
-  displayOrder: number;
-}
-
-export interface ProductItem {
-  id: number;
-  sku: string;
-  price: number;
-  originalPrice: number | null;
-  qtyInStock: number;
-  images: ProductImage[];
-  attributeValues: AttributeValue[];
-}
-
 export interface AttributeValue {
   attributeId: number;
   attributeName: string;
   valueId: number;
   value: string;
-}
-
-export interface ProductDetail {
-  id: number;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  brand: Brand;
-  categories: Category[];
-  images: ProductImage[];
-  attributes: AttributeGroup[];
-  ordersCount: number;
 }
 
 export interface Review {
@@ -126,6 +115,28 @@ export interface Category {
   id: number;
   name: string;
   parentId: number | null;
+}
+
+export interface ProductItem {
+  id: number;
+  sku: string;
+  price: number;
+  in_stock: boolean;
+  product?: Product;
+  qty_in_stock: number;
+  images: ProductItemImage[];
+  attribute_values: AttributeValue[];
+}
+export interface ProductItemImage {
+  id: number;
+  url: string;
+}
+
+export interface AttributeValue {
+  attribute_id: number;
+  attribute_name: string;
+  value_id: number;
+  value: string;
 }
 
 export type ProductResponse = ApiResponse<Product[]> &

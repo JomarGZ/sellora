@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ApiController;
 use App\Http\Resources\V1\ShoppingCartItemResource;
 use App\Http\Resources\V1\ShoppingCartResource;
 use App\Models\ShoppingCartItem;
+use App\Repositories\ShoppingCartItemRepository;
 use App\Services\ShoppingCartService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -15,18 +16,20 @@ use Illuminate\Support\Facades\Gate;
 final class ShoppingCartController extends ApiController
 {
     public function __construct(
-        private ShoppingCartService $cartService
+        private ShoppingCartService $cartService,
+        private ShoppingCartItemRepository $cartItemRepository
     ) {}
 
     public function index(Request $request)
     {
         $cart = $this->cartService->getCart($request->user()->id);
         Gate::authorize('view', $cart);
+        $cartItems = $this->cartItemRepository->paginateByCartId($cart->id);
 
-        return $this->success(
-            data: ShoppingCartResource::make($cart),
-            message: 'Retrieved cart successfully.'
-        );
+        return ShoppingCartItemResource::collection($cartItems)->additional([
+            'message' => 'Cart retrieved successfully.',
+            'success' => true,
+        ]);
     }
 
     public function store(Request $request)
@@ -42,25 +45,23 @@ final class ShoppingCartController extends ApiController
             $request->quantity
         );
 
-        logger('logger', [$record]);
-
         return $this->created(
             data: new ShoppingCartItemResource($record),
             message: 'Add to cart successfully.'
         );
     }
 
-    public function update(Request $request, ShoppingCartItem $item)
+    public function update(Request $request, ShoppingCartItem $shoppingCartItem)
     {
         $request->validate([
             'quantity' => ['required', 'integer', 'min:0'],
         ]);
-
-        Gate::authorize('update', $item);
+        $shoppingCartItem->load('cart');
+        Gate::authorize('update', $shoppingCartItem);
 
         $record = $this->cartService->updateItemQuantity(
             $request->user()->id,
-            $item->id,
+            $shoppingCartItem->id,
             $request->quantity
         );
 
@@ -70,15 +71,57 @@ final class ShoppingCartController extends ApiController
         );
     }
 
-    public function destroy(Request $request, ShoppingCartItem $item)
+    public function buyNow(Request $request)
     {
-        Gate::authorize('delete', $item);
+        $request->validate([
+            'product_item_id' => ['required', 'integer', 'exists:product_items,id'],
+            'quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $record = $this->cartService->buyNow(
+            $request->user()->id,
+            $request->product_item_id,
+            $request->quantity
+        );
+
+        return $this->created(
+            data: new ShoppingCartItemResource($record),
+            message: 'Add to cart successfully.'
+        );
+    }
+
+    public function destroy(Request $request, ShoppingCartItem $shoppingCartItem)
+    {
+        Gate::authorize('delete', $shoppingCartItem);
 
         $this->cartService->removeItem(
             $request->user()->id,
-            $item->id
+            $shoppingCartItem->id
         );
 
         return $this->success(data: null, message: 'Cart item deleted successfully.');
+    }
+    
+    public function summary(Request $request)
+    {
+        $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:shopping_cart_items,id'],
+        ]);
+
+        $cart = $this->cartService->getCart($request->user()->id);
+
+        $items = $this->cartItemRepository
+            ->getByIdsAndCartId($cart->id, $request->ids);
+
+        $total = $items->sum(fn ($item) =>
+            $item->productItem->price * $item->quantity
+        );
+
+        return $this->success([
+            'items' => ShoppingCartItemResource::collection($items),
+            'total' => $total,
+            'count' => $items->count(),
+        ], 'Cart summary retrieved successfully.');
     }
 }

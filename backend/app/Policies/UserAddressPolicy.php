@@ -16,6 +16,7 @@ final class UserAddressPolicy
             ? Response::allow()
             : Response::deny('You do not own this address');
     }
+
     /**
      * Determine whether the user can update the model.
      */

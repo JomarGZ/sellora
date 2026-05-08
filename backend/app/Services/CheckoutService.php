@@ -9,7 +9,9 @@ use App\DTOs\V1\CheckoutItemDTO;
 use App\Enums\CheckoutType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
+use App\Models\Order;
 use App\Models\ShippingMethod;
+use App\Models\User;
 use App\Repositories\CartRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
@@ -33,10 +35,14 @@ final class CheckoutService
 
     public function checkout(CheckoutDTO $dto): array
     {
+        $authUserDefaultAddress = User::find($dto->userId)?->defaultAddress()->first();
+
+        if (! $authUserDefaultAddress) {
+            throw new Exception('User must have a default address to proceed with checkout.');
+        }
         // ── Idempotency guard ─────────────────────────────────────────
         $existing = $this->orderRepo->findByIdempotencyKey(
-            $dto->idempotencyKey,
-            $dto->userId
+            $dto->idempotencyKey
         );
 
         if ($existing) {
@@ -49,9 +55,8 @@ final class CheckoutService
         $type = $resolved['type'];
         $cartId = $resolved['cart_id'] ?? null;
 
-        return DB::transaction(function () use ($dto, $items, $type, $cartId) {
+        return DB::transaction(function () use ($dto, $items, $type, $cartId, $authUserDefaultAddress) {
 
-            // ── Fetch product items from DB (DO NOT TRUST FRONTEND) ────
             $productItems = $this->productItemRepo->findByIds(
                 $items->pluck('productItemId')->toArray()
             );
@@ -83,6 +88,15 @@ final class CheckoutService
                 'idempotency_key' => $dto->idempotencyKey,
                 'status' => OrderStatus::Pending,
                 'checkout_type' => $type,
+            ]);
+
+            $order->address()->create([
+                'first_name' => $authUserDefaultAddress->first_name,
+                'last_name' => $authUserDefaultAddress->last_name,
+                'phone' => $authUserDefaultAddress->phone,
+                'country' => $authUserDefaultAddress->country->name,
+                'city' => $authUserDefaultAddress->city->name,
+                'street_address' => $authUserDefaultAddress->street_address,
             ]);
 
             // ── Create Order Items ─────────────────────────────────────
@@ -145,7 +159,7 @@ final class CheckoutService
     }
 
     // ── Handle existing order safely ──────────────────────────────────
-    private function handleExistingOrder($order): array
+    private function handleExistingOrder(Order $order): array
     {
         $payment = $order->payment;
 

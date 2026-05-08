@@ -17,11 +17,16 @@ final class ShoppingCartItem extends Model
         'shopping_cart_id',
         'product_item_id',
         'quantity',
+        'priority_at'
+    ];
+
+    protected $casts = [
+        'priority_at' => 'datetime'
     ];
 
     public function cart(): BelongsTo
     {
-        return $this->belongsTo(ShoppingCart::class, 'shopping_cart_item_id');
+        return $this->belongsTo(ShoppingCart::class, 'shopping_cart_id');
     }
 
     public function productItem(): BelongsTo

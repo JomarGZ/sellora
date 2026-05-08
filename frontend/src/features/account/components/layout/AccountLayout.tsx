@@ -22,7 +22,7 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 }
 
 export function AccountLayout() {
-  const { logout } = useAuth();
+  const { logout, user, isInitializing } = useAuth();
   const matches = useMatches();
   const lastMatch = matches[matches.length - 1];
   const pageTitle = lastMatch.context?.pageTitle;
@@ -32,7 +32,7 @@ export function AccountLayout() {
         {/* Profile header always visible */}
         <div className="mb-8">
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <ProfileHeader />
+            <ProfileHeader user={user} isLoading={isInitializing} />
           </ErrorBoundary>
         </div>
         {true && <h1 className="text-2xl font-bold mb-6">{pageTitle}</h1>}

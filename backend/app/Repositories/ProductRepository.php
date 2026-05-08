@@ -38,7 +38,7 @@ final class ProductRepository extends BaseRepository
                     $query->whereHas('order', function ($q) {
                         $q->where('status', OrderStatus::Completed);
                     });
-                }
+                },
             ])
             ->withMin('productItems', 'price')
             ->orderBy('created_at', 'desc')
@@ -64,7 +64,7 @@ final class ProductRepository extends BaseRepository
                     $query->whereHas('order', function ($q) {
                         $q->where('status', OrderStatus::Completed);
                     });
-                }
+                },
             ])
             ->having('sold_count', '>=', config('shop.best_seller_min_sales'))
             ->orderByDesc('sold_count')
@@ -102,10 +102,9 @@ final class ProductRepository extends BaseRepository
                     $query->whereHas('order', function ($q) {
                         $q->where('status', OrderStatus::Completed);
                     });
-                }
+                },
             ])
             ->orderByDesc('sold_count')
             ->paginate($filters->perPage);
     }
-
 }

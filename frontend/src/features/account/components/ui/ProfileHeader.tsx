@@ -1,58 +1,22 @@
 import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { format } from "date-fns";
-import { Edit2, Mail, Phone, Calendar } from "lucide-react";
+import { Edit2, Mail, Calendar } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { EditProfileModal } from "../modal/EditProfileModal";
-import { AvatarUploadModal } from "../modal/AvatarUploadModal";
-import {
-  useCustomerProfile,
-  useUpdateCustomer,
-} from "../../api/account.queries";
+import type { User } from "@/shared/types";
 
-export function ProfileHeader() {
-  const { data: customer, isLoading, isError } = useCustomerProfile();
-  const updateMutation = useUpdateCustomer();
-
+type ProfileHeaderProps = {
+  user: User | null;
+  isLoading?: boolean;
+};
+export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
 
-  // Local state for optimistic UI updates
-  const [localCustomer, setLocalCustomer] = useState(customer);
-
-  // Sync local state when remote data loads
-  if (customer && !localCustomer && !isLoading) {
-    setLocalCustomer(customer);
-  }
-
-  const handleSaveProfile = (data: Partial<typeof customer>) => {
-    if (localCustomer) {
-      setLocalCustomer({ ...localCustomer, ...data } as any);
-      updateMutation.mutate(data, {
-        onSuccess: () => {
-          //   toast({ title: "Profile updated successfully" });
-        },
-      });
-    }
-  };
-
-  const handleSaveAvatar = (url: string) => {
-    if (localCustomer) {
-      setLocalCustomer({ ...localCustomer, avatar: url } as any);
-      updateMutation.mutate(
-        { avatar: url },
-        {
-          onSuccess: () => {
-            // toast({ title: "Profile photo updated" });
-          },
-        },
-      );
-    }
-  };
-
-  const displayCustomer = localCustomer || customer;
-
-  if (isError) {
+  const fullName = user
+    ? `${user.first_name} ${user.last_name}`
+    : "Customer Name";
+  if (!user) {
     return (
       <div className="bg-destructive/10 text-destructive p-6 rounded-2xl flex items-center justify-center">
         Failed to load profile header.
@@ -70,8 +34,8 @@ export function ProfileHeader() {
       ) : (
         <div className="relative group">
           <img
-            src={displayCustomer?.avatar}
-            alt={displayCustomer?.name}
+            src={"https://i.pravatar.cc/150?img=2"}
+            alt={fullName}
             className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-background shadow-md"
           />
           <button
@@ -91,24 +55,21 @@ export function ProfileHeader() {
           </>
         ) : (
           <>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-1">
-              {displayCustomer?.name}
+            <h1 className="text-2xl capitalize md:text-3xl font-bold text-foreground mb-1">
+              {fullName}
             </h1>
 
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-6 mt-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <Mail className="w-4 h-4 text-primary/70" />
-                {displayCustomer?.email}
+                {user?.email}
               </div>
-              <div className="flex items-center gap-1.5">
-                <Phone className="w-4 h-4 text-primary/70" />
-                {displayCustomer?.phone}
-              </div>
+
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-primary/70" />
                 Member since{" "}
-                {displayCustomer &&
-                  format(new Date(displayCustomer.memberSince), "MMM yyyy")}
+                {user?.created_at &&
+                  format(new Date(user.created_at), "MMM yyyy")}
               </div>
             </div>
           </>
@@ -129,7 +90,7 @@ export function ProfileHeader() {
         )}
       </div>
 
-      {displayCustomer && (
+      {/* {displayCustomer && (
         <EditProfileModal
           isOpen={editProfileOpen}
           onClose={() => setEditProfileOpen(false)}
@@ -145,7 +106,7 @@ export function ProfileHeader() {
           currentAvatar={displayCustomer.avatar}
           onSave={handleSaveAvatar}
         />
-      )}
+      )} */}
     </div>
   );
 }

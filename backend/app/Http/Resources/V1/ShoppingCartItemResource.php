@@ -17,6 +17,7 @@ final class ShoppingCartItemResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'quantity' => $this->quantity,
             'product_item' => ProductItemResource::make($this->whenLoaded('productItem')),
             'shopping_cart' => ShoppingCartResource::make($this->whenLoaded('cart')),

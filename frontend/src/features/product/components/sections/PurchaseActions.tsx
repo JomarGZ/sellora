@@ -2,7 +2,14 @@ import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Heart, ShoppingCart, Minus, Plus, ShoppingBag } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import type { ProductItem } from "../../types";
+import {
+  useAddToCartMutation,
+  useBuyNowMutation,
+} from "@/features/cart/api/cart.queries";
+import { useAppToast } from "@/shared/components/feedback/AppToast";
+import type { ProductItem } from "@/shared/types";
+import { useNavigate, type HistoryState } from "@tanstack/react-router";
+import { useCartSelection } from "@/features/cart/store/cartSelection.store";
 
 interface PurchaseActionsProps {
   productId: number;
@@ -17,39 +24,57 @@ export function PurchaseActions({
 }: PurchaseActionsProps) {
   const [quantity, setQuantity] = useState(1);
   const [wishlisted, setWishlisted] = useState(false);
-  const [addingToCart, setAddingToCart] = useState(false);
-
+  const { showToast } = useAppToast();
+  const addToCart = useAddToCartMutation();
+  const buyNow = useBuyNowMutation();
+  const navigate = useNavigate();
   const isOutOfStock = selectedItem ? selectedItem.qty_in_stock === 0 : false;
   const isSelectionIncomplete = hasAttributes && !selectedItem;
+  const selectItem = useCartSelection((s) => s.selectItem);
 
   // ─────────────────────────────────────────────────────────────────────────────
   // When you have your real API ready, replace the bodies of these two handlers
   // with your actual fetch / mutation calls.
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (!selectedItem) {
-      //   toast({
-      //     title: "Please select options",
-      //     description: "Choose all product options before adding to cart.",
-      //     variant: "destructive",
-      //   });
+      showToast({
+        severity: "error",
+        summary: "Please select options",
+        detail: "Choose all product options before adding to cart.",
+      });
+      return;
+    }
+    addToCart.mutate({
+      product_item_id: selectedItem.id,
+      quantity,
+    });
+  };
+
+  const handleBuyNow = async () => {
+    if (!selectedItem) {
+      showToast({
+        severity: "error",
+        summary: "Please select options",
+        detail: "Choose all product options before buying.",
+      });
       return;
     }
 
-    setAddingToCart(true);
     try {
-      // TODO: replace with real API call
-      // await addToCartApi({ productItemId: selectedItem.id, quantity });
-      await new Promise((r) => setTimeout(r, 500));
-
-      //   toast({
-      //     title: "Added to Cart!",
-      //     description: `${quantity}x item added to your cart.`,
-      //   });
-      setQuantity(1);
-    } finally {
-      setAddingToCart(false);
+      const response = await buyNow.mutateAsync({
+        product_item_id: selectedItem.id,
+        quantity,
+      });
+      const cartItem = response.data;
+      const isChecked = true;
+      selectItem(cartItem.id, isChecked);
+      navigate({
+        to: "/account/cart",
+      });
+    } catch (error) {
+      console.error("Failed to add to cart a for buy now");
     }
   };
 
@@ -102,12 +127,14 @@ export function PurchaseActions({
         {/* Add to Cart */}
         <Button
           size="lg"
-          className="flex-1 h-14 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
-          disabled={isOutOfStock || isSelectionIncomplete || addingToCart}
+          className="flex-1 h-14 text-base cursor-pointer font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+          disabled={
+            isOutOfStock || isSelectionIncomplete || addToCart.isPending
+          }
           onClick={handleAddToCart}
         >
           <ShoppingCart className="w-5 h-5 mr-2" />
-          {addingToCart
+          {addToCart.isPending
             ? "Adding..."
             : isOutOfStock
               ? "Out of Stock"
@@ -115,12 +142,12 @@ export function PurchaseActions({
         </Button>
         <Button
           size="lg"
-          className="flex-1 h-14 text-base font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
-          disabled={isOutOfStock || isSelectionIncomplete || addingToCart}
-          onClick={handleAddToCart}
+          className="flex-1 h-14 text-base cursor-pointer font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+          disabled={isOutOfStock || isSelectionIncomplete || buyNow.isPending}
+          onClick={handleBuyNow}
         >
           <ShoppingBag className="w-5 h-5 mr-2" />
-          {addingToCart
+          {buyNow.isPending
             ? "Buying out..."
             : isOutOfStock
               ? "Out of Stock"
@@ -132,7 +159,7 @@ export function PurchaseActions({
           variant="outline"
           size="icon"
           className={cn(
-            "h-14 w-14 rounded-xl shrink-0 border-border/80 transition-all duration-300 hover:border-rose-200 hover:bg-rose-50",
+            "h-14 w-14 rounded-xl shrink-0 cursor-pointer border-border/80 transition-all duration-300 hover:border-rose-200 hover:bg-rose-50",
             wishlisted && "border-rose-200 bg-rose-50",
           )}
           onClick={handleToggleWishlist}

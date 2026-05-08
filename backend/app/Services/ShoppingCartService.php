@@ -6,13 +6,15 @@ namespace App\Services;
 
 use App\Enums\CheckoutType;
 use App\Models\Order;
+use App\Repositories\ShoppingCartItemRepository;
 use App\Repositories\ShoppingCartRepository;
 use Illuminate\Support\Facades\DB;
 
 final class ShoppingCartService
 {
     public function __construct(
-        private ShoppingCartRepository $cartRepository
+        private ShoppingCartRepository $cartRepository,
+        private ShoppingCartItemRepository $cartItemRepository
     ) {}
 
     public function getCart(int $userId)
@@ -26,17 +28,18 @@ final class ShoppingCartService
 
             $cart = $this->cartRepository->getOrCreateByUserId($userId);
 
-            $item = $this->cartRepository->findItemByProduct(
+            $item = $this->cartItemRepository->findByProduct(
                 $cart->id,
                 $productItemId
             );
 
             if ($item) {
-                $item = $this->cartRepository->updateItem($item->id, [
+                $item = $this->cartItemRepository->update($item->id, [
                     'quantity' => $item->quantity + $qty,
                 ]);
             } else {
-                $item = $this->cartRepository->createItem($cart->id, [
+                $item = $this->cartItemRepository->create([
+                    'shopping_cart_id' => $cart->id,
                     'product_item_id' => $productItemId,
                     'quantity' => $qty,
                 ]);
@@ -50,7 +53,7 @@ final class ShoppingCartService
     public function updateItemQuantity(int $userId, int $cartItemId, int $qty)
     {
 
-        $item = $this->cartRepository->findItemById(
+        $item = $this->cartItemRepository->findById(
             $this->cartRepository->getOrCreateByUserId($userId)->id,
             $cartItemId
         );
@@ -60,12 +63,12 @@ final class ShoppingCartService
         }
 
         if ($qty <= 0) {
-            $this->cartRepository->deleteItem($item->id);
+            $this->cartItemRepository->delete($item->id);
 
             return null;
         }
 
-        return $this->cartRepository->updateItem($item->id, [
+        return $this->cartItemRepository->update($item->id, [
             'quantity' => $qty,
         ]);
     }
@@ -74,7 +77,7 @@ final class ShoppingCartService
     {
         $cart = $this->cartRepository->getOrCreateByUserId($userId);
 
-        $item = $this->cartRepository->findItemById(
+        $item = $this->cartItemRepository->findById(
             $cart->id,
             $cartItemId
         );
@@ -83,7 +86,7 @@ final class ShoppingCartService
             return false;
         }
 
-        return $this->cartRepository->deleteItem($item->id);
+        return $this->cartItemRepository->delete($item->id);
     }
 
     public function clearPurchasedItems(Order $order): void
@@ -94,6 +97,32 @@ final class ShoppingCartService
 
         $ids = $order->items->pluck('product_item_id')->toArray();
 
-        $this->cartRepository->clearPurchasedItems($order->shopping_cart_id, $ids);
+        $this->cartItemRepository->clearPurchased($order->shopping_cart_id, $ids);
+    }
+
+    public function buyNow(int $userId, int $productItemId, int $qty)
+    {
+        $cart = $this->cartRepository->getOrCreateByUserId($userId);
+
+        $item = $this->cartItemRepository->findByProduct(
+            $cart->id,
+            $productItemId
+        );
+
+        if ($item) {
+            $item = $this->cartItemRepository->update($item->id, [
+                'quantity' => $item->quantity + $qty,
+                'priority_at' => now()
+            ]);
+        } else {
+            $item = $this->cartItemRepository->create([
+                'shopping_cart_id' => $cart->id,
+                'product_item_id' => $productItemId,
+                'quantity' => $qty,
+                'priority_at' => now()
+            ]);
+        }
+
+        return $item->load('productItem');
     }
 }

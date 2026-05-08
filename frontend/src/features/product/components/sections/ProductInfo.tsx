@@ -1,8 +1,9 @@
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import { ChevronRight } from "lucide-react";
-import type { ProductDetails, ProductItem } from "../../types";
+import type { ProductDetails } from "../../types";
 import DOMPurify from "dompurify";
+import type { ProductItem } from "@/shared/types";
 
 interface ProductInfoProps {
   product: ProductDetails;

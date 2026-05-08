@@ -10,11 +10,12 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import type { Customer } from "@/data/mockProfile";
+import type { User } from "@/shared/types";
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  customer: Customer;
+  customer: User | null;
   onSave: (data: Partial<Customer>) => void;
 }
 

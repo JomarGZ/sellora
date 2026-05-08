@@ -24,7 +24,7 @@ final class ProductResource extends JsonResource
             'id' => $product->id,
             'name' => $product->name,
             'slug' => $product->slug,
-           'rating' => [
+            'rating' => [
                 'average' => round($this->avg_rating ?? 0, 1),
                 'count' => $this->reviews_count ?? 0,
             ],
