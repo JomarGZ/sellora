@@ -4,13 +4,14 @@ import { motion } from "framer-motion";
 import type { CartItem } from "../../types";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/shared/lib/utils";
+import { useEffect, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 interface CartItemCardProps {
   item: CartItem;
   onUpdateQuantity: (id: number, quantity: number) => void;
   onRemove: (id: number) => void;
   isRemoving?: boolean;
-  isQuantityUpdatePending?: boolean;
   isSelected?: boolean;
   onSelect?: (id: number, checked: boolean) => void;
 }
@@ -21,9 +22,22 @@ export function CartItemCard({
   onRemove,
   onSelect,
   isSelected = false,
-  isQuantityUpdatePending = false,
   isRemoving = false,
 }: CartItemCardProps) {
+  const [quantity, setQuantity] = useState(item.quantity);
+
+  useEffect(() => {
+    setQuantity(item.quantity);
+  }, [item.quantity]);
+
+  const debouncedUpdateQuantity = useDebouncedCallback((quantity: number) => {
+    onUpdateQuantity(item.id, quantity);
+  }, 500);
+
+  const handleQuantityChange = (newQuantity: number) => {
+    setQuantity(newQuantity);
+    debouncedUpdateQuantity(newQuantity);
+  };
   const attributeDescription = item.product_item.attribute_values
     .map((av) => `${av.attribute_name}: ${av.value}`)
     .join(", ");
@@ -89,31 +103,27 @@ export function CartItemCard({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 rounded-md cursor-pointer"
-                onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                disabled={item.quantity <= 1 || isQuantityUpdatePending}
+                onClick={() => handleQuantityChange(quantity - 1)}
+                disabled={quantity <= 1}
               >
                 <Minus className="w-3 h-3" />
               </Button>
 
               <motion.span
-                key={item.quantity}
+                key={quantity}
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="w-4 text-center text-sm font-medium"
               >
-                {item.quantity}
+                {quantity}
               </motion.span>
 
               <Button
                 variant="ghost"
                 size="icon"
-                disabled={
-                  isQuantityUpdatePending ||
-                  Number(item.quantity) ===
-                    Number(item.product_item.qty_in_stock)
-                }
+                disabled={quantity === Number(item.product_item.qty_in_stock)}
                 className="h-7 w-7 rounded-md cursor-pointer"
-                onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                onClick={() => handleQuantityChange(quantity + 1)}
               >
                 <Plus className="w-3 h-3" />
               </Button>

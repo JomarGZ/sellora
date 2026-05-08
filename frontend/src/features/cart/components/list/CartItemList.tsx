@@ -109,10 +109,6 @@ export function CartItemList({
               updateQuantity.mutate({ id, quantity })
             }
             onRemove={(id) => deleteCartItem.mutate(id)}
-            isQuantityUpdatePending={
-              updateQuantity.isPending &&
-              updateQuantity.variables?.id === item.id
-            }
             isRemoving={
               deleteCartItem.isPending && deleteCartItem.variables === item.id
             }
