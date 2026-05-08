@@ -11,18 +11,10 @@ type BuyNowState = {
 export function CartSection() {
   const location = useLocation();
 
-  // Read once — location.state is never re-read after mount.
-  // On refresh, location.state is null → no preselection. ✓
   const buyNowId = (location.state as BuyNowState)?.buyNow?.itemId ?? null;
 
-  const {
-    selectedArray,
-    selectedCount,
-    isSelected,
-    selectItem,
-    selectAll,
-    deselectAll,
-  } = useCartSelection(buyNowId ? [buyNowId] : []);
+  const { selectedCount, isSelected, selectItem, selectAll, deselectAll } =
+    useCartSelection(buyNowId ? [buyNowId] : []);
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -32,7 +24,6 @@ export function CartSection() {
           onSelectItem={selectItem}
           onSelectAll={selectAll}
           onDeselectAll={deselectAll}
-          buyNowItemId={buyNowId}
         />
       </div>
 

@@ -50,7 +50,6 @@ export function useAddToCartMutation() {
 export function useBuyNowMutation() {
   const queryClient = useQueryClient();
   const { showToast } = useAppToast();
-  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: buyNowItem,

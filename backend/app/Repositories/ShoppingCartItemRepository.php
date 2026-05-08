@@ -24,6 +24,7 @@ final class ShoppingCartItemRepository extends BaseRepository
                 'productItem.attributeValues',
                 'productItem.images',
             ])
+            ->orderByDesc('priority_at')
             ->latest()
             ->paginate($perPage);
     }

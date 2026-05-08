@@ -60,18 +60,23 @@ export function PurchaseActions({
       return;
     }
 
-    buyNow.mutateAsync({
-      product_item_id: selectedItem.id,
-      quantity,
-    });
-    navigate({
-      to: "/account/cart",
-      state: {
-        buyNow: {
-          itemId: selectedItem.id,
-        },
-      } as unknown as HistoryState,
-    });
+    try {
+      await buyNow.mutateAsync({
+        product_item_id: selectedItem.id,
+        quantity,
+      });
+
+      navigate({
+        to: "/account/cart",
+        state: {
+          buyNow: {
+            itemId: selectedItem.id,
+          },
+        } as unknown as HistoryState,
+      });
+    } catch (error) {
+      console.error("Failed to add to cart a for buy now");
+    }
   };
 
   const handleToggleWishlist = async () => {

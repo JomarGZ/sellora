@@ -112,12 +112,14 @@ final class ShoppingCartService
         if ($item) {
             $item = $this->cartItemRepository->update($item->id, [
                 'quantity' => $item->quantity + $qty,
+                'priority_at' => now()
             ]);
         } else {
             $item = $this->cartItemRepository->create([
                 'shopping_cart_id' => $cart->id,
                 'product_item_id' => $productItemId,
                 'quantity' => $qty,
+                'priority_at' => now()
             ]);
         }
 

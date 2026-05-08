@@ -10,7 +10,6 @@ export function useCartSelection(initialIds: number[] = []) {
     setSelectedItems((prev) => {
       const next = new Set(prev);
       checked ? next.add(id) : next.delete(id);
-      console.log("asdsad", next);
       return next;
     });
   }, []);

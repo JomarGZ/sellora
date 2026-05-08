@@ -1,5 +1,4 @@
 // features/cart/components/list/CartItemList.tsx
-import { useEffect, useRef } from "react";
 import { CartItemCard } from "../item/CartItemCard";
 import { ShoppingBag } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
@@ -18,7 +17,6 @@ type CartItemListProps = {
   onSelectItem: (id: number, checked: boolean) => void;
   onSelectAll: (ids: number[]) => void;
   onDeselectAll: (ids: number[]) => void;
-  buyNowItemId: number | null;
 };
 
 export function CartItemList({
@@ -26,29 +24,12 @@ export function CartItemList({
   onSelectItem,
   onSelectAll,
   onDeselectAll,
-  buyNowItemId,
 }: CartItemListProps) {
   const { page = 1 } = accountCartRoute.useSearch();
   const navigate = accountCartRoute.useNavigate();
   const { data: cartData, isLoading } = useCartQuery(page);
   const deleteCartItem = useDeleteCartItemMutation();
   const updateQuantity = useUpdateCartItemQuantityMutation();
-
-  // If Buy Now item is not on page 1, jump to the correct page.
-  // Only fires once when buyNowItemId is set and data is loaded.
-  const jumpedRef = useRef(false);
-  useEffect(() => {
-    if (!buyNowItemId || jumpedRef.current || !cartData) return;
-    const onCurrentPage = cartData.data.some(
-      (item: CartItem) => item.product_item.id === buyNowItemId,
-    );
-    if (!onCurrentPage && cartData.meta.last_page > 1) {
-      // Could search across pages here; for simplicity, go to page 1
-      // and let the user find the item, or extend with a dedicated endpoint.
-      jumpedRef.current = true;
-    }
-    jumpedRef.current = true;
-  }, [buyNowItemId, cartData]);
 
   const setPage = (newPage: number) => {
     navigate({
