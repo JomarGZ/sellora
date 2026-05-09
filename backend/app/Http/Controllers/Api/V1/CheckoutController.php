@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\DTOs\CreateOrderDTO;
 use App\DTOs\V1\CheckoutDTO;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Api\ApiController;
@@ -12,32 +13,38 @@ use App\Http\Requests\Api\V1\CheckoutRequest;
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\V1\CheckoutPreviewResource;
 use App\Models\Order;
+use App\Models\ShippingMethod;
+use App\Models\ShoppingCartItem;
 use App\Repositories\OrderRepository;
 use App\Services\CheckoutService;
+use App\Services\OrderPreviewService;
 use App\Services\StripeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 final class CheckoutController extends ApiController
 {
     public function __construct(
         private readonly CheckoutService $checkoutService,
+        private readonly OrderPreviewService $orderPreview,
         private readonly StripeService $stripeService,
         private readonly OrderRepository $orderRepository
     ) {}
 
-    public function preview(CheckoutPreviewRequest $request): JsonResponse
-    {
-        $result = $this->checkoutService->preview(
-            PreviewDTO::fromRequest($request)
-        );
+   public function preview(CheckoutPreviewRequest $request): JsonResponse {
 
-        return $this->success(
-            data: new CheckoutPreviewResource($result),
-            message: 'Checkout preview retrieved successfully.'
-        );
+        $order = $this->orderPreview
+            ->preview(
+                auth()->user(),
+                $request->array('ids')
+            );
 
-        return response()->json(['sds' => 'asdsad']);
+            logger('result', [$order]);
+        return response()->json([
+            'success' => true,
+            'data' => $order,
+        ]);
     }
 
     public function checkout(CheckoutRequest $request): JsonResponse
