@@ -116,7 +116,8 @@ Route::name('api.v1.')->group(function () {
         */
         Route::prefix('checkout')->name('checkout.')->group(function () {
             Route::post('/', [CheckoutController::class, 'checkout'])->name('store');
-            Route::post('/preview', [CheckoutController::class, 'preview'])->name('preview');
+            Route::post('/snapshot', [CheckoutController::class, 'snapshot'])->name('snapshot');
+            Route::get('/current', [CheckoutController::class, 'current'])->name('current');
         });
 
         /*

@@ -10,13 +10,12 @@ use App\Enums\CheckoutType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\ShippingMethod;
 use App\Models\User;
 use App\Repositories\CartRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
-use App\Repositories\ProductItemRepository;
-use DomainException;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -27,68 +26,26 @@ final class CheckoutService
     public function __construct(
         private OrderRepository $orderRepo,
         private PaymentRepository $paymentRepo,
-        private ProductItemRepository $productItemRepo,
         private CartRepository $cartRepository,
         private InventoryService $inventory,
         private StripeClient $stripe,
     ) {}
 
-    public function checkout(CheckoutDTO $dto): array
+    public function checkout(User $user, Order $order): array
     {
-        $authUserDefaultAddress = User::find($dto->userId)?->defaultAddress()->first();
-
+        $authUserDefaultAddress = $user?->defaultAddress()->first();
+        $order->load('items.productItem');
         if (! $authUserDefaultAddress) {
             throw new Exception('User must have a default address to proceed with checkout.');
         }
         // ── Idempotency guard ─────────────────────────────────────────
-        $existing = $this->orderRepo->findByIdempotencyKey(
-            $dto->idempotencyKey
-        );
-
-        if ($existing) {
-            return $this->handleExistingOrder($existing);
-        }
-
-        $resolved = $this->resolveItems($dto);
-
-        $items = $resolved['items'];
-        $type = $resolved['type'];
-        $cartId = $resolved['cart_id'] ?? null;
-
-        return DB::transaction(function () use ($dto, $items, $type, $cartId, $authUserDefaultAddress) {
-
-            $productItems = $this->productItemRepo->findByIds(
-                $items->pluck('productItemId')->toArray()
-            );
+  
+        return DB::transaction(function () use ($order, $authUserDefaultAddress) {
 
             // ── Lock stock ─────────────────────────────────────────────
-            $this->inventory->ensureStockAvailable($items);
+            $this->inventory->ensureStockAvailable($order->items);
 
-            // ── Compute totals ─────────────────────────────────────────
-            $subtotal = 0;
-
-            foreach ($items as $item) {
-                $product = $productItems->get($item->productItemId);
-                $subtotal += $product->price * $item->quantity;
-            }
-
-            $shippingMethod = ShippingMethod::findOrFail($dto->shippingMethodId);
-            $shippingFee = $shippingMethod->price;
-            $orderTotal = $subtotal + $shippingFee;
-
-            // ── Create Order ───────────────────────────────────────────
-            $order = $this->orderRepo->create([
-                'user_id' => $dto->userId,
-                'shipping_method_id' => $dto->shippingMethodId,
-                'subtotal' => $subtotal,
-                'shipping_fee' => $shippingFee,
-                'shopping_cart_id' => $cartId,
-                'order_total' => $orderTotal,
-                'currency' => 'USD',
-                'idempotency_key' => $dto->idempotencyKey,
-                'status' => OrderStatus::Pending,
-                'checkout_type' => $type,
-            ]);
+            $orderItems = $order->items;
 
             $order->address()->create([
                 'first_name' => $authUserDefaultAddress->first_name,
@@ -99,26 +56,10 @@ final class CheckoutService
                 'street_address' => $authUserDefaultAddress->street_address,
             ]);
 
-            // ── Create Order Items ─────────────────────────────────────
-            $this->orderRepo->createItems(
-                $order->id,
-                collect($items)->map(function ($item) use ($productItems) {
-                    $product = $productItems->get($item->productItemId);
-
-                    return [
-                        'product_item_id' => $product->id,
-                        'quantity' => $item->quantity,
-                        'price' => $product->price,
-                        'product_name' => $product->product->name,
-                        'sku' => $product->sku,
-                    ];
-                })->toArray()
-            );
-
             // ── Create Stripe session ─────────────────────────────────
             $session = $this->stripe->checkout->sessions->create([
                 'payment_method_types' => ['card'],
-                'line_items' => $this->buildLineItems($items, $productItems),
+                'line_items' => $this->buildLineItems($orderItems),
                 'customer_email' => $order->user->email ?? null,
 
                 'shipping_options' => [
@@ -144,7 +85,7 @@ final class CheckoutService
             $this->paymentRepo->create([
                 'order_id' => $order->id,
                 'stripe_session_id' => $session->id,
-                'amount' => $orderTotal,
+                'amount' => $order->order_total,
                 'status' => PaymentStatus::Pending,
                 'payment_provider' => 'stripe',
                 'stripe_checkout_url' => $session->url,
@@ -198,51 +139,21 @@ final class CheckoutService
         ];
     }
 
-    private function resolveItems(CheckoutDTO $dto): array
+    private function buildLineItems(Collection $items): array
     {
-        if (! empty($dto->items)) {
-            return [
-                'items' => collect($dto->items),
-                'type' => CheckoutType::BuyNow,
-            ];
-        }
-
-        $cart = $this->cartRepository->getUserCartWithItems($dto->userId);
-
-        if (! $cart || $cart->items->isEmpty()) {
-            throw new Exception('Cart is empty.');
-        }
-
-        return [
-            'items' => $cart->items->map(fn ($item) => new CheckoutItemDTO(
-                productItemId: $item->product_item_id,
-                quantity: $item->quantity,
-            )
-            ),
-            'type' => CheckoutType::Cart,
-            'cart_id' => $cart->id,
-        ];
-    }
-
-    private function buildLineItems(Collection $items, Collection $productItems): array
-    {
-        return $items->map(function ($item) use ($productItems) {
-            $product = $productItems->get($item->productItemId);
-
-            if (! $product) {
-                throw new DomainException("Invalid product item ID: {$item->productItemId}");
-            }
-
+        return $items->map(function (OrderItem $item) {
+            $productItem = $item->productItem;
+            
             return [
                 'price_data' => [
-                    'currency' => $product->currency ?? 'usd',
-                    'unit_amount' => (int) round($product->price * 100),
+                    'currency' => 'usd',
+                    'unit_amount' => (int) round($productItem->price * 100),
                     'product_data' => [
-                        'name' => $product->product->name,
+                        'name' => $productItem->product->name,
                     ],
                 ],
                 'quantity' => $item->quantity,
             ];
-        })->values()->toArray(); // values() = clean indexed array
+        })->values()->toArray();
     }
 }

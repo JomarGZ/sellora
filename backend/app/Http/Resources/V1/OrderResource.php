@@ -1,9 +1,8 @@
 <?php
 
 declare(strict_types=1);
-// app/Http/Resources/OrderResource.php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,6 +19,7 @@ final class OrderResource extends JsonResource
             'currency' => $this->currency,
             'idempotency_key' => $this->idempotency_key,
             'created_at' => $this->created_at->toISOString(),
+            'order_items' => OrderItemResource::collection($this->whenLoaded('items')),
             'payment' => new PaymentResource($this->whenLoaded('payment')),
         ];
     }

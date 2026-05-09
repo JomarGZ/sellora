@@ -4,24 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\DTOs\CreateOrderDTO;
-use App\DTOs\V1\CheckoutDTO;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\Api\V1\CheckoutPreviewRequest;
 use App\Http\Requests\Api\V1\CheckoutRequest;
-use App\Http\Resources\OrderResource;
-use App\Http\Resources\V1\CheckoutPreviewResource;
+use App\Http\Resources\V1\OrderResource;
 use App\Models\Order;
-use App\Models\ShippingMethod;
-use App\Models\ShoppingCartItem;
 use App\Repositories\OrderRepository;
 use App\Services\CheckoutService;
 use App\Services\OrderPreviewService;
 use App\Services\StripeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 final class CheckoutController extends ApiController
 {
@@ -32,7 +26,7 @@ final class CheckoutController extends ApiController
         private readonly OrderRepository $orderRepository
     ) {}
 
-   public function preview(CheckoutPreviewRequest $request): JsonResponse {
+   public function snapshot(CheckoutPreviewRequest $request): JsonResponse {
 
         $order = $this->orderPreview
             ->preview(
@@ -40,18 +34,40 @@ final class CheckoutController extends ApiController
                 $request->array('ids')
             );
 
-            logger('result', [$order]);
-        return response()->json([
-            'success' => true,
-            'data' => $order,
-        ]);
+        return $this->created(
+            data: new OrderResource($order),
+            message: 'Order Preview successfully',
+        );
+    }
+
+    public function current(): JsonResponse
+    {
+        $order = Order::query()
+            ->where('user_id', auth()->id())
+            ->where('status', OrderStatus::Pending)
+            ->with('items')
+            ->latest()
+            ->first();
+
+        if (!$order) {
+            return $this->notFound(message: 'No active checkout found');
+        }
+
+        return $this->success(
+            data: OrderResource::make($order),
+            message: 'Retrieved pending order successfully.'
+        );
     }
 
     public function checkout(CheckoutRequest $request): JsonResponse
     {
-        $result = $this->checkoutService->checkout(
-            CheckoutDTO::fromRequest($request)
-        );
+
+        $order = Order::query()
+            ->where('status', OrderStatus::Pending)
+            ->where('id', $request->order_id)
+            ->where('user_id', auth()->id())->firstOrFail();
+
+        $result = $this->checkoutService->checkout(auth()->user(), $order);
 
         return $this->success(
             data: [
