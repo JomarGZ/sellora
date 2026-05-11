@@ -55,7 +55,7 @@ final class UserAddressRepository extends BaseRepository
 
     public function getDefault(int $userId): ?UserAddress
     {
-        return $this->model->query()->where('user_id', $userId)->where('is_default', true)->firstOrFail();
+        return $this->model->query()->with(['country', 'city'])->where('user_id', $userId)->where('is_default', true)->firstOrFail();
     }
 
     public function hasDefault(int $userId): bool

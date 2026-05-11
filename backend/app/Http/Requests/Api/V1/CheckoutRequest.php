@@ -16,27 +16,28 @@ final class CheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'idempotency_key' => ['bail', 'required', 'string', 'max:255'],
+            // 'idempotency_key' => ['bail', 'required', 'string', 'max:255'],
 
-            'items' => ['nullable', 'array'],
+            // 'items' => ['nullable', 'array'],
 
-            'items.*.product_item_id' => [
-                'required',
-                'integer',
-                'exists:product_items,id',
-            ],
+            // 'items.*.product_item_id' => [
+            //     'required',
+            //     'integer',
+            //     'exists:product_items,id',
+            // ],
 
-            'items.*.qty' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
+            // 'items.*.qty' => [
+            //     'required',
+            //     'integer',
+            //     'min:1',
+            // ],
 
-            'shipping_method_id' => [
-                'required',
-                'integer',
-                'exists:shipping_methods,id',
-            ],
+            // 'shipping_method_id' => [
+            //     'required',
+            //     'integer',
+            //     'exists:shipping_methods,id',
+            // ],
+            'order_id' => ['required', 'integer', 'exists:orders,id']
         ];
     }
 }

@@ -1,16 +1,18 @@
-import type { CheckoutItem } from "@/types/checkout";
 import { OrderItemCard } from "../ui/OrderItemCard";
 import { OrderItemsSkeleton } from "../states/OrderItemsSkeleton";
 import { Package } from "lucide-react";
+import type { OrderItem } from "@/shared/types";
 
 interface OrderItemsSectionProps {
-  items: CheckoutItem[];
-  loading?: boolean;
+  items: OrderItem[];
+  isloading?: boolean;
 }
 
-export function OrderItemsSection({ items, loading }: OrderItemsSectionProps) {
-  if (loading) return <OrderItemsSkeleton />;
-
+export function OrderItemsSection({
+  items,
+  isloading,
+}: OrderItemsSectionProps) {
+  if (isloading) return <OrderItemsSkeleton />;
   if (items.length === 0) {
     return (
       <section>
@@ -37,7 +39,7 @@ export function OrderItemsSection({ items, loading }: OrderItemsSectionProps) {
       </h2>
       <div className="space-y-3">
         {items.map((item) => (
-          <OrderItemCard key={item.product_item_id} item={item} />
+          <OrderItemCard key={item.id} item={item} />
         ))}
       </div>
     </section>

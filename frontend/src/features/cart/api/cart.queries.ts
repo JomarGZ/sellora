@@ -66,7 +66,7 @@ export function useBuyNowMutation() {
       showToast({
         severity: "error",
         summary: "Failed",
-        detail: error?.message ?? "Unable to proceed to checkout.",
+        detail: error?.message ?? "Unable to add to cart and preselected item.",
       });
     },
   });

@@ -1,3 +1,5 @@
+import type { ApiResponse, OrderItem } from "@/shared/types";
+
 export interface CheckoutItem {
   product_item_id: number;
   name: string;
@@ -5,14 +7,6 @@ export interface CheckoutItem {
   price: number;
   quantity: number;
   variant: string;
-}
-
-export interface Address {
-  id: number;
-  full_name: string;
-  phone: string;
-  address_line: string;
-  is_default: boolean;
 }
 
 export interface ShippingMethod {
@@ -33,3 +27,23 @@ export interface CheckoutPayload {
     quantity: number;
   }[];
 }
+
+export interface CheckoutOrderItem {
+  id: number;
+  is_paid?: boolean;
+  order_total: number;
+  shipping_fee: number;
+  order_items: OrderItem[];
+  subtotal: number;
+  status: string;
+  status_label: string;
+}
+
+export interface OrderSummary {
+  items_count: number;
+  subtotal: number;
+  shipping_fee: number;
+  total: number;
+}
+
+export type CheckoutOrderPreviewResponse = ApiResponse<CheckoutOrderItem>;

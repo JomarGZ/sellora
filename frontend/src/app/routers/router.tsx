@@ -20,9 +20,9 @@ import { CartPage } from "@/features/account/pages/CartPage";
 import { WishlistPage } from "@/features/account/pages/WishlistPage";
 import { SettingPage } from "@/features/account/pages/SettingPage";
 import { useAuth } from "@/providers/AuthProvider";
-import { AppSkeleton } from "@/shared/components/feedback/AppSkeleton";
 import ProtectedRoute from "./ProtectedRoute";
 import GuestRoute from "./GuestRoute";
+import PaymentSuccessPage from "@/features/checkout/pages/PaymentSuccessPage";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
@@ -110,6 +110,15 @@ const checkoutRoute = createRoute({
     meta: [{ title: "Sellora | Checkout" }],
   }),
 });
+
+const checkoutSuccessPageRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checkout/success",
+  component: PaymentSuccessPage,
+  head: () => ({
+    meta: [{ title: "'Sellora | checkout success" }],
+  }),
+});
 const guestRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: "guest",
@@ -193,6 +202,7 @@ rootRoute.addChildren([
   shopRoute,
   productRoute,
   checkoutRoute,
+  checkoutSuccessPageRoute,
   guestRoute,
   protectedRoute.addChildren([
     accountRoute.addChildren([

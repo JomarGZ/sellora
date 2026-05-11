@@ -21,7 +21,7 @@ final class InventoryService
     {
         $items->each(function ($item) {
             $productItem = ProductItem::lockForUpdate()
-                ->findOrFail($item->productItemId);
+                ->findOrFail($item->product_item_id);
 
             if ($productItem->qty_in_stock < $item->quantity) {
                 throw new OutOfStockException(

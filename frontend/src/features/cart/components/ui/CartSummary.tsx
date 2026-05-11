@@ -3,6 +3,8 @@ import { Input } from "@/shared/components/ui/input";
 import { Separator } from "@/shared/components/ui/separator";
 import type { Summary } from "../../types";
 import { cn } from "@/shared/lib/utils";
+import { useCheckoutSnapshot } from "@/features/checkout/api/checkout.queries";
+import { useNavigate } from "@tanstack/react-router";
 
 interface CartSummaryProps {
   summary: Summary | undefined;
@@ -10,6 +12,20 @@ interface CartSummaryProps {
 }
 
 export function CartSummary({ summary, isLoading = false }: CartSummaryProps) {
+  const navigate = useNavigate();
+  const checkoutSnapshot = useCheckoutSnapshot({
+    onSuccess: () => {
+      navigate({ to: "/checkout" });
+    },
+  });
+  const ids = summary?.items.map((item) => item.id);
+
+  const handleCheckoutSnapshot = () => {
+    if (!ids) return;
+
+    checkoutSnapshot.mutate(ids);
+  };
+
   return (
     <div className="bg-white dark:bg-card rounded-2xl border border-border/50 p-6 shadow-sm sticky top-8">
       <h3 className="text-lg font-bold font-display mb-4">Order Summary</h3>
@@ -37,7 +53,11 @@ export function CartSummary({ summary, isLoading = false }: CartSummaryProps) {
         </Button>
       </div>
 
-      <Button className="w-full rounded-xl py-6 text-base font-bold" size="lg">
+      <Button
+        onClick={handleCheckoutSnapshot}
+        className="w-full rounded-xl py-6 text-base font-bold"
+        size="lg"
+      >
         Checkout
       </Button>
 

@@ -14,7 +14,7 @@ final class ShoppingCartItemRepository extends BaseRepository
         parent::__construct($model);
     }
 
-    public function paginateByCartId(int $cartId, int $perPage = 2): LengthAwarePaginator
+    public function paginateByCartId(int $cartId, int $perPage = 5): LengthAwarePaginator
     {
         return $this->model
             ->where('shopping_cart_id', $cartId)

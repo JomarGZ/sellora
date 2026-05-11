@@ -4,7 +4,7 @@ import { useAppToast } from "@/shared/components/feedback/AppToast";
 import {
   createUserAddress,
   deleteUserAddress,
-  getUserAddress,
+  getDefaultAddress,
   getUserAddresses,
   setDefaultUserAddress,
   updateUserAddress,
@@ -38,18 +38,11 @@ export function useCreateUserAddress() {
   });
 }
 
-export function useUserAddress(id: number, options?: { enabled?: boolean }) {
-  return useQuery({
-    queryKey: ["user", "address", id],
-    queryFn: () => getUserAddress(id),
-    enabled: !!id && (options?.enabled ?? true),
-  });
-}
-
-export function useUserAddresses() {
+export function useUserAddresses(enabled: boolean) {
   return useQuery({
     queryKey: ["user", "addresses"],
     queryFn: getUserAddresses,
+    enabled,
   });
 }
 
@@ -67,6 +60,9 @@ export function useSetDefaultUserAddress() {
 
       queryClient.invalidateQueries({
         queryKey: ["user", "addresses"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["default-address"],
       });
     },
     onError(error: any) {
@@ -200,5 +196,12 @@ export function useDeleteAddress() {
         queryKey: ["user", "addresses"],
       });
     },
+  });
+}
+
+export function useUserDefaultAddress() {
+  return useQuery({
+    queryKey: ["default-address"],
+    queryFn: getDefaultAddress,
   });
 }

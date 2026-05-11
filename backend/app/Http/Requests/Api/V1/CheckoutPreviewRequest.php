@@ -24,10 +24,8 @@ final class CheckoutPreviewRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.product_item_id' => ['required', 'integer', 'exists:product_items,id'],
-            'items.*.qty' => ['required', 'integer', 'min:1'],
-            'shipping_method_id' => ['nullable', 'integer', 'exists:shipping_methods,id'],
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer', 'exists:shopping_cart_items,id'],
         ];
     }
 }

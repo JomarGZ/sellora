@@ -46,3 +46,8 @@ export async function setDefaultUserAddress(
   const { data } = await client.put(`/v1/user/address/${id}/default`);
   return data;
 }
+
+export async function getDefaultAddress() {
+  const { data } = await client.get("/v1/user/address/default");
+  return data;
+}

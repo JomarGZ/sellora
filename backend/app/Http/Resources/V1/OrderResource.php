@@ -1,9 +1,8 @@
 <?php
 
 declare(strict_types=1);
-// app/Http/Resources/OrderResource.php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\V1;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,9 +16,12 @@ final class OrderResource extends JsonResource
             'status_label' => $this->status->label(),      // ✅ "Payment confirmed"
             'is_paid' => $this->status->isPaid(),     // ✅ boolean for frontend
             'order_total' => $this->order_total,
+            'subtotal' => $this->subtotal,
+            'shipping_fee' => $this->shipping_fee,
             'currency' => $this->currency,
             'idempotency_key' => $this->idempotency_key,
             'created_at' => $this->created_at->toISOString(),
+            'order_items' => OrderItemResource::collection($this->whenLoaded('items')),
             'payment' => new PaymentResource($this->whenLoaded('payment')),
         ];
     }
