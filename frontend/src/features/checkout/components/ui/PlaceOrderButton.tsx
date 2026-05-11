@@ -3,22 +3,23 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 interface PlaceOrderButtonProps {
-  disabled: boolean;
   loading: boolean;
   onClick: () => void;
   className?: string;
 }
 
 export function PlaceOrderButton({
-  disabled,
   loading,
   onClick,
   className,
 }: PlaceOrderButtonProps) {
   return (
     <Button
-      className={cn("w-full h-12 text-base font-semibold", className)}
-      disabled={disabled || loading}
+      className={cn(
+        "w-full h-12 text-base cursor-pointer font-semibold",
+        className,
+      )}
+      disabled={loading}
       onClick={onClick}
     >
       {loading ? (

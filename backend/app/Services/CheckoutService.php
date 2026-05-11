@@ -76,7 +76,7 @@ final class CheckoutService
                 ],
                 'mode' => 'payment',
                 'success_url' => config('app.frontend_url').'/checkout/success',
-                'cancel_url' => config('app.frontend_url').'/checkout/cancel',
+                'cancel_url' => config('app.frontend_url').'/account/cart',
                 'metadata' => [
                     'order_id' => $order->id,
                 ],

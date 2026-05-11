@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductFilterController;
 use App\Http\Controllers\Api\V1\ProductItemReviewController;
 use App\Http\Controllers\Api\V1\ProductReviewController;
+use App\Http\Controllers\Api\V1\ShippingOptionController;
 use App\Http\Controllers\Api\V1\ShoppingCartController;
 use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\UserAddressController;
@@ -88,10 +89,11 @@ Route::name('api.v1.')->group(function () {
         Route::prefix('user/address')->name('user.address.')->group(function () {
             Route::get('/', [UserAddressController::class, 'index'])->name('index');
             Route::post('/', [UserAddressController::class, 'store'])->name('store');
+            Route::get('/default', [UserAddressController::class, 'default'])->name('default');
             Route::put('/{userAddress}', [UserAddressController::class, 'update'])->name('update');
             Route::get('/{userAddress}', [UserAddressController::class, 'show'])->name('show');
             Route::delete('/{userAddress}', [UserAddressController::class, 'destroy'])->name('destroy');
-            Route::put('/{userAddress}/default', [UserAddressController::class, 'setDefault'])->name('default');
+            Route::put('/{userAddress}/default', [UserAddressController::class, 'setDefault'])->name('set.default');
         });
 
         /*
@@ -107,6 +109,10 @@ Route::name('api.v1.')->group(function () {
             Route::delete('/clear', [ShoppingCartController::class, 'clear'])->name('clear');
             Route::put('/{shoppingCartItem}', [ShoppingCartController::class, 'update'])->name('update');
             Route::delete('/{shoppingCartItem}', [ShoppingCartController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('shipping-option')->name('shipping.')->group(function () {
+            Route::get('/default', [ShippingOptionController::class, 'default'])->name('default');
         });
 
         /*

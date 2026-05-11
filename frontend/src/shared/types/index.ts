@@ -139,6 +139,15 @@ export interface AttributeValue {
   value: string;
 }
 
+export interface OrderItem {
+  id: number;
+  price: number;
+  product_item_id: number;
+  product_item: ProductItem;
+  qty: number;
+  sku: string;
+}
+
 export type ProductResponse = ApiResponse<Product[]> &
   PaginatedResponse<Product>;
 

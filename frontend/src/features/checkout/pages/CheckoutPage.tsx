@@ -1,12 +1,37 @@
 import { ErrorBoundary } from "react-error-boundary";
 import { CheckoutContent } from "@/features/checkout/components/sections/CheckoutContent";
 import { ErrorFallback } from "@/features/checkout/components/states/ErrorFallback";
-import { useState } from "react";
-import { mockCartItems } from "@/data";
-import type { CheckoutItem } from "../types";
+import {
+  useCurrentCheckoutPreview,
+  usePlaceOrder,
+} from "../api/checkout.queries";
+import type { OrderSummary } from "../types";
 
 export default function CheckoutPage() {
-  const [items, setItems] = useState<CheckoutItem[]>(mockCartItems);
+  const { data: checkoutPreviewData, isLoading } = useCurrentCheckoutPreview();
+  const placeOrder = usePlaceOrder({
+    onSuccess(response: any) {
+      window.location.assign(response.data.checkout_url);
+    },
+  });
+  const preview = checkoutPreviewData?.data;
+
+  if (!preview) {
+    return null;
+  }
+  const orderItems = preview.order_items ?? [];
+  const orderId = preview.id;
+
+  const orderSummary: OrderSummary = {
+    items_count: preview.order_items.length,
+    subtotal: Number(preview.subtotal),
+    shipping_fee: Number(preview.shipping_fee),
+    total: Number(preview.order_total),
+  };
+  const handlePlaceOrder = () => {
+    if (!orderId) return;
+    placeOrder.mutate(orderId);
+  };
   return (
     <ErrorBoundary
       fallbackRender={({ resetErrorBoundary }) => (
@@ -19,7 +44,13 @@ export default function CheckoutPage() {
       )}
     >
       <div className="min-h-screen bg-background">
-        <CheckoutContent items={items} />
+        <CheckoutContent
+          onPlaceOrder={handlePlaceOrder}
+          placingOrder={placeOrder.isPending}
+          orderSummary={orderSummary}
+          items={orderItems}
+          isOrderItemsLoading={isLoading}
+        />
       </div>
     </ErrorBoundary>
   );

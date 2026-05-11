@@ -55,20 +55,6 @@ export function AddressCard({
           </p>
         </div>
       </div>
-
-      {canDelete && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="absolute bottom-3 right-3 rounded p-1 text-muted-foreground transition-colors hover:text-destructive"
-          aria-label="Delete address"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
-      )}
     </button>
   );
 }

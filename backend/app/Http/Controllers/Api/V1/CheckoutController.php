@@ -45,7 +45,7 @@ final class CheckoutController extends ApiController
         $order = Order::query()
             ->where('user_id', auth()->id())
             ->where('status', OrderStatus::Pending)
-            ->with('items')
+            ->with(['items.productItem.images', 'items.productItem.product', 'items.productItem.attributeValues'])
             ->latest()
             ->first();
 

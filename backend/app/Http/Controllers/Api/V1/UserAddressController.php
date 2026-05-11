@@ -29,6 +29,14 @@ final class UserAddressController extends ApiController
 
     }
 
+    public function default()
+    {
+        return $this->success(
+            data: UserAddressResource::make($this->repository->getDefault(auth()->id())),
+            message: 'Retrieved default address successfully.'
+        ) ;
+    }
+
     public function show(UserAddress $userAddress)
     {
         // Gate::authorize('view', $address);

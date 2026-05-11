@@ -1,66 +1,55 @@
-import type { Address } from "@/types/checkout";
-import { AddressCard } from "../ui/AddressCard";
+import { useUserDefaultAddress } from "@/features/address/api/address.queries";
 import { AddressSkeleton } from "../states/AddressSkeleton";
-import { EmptyAddressState } from "../states/EmptyAddressState";
+import { MapPin } from "lucide-react";
 import { ErrorFallback } from "../states/ErrorFallback";
-import { Button } from "@/shared/components/ui/button";
-import { Plus } from "lucide-react";
+import { EmptyAddressState } from "../states/EmptyAddressState";
 
-interface AddressSectionProps {
-  addresses: Address[];
-  loading: boolean;
-  error: Error | null;
-  selectedId: number | null;
-  onSelect: (id: number) => void;
-  onDelete: (id: number) => void;
-  onRetry: () => void;
-}
-
-export function AddressSection({
-  addresses,
-  loading,
-  error,
-  selectedId,
-  onSelect,
-  onDelete,
-  onRetry,
-}: AddressSectionProps) {
+export function AddressSection() {
+  const {
+    data: defaultAddress,
+    isLoading,
+    refetch,
+    error,
+  } = useUserDefaultAddress();
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground">
           Delivery Address
         </h2>
-        {addresses.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-selection hover:text-selection"
-          >
-            <Plus className="mr-1 h-3.5 w-3.5" />
-            Add Address
-          </Button>
-        )}
+        <button className="cursor-pointer">Change</button>
       </div>
-
-      {loading ? (
+      {isLoading ? (
         <AddressSkeleton />
       ) : error ? (
-        <ErrorFallback message="Failed to load addresses" onRetry={onRetry} />
-      ) : addresses.length === 0 ? (
+        <ErrorFallback message="Failed to load addresses" onRetry={refetch} />
+      ) : !defaultAddress || Object.keys(defaultAddress.data).length === 0 ? (
         <EmptyAddressState />
       ) : (
         <div className="space-y-3">
-          {addresses.map((addr) => (
-            <AddressCard
-              key={addr.id}
-              address={addr}
-              selected={selectedId === addr.id}
-              onSelect={() => onSelect(addr.id)}
-              onDelete={() => onDelete(addr.id)}
-              canDelete={!(addr.is_default && addresses.length === 1)}
-            />
-          ))}
+          <div className="flex items-start gap-3">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-card-foreground">
+                  {defaultAddress.data.first_name}{" "}
+                  {defaultAddress.data.last_name}
+                </span>
+                {defaultAddress.data.is_default && (
+                  <span className="rounded bg-selection/10 px-1.5 py-0.5 text-xs font-medium text-selection">
+                    Default
+                  </span>
+                )}
+              </div>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {defaultAddress.data.phone}
+              </p>
+              <p className="mt-1 text-sm text-card-foreground">
+                {defaultAddress.data.city.name}{" "}
+                {defaultAddress.data.country.name}
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </section>
