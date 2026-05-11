@@ -6,6 +6,12 @@ import {
   usePlaceOrder,
 } from "../api/checkout.queries";
 import type { OrderSummary } from "../types";
+import { AddressListModal } from "../components/modals/AddressListModal";
+import { useState } from "react";
+import {
+  useSetDefaultUserAddress,
+  useUserAddresses,
+} from "@/features/address/api/address.queries";
 
 export default function CheckoutPage() {
   const { data: checkoutPreviewData, isLoading } = useCurrentCheckoutPreview();
@@ -14,8 +20,11 @@ export default function CheckoutPage() {
       window.location.assign(response.data.checkout_url);
     },
   });
-  const preview = checkoutPreviewData?.data;
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
+  const { data: addresses } = useUserAddresses(addressModalOpen);
+  const setDefaultAddress = useSetDefaultUserAddress();
 
+  const preview = checkoutPreviewData?.data;
   if (!preview) {
     return null;
   }
@@ -45,11 +54,19 @@ export default function CheckoutPage() {
     >
       <div className="min-h-screen bg-background">
         <CheckoutContent
+          onChangeAddress={() => setAddressModalOpen(true)}
           onPlaceOrder={handlePlaceOrder}
           placingOrder={placeOrder.isPending}
           orderSummary={orderSummary}
           items={orderItems}
           isOrderItemsLoading={isLoading}
+        />
+        <AddressListModal
+          open={addressModalOpen}
+          isLoading={setDefaultAddress.isPending}
+          onOpenChange={setAddressModalOpen}
+          addresses={addresses?.data ?? []}
+          onSetDefault={(id) => setDefaultAddress.mutate(id)}
         />
       </div>
     </ErrorBoundary>

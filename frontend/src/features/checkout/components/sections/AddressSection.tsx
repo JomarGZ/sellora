@@ -4,7 +4,7 @@ import { MapPin } from "lucide-react";
 import { ErrorFallback } from "../states/ErrorFallback";
 import { EmptyAddressState } from "../states/EmptyAddressState";
 
-export function AddressSection() {
+export function AddressSection({ onChange }: { onChange: () => void }) {
   const {
     data: defaultAddress,
     isLoading,
@@ -17,7 +17,12 @@ export function AddressSection() {
         <h2 className="text-lg font-semibold text-foreground">
           Delivery Address
         </h2>
-        <button className="cursor-pointer">Change</button>
+        <button
+          onClick={onChange}
+          className="cursor-pointer border rounded-2xl px-3 hover:bg-gray-300 py-1"
+        >
+          Change
+        </button>
       </div>
       {isLoading ? (
         <AddressSkeleton />

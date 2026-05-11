@@ -5,7 +5,6 @@ import {
   createUserAddress,
   deleteUserAddress,
   getDefaultAddress,
-  getUserAddress,
   getUserAddresses,
   setDefaultUserAddress,
   updateUserAddress,
@@ -39,18 +38,11 @@ export function useCreateUserAddress() {
   });
 }
 
-export function Default(id: number, options?: { enabled?: boolean }) {
-  return useQuery({
-    queryKey: ["user", "address", id],
-    queryFn: () => getUserAddress(id),
-    enabled: !!id && (options?.enabled ?? true),
-  });
-}
-
-export function useUserAddresses() {
+export function useUserAddresses(enabled: boolean) {
   return useQuery({
     queryKey: ["user", "addresses"],
     queryFn: getUserAddresses,
+    enabled,
   });
 }
 
@@ -68,6 +60,9 @@ export function useSetDefaultUserAddress() {
 
       queryClient.invalidateQueries({
         queryKey: ["user", "addresses"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["default-address"],
       });
     },
     onError(error: any) {

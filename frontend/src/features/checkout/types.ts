@@ -9,14 +9,6 @@ export interface CheckoutItem {
   variant: string;
 }
 
-export interface Address {
-  id: number;
-  full_name: string;
-  phone: string;
-  address_line: string;
-  is_default: boolean;
-}
-
 export interface ShippingMethod {
   id: number;
   name: string;
