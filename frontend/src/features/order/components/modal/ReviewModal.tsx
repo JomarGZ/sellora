@@ -25,7 +25,6 @@ import {
 } from "@/shared/components/ui/field";
 
 import { Star } from "lucide-react";
-import type { CreateReviewPayload } from "../../types";
 import {
   reviewSchema,
   type ReviewFormValues,
@@ -33,7 +32,6 @@ import {
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 
 interface ReviewModalProps {
-  orderItemId: string;
   productName: string;
   productImage: string;
   existingReview?: {
@@ -42,21 +40,20 @@ interface ReviewModalProps {
   } | null;
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CreateReviewPayload) => void;
+  isPending?: boolean;
+  onSubmit: (data: ReviewFormValues, reset: () => void) => void;
 }
 
 export function ReviewModal({
-  orderItemId,
   productName,
   productImage,
   existingReview,
+  isPending = false,
   isOpen,
   onClose,
   onSubmit,
 }: ReviewModalProps) {
   const [hoveredStar, setHoveredStar] = useState(0);
-  const [isPending, setIsPending] = useState(false);
-  const { showToast } = useAppToast();
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
@@ -65,26 +62,8 @@ export function ReviewModal({
     },
   });
 
-  const handleSubmit = async (data: ReviewFormValues) => {
-    setIsPending(true);
-    try {
-      await new Promise((r) => setTimeout(r, 400));
-
-      await onSubmit({
-        orderItemId,
-        rating: data.rating,
-        comment: data.comment,
-      });
-      showToast({
-        severity: "success",
-        summary: "Review submitted",
-        detail: "Thank you for your feedback",
-      });
-      form.reset();
-      onClose();
-    } finally {
-      setIsPending(false);
-    }
+  const handleSubmit = (data: ReviewFormValues) => {
+    onSubmit(data, form.reset);
   };
 
   return (

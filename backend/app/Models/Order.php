@@ -8,6 +8,8 @@ use App\Enums\CheckoutType;
 use App\Enums\OrderStatus;
 use Database\Factories\OrderFactory;
 use DomainException;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -96,4 +98,14 @@ final class Order extends Model
     {
         return $query->where('status', OrderStatus::Pending);
     }
+
+    #[Scope]
+    protected function filterByStatus(Builder $query, ?OrderStatus $status)
+    {
+        return $query->when(
+            $status,
+            fn (Builder $q) => $q->where('status', $status)
+        );
+    }
+    
 }

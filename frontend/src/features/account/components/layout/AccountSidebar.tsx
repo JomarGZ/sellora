@@ -1,7 +1,5 @@
 // account/components/layout/AccountSidebar.tsx
 import {
-  Heart,
-  LayoutDashboard,
   LogOut,
   MapPin,
   Settings,
@@ -11,11 +9,9 @@ import {
 import { AccountNavLink } from "../navigation/AccountNavlink";
 
 const links = [
-  { label: "Overview", to: "/account/overview", icon: LayoutDashboard },
-  { label: "Orders", to: "/account/orders", icon: ShoppingBag },
-  { label: "Cart", to: "/account/cart", icon: ShoppingCart },
-  { label: "Addresses", to: "/account/addresses", icon: MapPin },
-  { label: "Wishlist", to: "/account/wishlist", icon: Heart },
+  { label: "My Purchase", to: "/account/orders", icon: ShoppingBag },
+  { label: "My Cart", to: "/account/cart", icon: ShoppingCart },
+  { label: "My Addresses", to: "/account/addresses", icon: MapPin },
   { label: "Settings", to: "/account/settings", icon: Settings },
 ];
 

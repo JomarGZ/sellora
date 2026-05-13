@@ -1,31 +1,16 @@
-import type { OrderCallbacks, OrderItem, OrderStatus } from "../../types";
+import type { OrderItem } from "@/shared/types";
 import OrderItemCard from "../ui/OrderItemCard";
+import type { ReviewPayload } from "../../types";
 
 interface OrderItemsListProps {
   items: OrderItem[];
-  orderStatus: OrderStatus;
-  orderId: string;
-  callbacks: OrderCallbacks;
-  onReviewItem: (orderId: string, item: OrderItem) => void;
+  onReview: (payload: ReviewPayload) => void;
 }
 
-const OrderItemsList = ({
-  items,
-  orderStatus,
-  orderId,
-  callbacks,
-  onReviewItem,
-}: OrderItemsListProps) => (
+const OrderItemsList = ({ items, onReview }: OrderItemsListProps) => (
   <div className="divide-y divide-border">
     {items.map((item) => (
-      <OrderItemCard
-        key={item.id}
-        item={item}
-        orderStatus={orderStatus}
-        orderId={orderId}
-        callbacks={callbacks}
-        onReviewItem={onReviewItem}
-      />
+      <OrderItemCard key={item.id} item={item} onReview={onReview} />
     ))}
   </div>
 );

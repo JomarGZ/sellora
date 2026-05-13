@@ -139,9 +139,22 @@ export interface AttributeValue {
   value: string;
 }
 
+export interface Order {
+  id: number;
+  status: string;
+  is_paid: boolean;
+  order_total: number;
+  subtotal: number;
+  shipping_fee: number;
+  currency: string;
+  created_at: string;
+  order_items: OrderItem[];
+}
+
 export interface OrderItem {
   id: number;
   price: number;
+  already_reviewed: boolean;
   product_item_id: number;
   product_item: ProductItem;
   qty: number;
@@ -150,5 +163,7 @@ export interface OrderItem {
 
 export type ProductResponse = ApiResponse<Product[]> &
   PaginatedResponse<Product>;
+
+export type OrderResponse = PaginatedResponse<Order>;
 
 export * from "./auth";

@@ -2,10 +2,8 @@ import { useState } from "react";
 import { MOCK_REVIEWS } from "@/data/mock-data";
 import { format } from "date-fns";
 import { Star, MessageSquare } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
 import { Progress } from "@/shared/components/ui/progress";
 import { Separator } from "@/shared/components/ui/separator";
-import { ReviewModal } from "../../../order/components/modal/ReviewModal";
 import { EmptyState } from "../../states/EmptyState";
 import type { Review, ReviewsResponse } from "../../types";
 
@@ -26,7 +24,6 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
   };
 
   const [reviewsData, setReviewsData] = useState<ReviewsResponse>(initialData);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { reviews, averageRating, totalReviews } = reviewsData;
 
@@ -103,15 +100,6 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             icon={<MessageSquare className="w-8 h-8" />}
             title="No reviews yet"
             description="Be the first to review this product and share your experience with others."
-            action={
-              <Button
-                onClick={() => setIsModalOpen(true)}
-                variant="outline"
-                className="rounded-xl"
-              >
-                Write the first review
-              </Button>
-            }
           />
         ) : (
           <div className="space-y-6">

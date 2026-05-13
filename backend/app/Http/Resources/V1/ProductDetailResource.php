@@ -32,7 +32,7 @@ final class ProductDetailResource extends JsonResource
                 'max' => $this->product_items_max_price,
             ],
             'rating' => [
-                'average' => round($this->avg_rating ?? 0, 1),
+                'average' => round((float) ($this->avg_rating ?? 0), 1),
                 'count' => $this->reviews_count ?? 0,
             ],
             'total_stock' => (int) $this->product_items_sum_qty_in_stock,

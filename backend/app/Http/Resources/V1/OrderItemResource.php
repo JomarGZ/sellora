@@ -27,6 +27,7 @@ final class OrderItemResource extends JsonResource
             'sku' => $this->sku,
             'qty' => $this->quantity,
             'price' => number_format((float) $this->price, 2),
+            'already_reviewed' => $this->review !== null,
             'product_item' => ProductItemResource::make($this->whenLoaded('productItem'))
         ];
     }
