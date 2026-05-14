@@ -31,9 +31,10 @@ final class ProductDetailResource extends JsonResource
                 'min' => $this->product_items_min_price,
                 'max' => $this->product_items_max_price,
             ],
-            'rating' => [
+            'review_summary' => [
                 'average' => round((float) ($this->avg_rating ?? 0), 1),
                 'count' => $this->reviews_count ?? 0,
+                'ratings' => $this->rating_breakdown
             ],
             'total_stock' => (int) $this->product_items_sum_qty_in_stock,
             'brand' => BrandResource::make($this->whenLoaded('brand')),

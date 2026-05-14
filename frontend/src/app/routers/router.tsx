@@ -91,10 +91,13 @@ export const shopRoute = createRoute({
   }),
 });
 
-const productRoute = createRoute({
+export const productRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/product/$slug",
   component: ProductPage,
+  validateSearch: (search) => ({
+    page: search.page ? Number(search.page) : undefined,
+  }),
   head: () => ({
     meta: [{ title: "Sellora | product" }],
   }),

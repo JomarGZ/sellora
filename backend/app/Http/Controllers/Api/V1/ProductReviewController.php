@@ -17,12 +17,9 @@ final class ProductReviewController extends ApiController
     {
         $reviews = $this->itemReviewService->getReviewByProductSlug(
             slug: $slug,
-            perPage: $request->integer('per_page', 10)
+            perPage: $request->integer('per_page', 5)
         );
 
-        return ProductItemReviewResource::collection($reviews)->additional([
-            'message' => 'Paginated product reviews retrieved successfully',
-            'success' => true,
-        ]);
+        return ProductItemReviewResource::collection($reviews);
     }
 }

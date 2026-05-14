@@ -1,56 +1,25 @@
-import { useState } from "react";
-import { MOCK_REVIEWS } from "@/data/mock-data";
 import { format } from "date-fns";
 import { Star, MessageSquare } from "lucide-react";
 import { Progress } from "@/shared/components/ui/progress";
 import { Separator } from "@/shared/components/ui/separator";
 import { EmptyState } from "../../states/EmptyState";
-import type { Review, ReviewsResponse } from "../../types";
+import type { ProductReview, ProductReviewResponse } from "@/shared/types";
+import { formatAttributeDescription } from "@/shared/lib/utils";
+import { Pagination } from "../ui/Pagination";
 
 interface ProductReviewsProps {
-  productId: number;
+  reviewSummary: ProductReview;
+  commentListPage: number;
+  onPageChange: (page: number) => void;
+  productReviews: ProductReviewResponse | undefined;
 }
 
-export function ProductReviews({ productId }: ProductReviewsProps) {
-  // ─────────────────────────────────────────────────────────────────────────────
-  // When you have your real API ready, replace the mock data source below with
-  // a real fetch / React Query hook:
-  //   const { data, isLoading, error } = useGetProductReviews(productId);
-  // ─────────────────────────────────────────────────────────────────────────────
-  const initialData: ReviewsResponse = MOCK_REVIEWS[productId] ?? {
-    reviews: [],
-    averageRating: 0,
-    totalReviews: 0,
-  };
-
-  const [reviewsData, setReviewsData] = useState<ReviewsResponse>(initialData);
-
-  const { reviews, averageRating, totalReviews } = reviewsData;
-
-  const distribution = [5, 4, 3, 2, 1].map((stars) => {
-    const count = reviews.filter((r) => r.rating === stars).length;
-    return {
-      stars,
-      count,
-      percentage: totalReviews > 0 ? (count / totalReviews) * 100 : 0,
-    };
-  });
-
-  // Called by ReviewModal after a new review is submitted
-  const handleReviewSubmit = (newReview: Review) => {
-    const updatedReviews = [newReview, ...reviews];
-    const newTotal = updatedReviews.length;
-    const newAvg =
-      Math.round(
-        (updatedReviews.reduce((s, r) => s + r.rating, 0) / newTotal) * 10,
-      ) / 10;
-    setReviewsData({
-      reviews: updatedReviews,
-      averageRating: newAvg,
-      totalReviews: newTotal,
-    });
-  };
-
+export function ProductReviews({
+  reviewSummary,
+  onPageChange,
+  productReviews,
+  commentListPage,
+}: ProductReviewsProps) {
   return (
     <div className="space-y-10">
       {/* Summary */}
@@ -63,17 +32,18 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
           <div className="flex items-center justify-center gap-2 mb-2">
             <Star className="w-8 h-8 fill-amber-400 text-amber-400" />
             <span className="text-5xl font-display font-bold">
-              {averageRating.toFixed(1)}
+              {reviewSummary.average}
             </span>
           </div>
           <p className="text-muted-foreground text-sm mb-6">
-            Based on {totalReviews} review{totalReviews !== 1 && "s"}
+            Based on {reviewSummary.count} review
+            {reviewSummary.count !== 1 && "s"}
           </p>
         </div>
 
         {/* Rating Distribution */}
         <div className="lg:col-span-8 flex flex-col justify-center h-full space-y-3 py-4">
-          {distribution.map(({ stars, count, percentage }) => (
+          {reviewSummary.ratings.map(({ stars, count, percentage }) => (
             <div key={stars} className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1 w-12 shrink-0">
                 <span className="font-medium">{stars}</span>
@@ -95,7 +65,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
         <h4 className="text-xl font-display font-semibold mb-6">
           Recent Reviews
         </h4>
-        {reviews.length === 0 ? (
+        {productReviews?.data.length === 0 ? (
           <EmptyState
             icon={<MessageSquare className="w-8 h-8" />}
             title="No reviews yet"
@@ -103,7 +73,7 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
           />
         ) : (
           <div className="space-y-6">
-            {reviews.map((review) => (
+            {productReviews?.data.map((review) => (
               <div
                 key={review.id}
                 className="bg-card p-6 rounded-2xl border border-border/50 shadow-sm hover:shadow-md transition-shadow duration-300"
@@ -111,19 +81,25 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold">
-                      {review.userName.charAt(0).toUpperCase()}
+                      {review.user.first_name.charAt(0).toUpperCase()}
+                      {review.user.last_name.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <p className="font-semibold text-foreground flex items-center gap-2">
-                        {review.userName}
-                        {review.verified && (
+                        {`${review.user.first_name} ${review.user.last_name}`}
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(review.created_at), "MMMM d, yyyy")}
+                        </span>
+                        {!!review.user.email_verified_at && (
                           <span className="text-[10px] uppercase tracking-wider font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded-sm">
                             Verified
                           </span>
                         )}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(review.createdAt), "MMMM d, yyyy")}
+                        {formatAttributeDescription(
+                          review.product_item.attribute_values,
+                        )}
                       </p>
                     </div>
                   </div>
@@ -149,6 +125,11 @@ export function ProductReviews({ productId }: ProductReviewsProps) {
             ))}
           </div>
         )}
+        <Pagination
+          currentPage={commentListPage}
+          totalPages={productReviews?.meta.last_page ?? 1}
+          onPageChange={onPageChange}
+        />
       </div>
     </div>
   );

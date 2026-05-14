@@ -21,9 +21,10 @@ import { PurchaseActions } from "@/features/product/components/sections/Purchase
 import { ProductReviews } from "@/features/product/components/sections/ProductReviews";
 import { useParams } from "@tanstack/react-router";
 import type { ProductDetailResponse } from "../types";
-import { useProductShow } from "../api/product.queries";
+import { useProductReviews, useProductShow } from "../api/product.queries";
 import { useAuth } from "@/providers/AuthProvider";
-import type { ProductItem } from "@/shared/types";
+import type { ProductItem, ProductReviewResponse } from "@/shared/types";
+import { productRoute } from "@/app/routers/router";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
@@ -81,12 +82,18 @@ function ProductPageSkeleton() {
 }
 
 function ProductPageContent({
+  productReviews,
   product,
   isLoading,
+  onPageChange,
+  commentListPage,
   isLoggedIn,
 }: {
   product: ProductDetailResponse | undefined;
+  productReviews: ProductReviewResponse | undefined;
   isLoading: boolean;
+  commentListPage: number;
+  onPageChange: (page: number) => void;
   isLoggedIn: boolean;
 }) {
   const [selectedAttributes, setSelectedAttributes] = useState<
@@ -328,7 +335,12 @@ function ProductPageContent({
               className="focus-visible:outline-none focus-visible:ring-0"
             >
               <div className="max-w-5xl">
-                <ProductReviews productId={productData.id} />
+                <ProductReviews
+                  reviewSummary={productData.review_summary}
+                  productReviews={productReviews}
+                  onPageChange={onPageChange}
+                  commentListPage={commentListPage}
+                />
               </div>
             </TabsContent>
           </Tabs>
@@ -342,14 +354,29 @@ export default function ProductPage() {
   const { slug } = useParams({ from: "/product/$slug" });
   const { user } = useAuth();
   const { data: product, isLoading } = useProductShow(slug);
+  const { page = 1 } = productRoute.useSearch();
+  const navigate = productRoute.useNavigate();
+  const { data: productReviews } = useProductReviews(slug, page);
+
+  const setCommentListPage = (newPage: number) => {
+    navigate({
+      resetScroll: false,
+      search: (prev: { page?: number }) => {
+        const next = { ...prev };
+        if (newPage === 1) delete next.page;
+        else next.page = newPage;
+        return next;
+      },
+    });
+  };
   return (
-    <ErrorBoundary
-      FallbackComponent={ErrorFallback}
-      onReset={() => window.location.reload()}
-    >
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
       <ProductPageContent
         product={product}
+        productReviews={productReviews}
         isLoggedIn={!!user}
+        onPageChange={setCommentListPage}
+        commentListPage={page}
         isLoading={isLoading}
       />
     </ErrorBoundary>
