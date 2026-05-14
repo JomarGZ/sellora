@@ -7,6 +7,7 @@ namespace App\Http\Resources\V1;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @mixin User
@@ -22,6 +23,7 @@ final class UserResource extends JsonResource
             'id' => $this->id,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
+            'avatar' => $this->avatar ? asset(Storage::url($this->avatar)) : null,
             'email' => $this->email,
             'email_verified_at' => $this->email_verified_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

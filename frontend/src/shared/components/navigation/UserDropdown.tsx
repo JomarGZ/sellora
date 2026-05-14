@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface UserDropdownProps {
   onLogout?: () => void;
@@ -8,6 +9,7 @@ interface UserDropdownProps {
 
 export function UserDropdown({ onLogout, hasNewActivity }: UserDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -19,22 +21,34 @@ export function UserDropdown({ onLogout, hasNewActivity }: UserDropdownProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
+  console.log(user);
   return (
     <div className="relative" ref={ref}>
       {/* Avatar Button */}
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full bg-yellow-300 text-accent transition-all hover:ring-2 hover:ring-accent"
+        className="relative flex h-9 w-9 items-center cursor-pointer justify-center overflow-hidden rounded-full bg-yellow-300 text-accent transition-all hover:ring-2 hover:ring-accent"
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        JD
-        {/* Notification Dot */}
-        {hasNewActivity && (
-          <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-black ring-2 ring-white" />
+        {user?.avatar ? (
+          <img
+            src={user.avatar}
+            alt="User avatar"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <span className="text-sm font-medium">
+            {user?.first_name?.[0]}
+            {user?.last_name?.[0]}
+          </span>
         )}
+
+        {/* Notification Dot */}
+        {/* {hasNewActivity && (
+          <span className="absolute top-0 right-0 h-2.5 w-2.5 z-10 rounded-full bg-red-950 ring-2 ring-white"></span>
+        )} */}
       </button>
 
       {/* Dropdown Menu */}
@@ -46,7 +60,7 @@ export function UserDropdown({ onLogout, hasNewActivity }: UserDropdownProps) {
           <Link
             to="/account/orders"
             onClick={() => setIsOpen(false)}
-            className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-accent"
+            className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950"
             role="menuitem"
           >
             Dashboard

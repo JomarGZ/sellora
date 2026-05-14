@@ -46,6 +46,7 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
         'first_name',
         'last_name',
         'email',
+        'avatar',
         'password',
     ];
 
