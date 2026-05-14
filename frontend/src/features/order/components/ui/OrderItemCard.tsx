@@ -1,36 +1,24 @@
 import { Button } from "@/shared/components/ui/button";
 import { ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
-import {
-  REVIEWABLE_STATUSES,
-  type OrderCallbacks,
-  type OrderItem,
-  type OrderStatus,
-} from "../../types";
+import type { OrderItem } from "@/shared/types";
+import { formatAttributeDescription } from "@/shared/lib/utils";
+import type { ReviewPayload } from "../../types";
 
 interface OrderItemCardProps {
   item: OrderItem;
-  orderStatus: OrderStatus;
-  orderId: string;
-  callbacks: OrderCallbacks;
-  onReviewItem: (orderId: string, item: OrderItem) => void;
+  onReview: (payload: ReviewPayload) => void;
 }
 
-const OrderItemCard = ({
-  item,
-  orderStatus,
-  orderId,
-  callbacks,
-  onReviewItem,
-}: OrderItemCardProps) => {
-  const canReview = REVIEWABLE_STATUSES.includes(orderStatus) && !item.reviewed;
-  const canBuyAgain = item.inStock;
+const OrderItemCard = ({ item, onReview }: OrderItemCardProps) => {
+  const canReview = !item.already_reviewed;
+  const canBuyAgain = item.product_item.in_stock;
 
   return (
     <div className="flex items-start gap-3 py-3">
       <img
-        src={item.image}
-        alt={item.name}
+        src={item.product_item.images[0].url}
+        alt={item.product_item.product?.name}
         className="h-14 w-14 rounded-md object-cover bg-secondary shrink-0"
         loading="lazy"
       />
@@ -38,12 +26,13 @@ const OrderItemCard = ({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground truncate">
-              {item.name}
+              {item.product_item.product?.name}
             </p>
             <p className="text-xs text-muted-foreground">
-              {item.variant} · Qty: {item.quantity}
+              {formatAttributeDescription(item.product_item.attribute_values)} ·
+              Qty: {item.qty}
             </p>
-            {!item.inStock && (
+            {!item.product_item.in_stock && (
               <Badge
                 variant="outline"
                 className="mt-1 text-[10px] text-destructive border-destructive/20"
@@ -51,7 +40,7 @@ const OrderItemCard = ({
                 Out of Stock
               </Badge>
             )}
-            {item.reviewed && (
+            {item.already_reviewed && (
               <Badge
                 variant="outline"
                 className="mt-1 text-[10px] text-status-success border-status-success/20"
@@ -61,7 +50,7 @@ const OrderItemCard = ({
             )}
           </div>
           <p className="text-sm font-semibold text-foreground whitespace-nowrap">
-            ${(item.price * item.quantity).toFixed(2)}
+            ${(item.price * item.qty).toFixed(2)}
           </p>
         </div>
 
@@ -72,7 +61,6 @@ const OrderItemCard = ({
               size="sm"
               variant="ghost"
               className="h-7 text-xs gap-1 px-2 text-primary"
-              onClick={() => callbacks.onBuyAgain(item)}
             >
               <ShoppingCart className="h-3 w-3" />
               Buy Again
@@ -82,8 +70,15 @@ const OrderItemCard = ({
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 text-xs gap-1 px-2 text-status-pending"
-              onClick={() => onReviewItem(orderId, item)}
+              onClick={() => {
+                onReview({
+                  orderItemId: item.id,
+                  productItemId: item.product_item_id,
+                  productItemImage: item.product_item.images[0].url,
+                  productName: item.product_item.product?.name,
+                });
+              }}
+              className="h-7 text-xs gap-1 px-2 cursor-pointer text-status-pending"
             >
               <Star className="h-3 w-3" />
               Rate Product

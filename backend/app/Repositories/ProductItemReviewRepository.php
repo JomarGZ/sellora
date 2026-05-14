@@ -29,8 +29,9 @@ final class ProductItemReviewRepository extends BaseRepository
                 $q->where('slug', $slug);
             })
             ->with([
-                'user:id,first_name,last_name',
-                'productItem.id,sku',
+                'user:id,first_name,last_name,email_verified_at',
+                'productItem:id,sku,price,product_id',
+                'productItem.attributeValues.attribute'
             ])
             ->latest()
             ->paginate($perPage);

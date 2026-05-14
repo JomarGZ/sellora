@@ -22,6 +22,8 @@ final class AttributeValueResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'attribute_id' => $this->attribute_id,
+            'attribute_name' => $this->attribute->name ?? null,
             'label' => ucfirst($this->value),
             'value' => $this->value,
             'hex_color' => $this->hex_color,

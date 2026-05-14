@@ -21,7 +21,7 @@ final class ShoppingCartItemRepository extends BaseRepository
             ->with([
                 'productItem',
                 'productItem.product',
-                'productItem.attributeValues',
+                'productItem.attributeValues.attribute',
                 'productItem.images',
             ])
             ->orderByDesc('priority_at')

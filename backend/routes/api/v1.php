@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CheckoutController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ProductFilterController;
 use App\Http\Controllers\Api\V1\ProductItemReviewController;
@@ -111,9 +112,21 @@ Route::name('api.v1.')->group(function () {
             Route::delete('/{shoppingCartItem}', [ShoppingCartController::class, 'destroy'])->name('destroy');
         });
 
+
         Route::prefix('shipping-option')->name('shipping.')->group(function () {
             Route::get('/default', [ShippingOptionController::class, 'default'])->name('default');
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | order
+        |--------------------------------------------------------------------------
+        */
+
+        Route::prefix('orders')->name('order.')->group(function () {
+            Route::get('/', [OrderController::class, 'index'])->name('index');
+        });
+
 
         /*
         |--------------------------------------------------------------------------

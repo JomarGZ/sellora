@@ -48,6 +48,25 @@ final class ProductController extends ApiController
             ->loadMin('productItems', 'price')
             ->loadMax('productItems', 'price')
             ->loadSum('productItems', 'qty_in_stock');
+        
+        $ratingBreakdown = $product->productItemReviews()
+            ->selectRaw('rating, COUNT(*) as total')
+            ->groupBy('rating')
+            ->pluck('total','rating');
+
+
+        $product->rating_breakdown = collect([5,4,3,2,1])
+            ->map(function($star) use ($ratingBreakdown, $product) {
+                $count = $ratingBreakdown->get($star, 0);
+                return [
+                    'stars' => $star,
+                    'count' => $count,
+                    'percentage' => $product->reviews_count > 0 
+                        ? round(($count / $product->reviews_count) * 100, 2)
+                        : 0
+                ];
+            });
+
 
         $attributes = $this->service->resolveAttributes($product);
 

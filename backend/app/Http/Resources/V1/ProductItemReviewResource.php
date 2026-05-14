@@ -16,6 +16,14 @@ final class ProductItemReviewResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'rating' => $this->rating,
+            'comment' => $this->comment,
+            'user' => UserResource::make($this->whenLoaded('user')),
+            'product_item' => ProductItemResource::make($this->whenLoaded('productItem')),
+            'created_at' => $this->created_at
+
+        ];
     }
 }

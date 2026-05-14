@@ -1,3 +1,5 @@
+import type { User } from "./auth";
+
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
@@ -52,6 +54,15 @@ export interface PaginationLink {
   active: boolean;
 }
 
+export interface ProductReview {
+  average: number;
+  count: number;
+  ratings: {
+    stars: number;
+    count: number;
+    percentage: number;
+  }[];
+}
 export interface Product {
   id: number;
   name: string;
@@ -62,10 +73,7 @@ export interface Product {
   min_price: string;
   is_new: boolean;
   is_bestseller: boolean;
-  rating: {
-    average: number;
-    count: number;
-  };
+  review_summary: ProductReview;
   primary_image: {
     id: number;
     url: string;
@@ -82,11 +90,11 @@ export interface AttributeValue {
 
 export interface Review {
   id: number;
-  userName: string;
+  user: User;
   rating: number;
   comment: string | null;
-  createdAt: string;
-  verified: boolean;
+  created_at: string;
+  product_item: ProductItem;
 }
 
 export interface AttributeGroup {
@@ -97,12 +105,6 @@ export interface AttributeGroup {
 export interface AttributeValueSimple {
   id: number;
   value: string;
-}
-
-export interface ReviewsResponse {
-  reviews: Review[];
-  averageRating: number;
-  totalReviews: number;
 }
 
 export interface Brand {
@@ -139,9 +141,22 @@ export interface AttributeValue {
   value: string;
 }
 
+export interface Order {
+  id: number;
+  status: string;
+  is_paid: boolean;
+  order_total: number;
+  subtotal: number;
+  shipping_fee: number;
+  currency: string;
+  created_at: string;
+  order_items: OrderItem[];
+}
+
 export interface OrderItem {
   id: number;
   price: number;
+  already_reviewed: boolean;
   product_item_id: number;
   product_item: ProductItem;
   qty: number;
@@ -151,4 +166,7 @@ export interface OrderItem {
 export type ProductResponse = ApiResponse<Product[]> &
   PaginatedResponse<Product>;
 
+export type OrderResponse = PaginatedResponse<Order>;
+
+export type ProductReviewResponse = PaginatedResponse<Review>;
 export * from "./auth";

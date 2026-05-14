@@ -14,10 +14,8 @@ import ProductPage from "@/features/product/pages/ProductPage";
 import { ShopPage } from "@/features/shop/pages/ShopPage";
 import { AccountLayout } from "@/features/account/components/layout/AccountLayout";
 import OrdersPage from "@/features/account/pages/OrdersPage";
-import { AccountOverviewPage } from "@/features/account/pages/AccountOverviewPage";
 import { AddressesPage } from "@/features/account/pages/AddressesPage";
 import { CartPage } from "@/features/account/pages/CartPage";
-import { WishlistPage } from "@/features/account/pages/WishlistPage";
 import { SettingPage } from "@/features/account/pages/SettingPage";
 import { useAuth } from "@/providers/AuthProvider";
 import ProtectedRoute from "./ProtectedRoute";
@@ -93,10 +91,13 @@ export const shopRoute = createRoute({
   }),
 });
 
-const productRoute = createRoute({
+export const productRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/product/$slug",
   component: ProductPage,
+  validateSearch: (search) => ({
+    page: search.page ? Number(search.page) : undefined,
+  }),
   head: () => ({
     meta: [{ title: "Sellora | product" }],
   }),
@@ -134,21 +135,15 @@ const accountRoute = createRoute({
   path: "/account",
   component: AccountLayout,
 });
-const accountOverviewRoute = createRoute({
-  getParentRoute: () => accountRoute,
-  path: "overview",
-  component: AccountOverviewPage,
-  context: () => ({ pageTitle: "My Account" }),
-  head: () => ({
-    meta: [{ title: "Sellora | My Account" }],
-  }),
-});
 
-const accountOrdersRoute = createRoute({
+export const accountOrdersRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "orders",
   component: OrdersPage,
   context: () => ({ pageTitle: "My Orders" }),
+  validateSearch: (search) => ({
+    page: search.page ? Number(search.page) : undefined,
+  }),
   head: () => ({
     meta: [{ title: "Sellora | My Orders" }],
   }),
@@ -177,16 +172,6 @@ export const accountCartRoute = createRoute({
   }),
 });
 
-const accountWishlistRoute = createRoute({
-  getParentRoute: () => accountRoute,
-  path: "wishlist",
-  component: WishlistPage,
-  context: () => ({ pageTitle: "My Wishlist" }),
-  head: () => ({
-    meta: [{ title: "Sellora | My Wishlist" }],
-  }),
-});
-
 const accountSettingRoute = createRoute({
   getParentRoute: () => accountRoute,
   path: "settings",
@@ -206,11 +191,9 @@ rootRoute.addChildren([
   guestRoute,
   protectedRoute.addChildren([
     accountRoute.addChildren([
-      accountOverviewRoute,
       accountOrdersRoute,
       accountAddressRoute,
       accountCartRoute,
-      accountWishlistRoute,
       accountSettingRoute,
     ]),
   ]),

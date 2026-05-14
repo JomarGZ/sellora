@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\OrderItem;
 
@@ -14,24 +15,15 @@ final class OrderRepository extends BaseRepository
         parent::__construct($order);
     }
 
-    public function findByIdempotencyKey(string $key): ?Order
+
+    public function getPaginatedUserOrders(int $userId, ?OrderStatus $status = null, int $perPage = 2)
     {
-        return Order::with('payment')
-            ->where('idempotency_key', $key)
-            ->first();
+        return $this->model->query()
+            ->where('user_id', $userId)
+            ->with(['items.productItem.images','items.productItem.attributeValues', 'items.review', 'items.productItem.product'])
+            ->filterByStatus($status)
+            ->latest()
+            ->paginate($perPage);
     }
 
-    public function createItems(int $orderId, array $items): void
-    {
-        $rows = collect($items)->map(fn ($i) => [
-            'order_id' => $orderId,
-            'product_name' => $i['product_name'],
-            'sku' => $i['sku'],
-            'product_item_id' => $i['product_item_id'],
-            'quantity' => $i['quantity'],
-            'price' => $i['price'],
-        ])->toArray();
-
-        OrderItem::insert($rows);
-    }
 }

@@ -7,7 +7,8 @@ export interface Order {
   items: OrderItem[];
 }
 export interface CreateReviewPayload {
-  orderItemId: string;
+  order_item_id: number;
+  product_item_id: number;
   rating: number;
   comment?: string;
 }
@@ -16,19 +17,6 @@ export interface OrderFiltersState {
   orderStatus: OrderStatus | "all";
   paymentStatus: PaymentStatus | "all";
   search: string;
-}
-
-export interface OrderCallbacks {
-  onCancel: (orderId: string) => void;
-  onReceive: (orderId: string) => void;
-  onOrderAgain: (order: Order) => void;
-  onBuyAgain: (item: OrderItem) => void;
-  onReviewSubmit: (
-    orderId: string,
-    itemId: string,
-    rating: number,
-    comment: string,
-  ) => void;
 }
 
 export interface OrderItem {
@@ -42,6 +30,13 @@ export interface OrderItem {
   inStock: boolean;
   /** Whether this item has already been reviewed */
   reviewed: boolean;
+}
+
+export interface ReviewPayload {
+  orderItemId: number;
+  productItemId: number;
+  productItemImage?: string;
+  productName?: string;
 }
 
 export const OrderStatus = {

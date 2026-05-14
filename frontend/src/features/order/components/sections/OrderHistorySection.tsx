@@ -1,160 +1,96 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import { mockOrders } from "@/data";
+import { useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Button } from "primereact/button";
-import { Toast } from "primereact/toast";
 import OrderFilters from "@/features/order/components/sections/OrderFilters";
 import OrderList from "@/features/order/components/sections/OrderList";
-import OrderPagination from "@/features/order/components/sections/OrderPagination";
 import ErrorFallback from "@/features/order/components/states/ErrorFallback";
-import type {
-  CreateReviewPayload,
-  Order,
-  OrderCallbacks,
-  OrderFiltersState,
-  OrderItem,
-} from "../../types";
+import type { ReviewPayload } from "../../types";
 import { ReviewModal } from "../modal/ReviewModal";
-import { useAppToast } from "@/shared/components/feedback/AppToast";
-
-const ORDERS_PER_PAGE = 5;
+import { useOrdersList, useReviewOrderItem } from "../../api/order.queries";
+import { accountOrdersRoute } from "@/app/routers/router";
+import type { ReviewFormValues } from "../../validation/review.schema";
 
 const OrderHistorySection = () => {
-  const { showToast } = useAppToast();
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [filters, setFilters] = useState<OrderFiltersState>({
-    orderStatus: "all",
-    paymentStatus: "all",
-    search: "",
-  });
+  const { page = 1 } = accountOrdersRoute.useSearch();
+  const navigate = accountOrdersRoute.useNavigate();
+  const { data: orders, isLoading, refetch } = useOrdersList(page);
+  const [selectedReviewItem, setSelectedReviewItem] =
+    useState<ReviewPayload | null>(null);
+  const reviewMutation = useReviewOrderItem();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading] = useState(false);
-
-  // Review modal state — tracks specific item being reviewed
-  const [reviewTarget, setReviewTarget] = useState<{
-    orderId: string;
-    item: OrderItem;
-  } | null>(null);
-
-  const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
-      if (filters.orderStatus !== "all" && order.status !== filters.orderStatus)
-        return false;
-      if (
-        filters.paymentStatus !== "all" &&
-        order.paymentStatus !== filters.paymentStatus
-      )
-        return false;
-      if (filters.search) {
-        const q = filters.search.toLowerCase();
-        const matchesId = order.id.toLowerCase().includes(q);
-        const matchesItem = order.items.some((item) =>
-          item.name.toLowerCase().includes(q),
-        );
-        if (!matchesId && !matchesItem) return false;
-      }
-      return true;
+  const setPage = (newPage: number) => {
+    navigate({
+      search: (prev: { page?: number }) => {
+        const next = { ...prev };
+        if (newPage === 1) {
+          delete next.page;
+        } else {
+          next.page = newPage;
+        }
+        return next;
+      },
     });
-  }, [filters, orders]);
-
-  const totalPages = Math.ceil(filteredOrders.length / ORDERS_PER_PAGE);
-  const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * ORDERS_PER_PAGE,
-    currentPage * ORDERS_PER_PAGE,
-  );
-
-  const handleFiltersChange = (newFilters: OrderFiltersState) => {
-    setFilters(newFilters);
-    setCurrentPage(1);
+  };
+  const onOrderItemReview = (payload: ReviewPayload) => {
+    setSelectedReviewItem(payload);
   };
 
-  // --- Callbacks ---
-  const handleCancel = useCallback((orderId: string) => {
-    // toast.info(`Cancellation requested for ${orderId}`);
-  }, []);
+  const handleReviewSubmit = async (
+    data: ReviewFormValues,
+    reset: () => void,
+  ) => {
+    const orderItemId = selectedReviewItem?.orderItemId ?? null;
+    const productItemId = selectedReviewItem?.productItemId ?? null;
+    if (!orderItemId) {
+      console.error("order item id is required to submit");
+      return;
+    }
 
-  const handleReceive = useCallback((orderId: string) => {
-    // toast.success(`${orderId} marked as received!`);
-  }, []);
+    if (!productItemId) {
+      console.error("product item id is required to submit");
+      return;
+    }
+    try {
+      await reviewMutation.mutateAsync({
+        order_item_id: selectedReviewItem!.orderItemId,
+        product_item_id: selectedReviewItem!.productItemId,
+        rating: data.rating,
+        comment: data.comment,
+      });
+      setSelectedReviewItem(null);
+      reset(); // ✅ only runs on success
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+    }
+  };
 
-  const handleOrderAgain = useCallback((order: Order) => {
-    const inStockItems = order.items.filter((i) => i.inStock);
-    // toast.success(
-    //   `${inStockItems.length} item(s) from ${order.id} added to cart!`,
-    // );
-  }, []);
-
-  const handleBuyAgain = useCallback((item: OrderItem) => {
-    // toast.success(`${item.name} added to cart!`);
-  }, []);
-  const handleReviewSubmit = useCallback((data: CreateReviewPayload) => {
-    const { orderItemId, rating, comment } = data;
-
-    setOrders((prev) =>
-      prev.map((o) => ({
-        ...o,
-        items: o.items.map((i) =>
-          i.id === orderItemId ? { ...i, reviewed: true } : i,
-        ),
-      })),
-    );
-
-    // toast.success(
-    //   `Review submitted (${rating}★)${comment ? " with comment" : ""}!`,
-    // );
-  }, []);
-  const callbacks: OrderCallbacks = useMemo(
-    () => ({
-      onCancel: handleCancel,
-      onReceive: handleReceive,
-      onOrderAgain: handleOrderAgain,
-      onBuyAgain: handleBuyAgain,
-      onReviewSubmit: handleReviewSubmit,
-    }),
-    [
-      handleCancel,
-      handleReceive,
-      handleOrderAgain,
-      handleBuyAgain,
-      handleReviewSubmit,
-    ],
-  );
-
-  const handleReviewItem = useCallback((orderId: string, item: OrderItem) => {
-    setReviewTarget({ orderId, item });
-  }, []);
-
+  useEffect(() => {
+    console.log("selectedReviewItem:", selectedReviewItem);
+  }, [selectedReviewItem]);
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
-        <OrderFilters filters={filters} onFiltersChange={handleFiltersChange} />
+        {/* <OrderFilters filters={filters} onFiltersChange={handleFiltersChange} /> */}
 
         <ErrorBoundary
           FallbackComponent={ErrorFallback}
-          onReset={() => setOrders(mockOrders)}
+          onReset={() => refetch()}
         >
           <OrderList
-            orders={paginatedOrders}
+            orders={orders}
             isLoading={isLoading}
-            callbacks={callbacks}
-            onReviewItem={handleReviewItem}
+            page={page}
+            setPage={setPage}
+            onReview={onOrderItemReview}
           />
         </ErrorBoundary>
 
-        <OrderPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-
         <ReviewModal
-          orderItemId={reviewTarget?.item.id ?? ""}
-          productName={reviewTarget?.item.name ?? ""}
-          productImage={reviewTarget?.item.image ?? ""}
-          existingReview={reviewTarget?.item.review ?? null}
-          isOpen={!!reviewTarget}
-          onClose={() => setReviewTarget(null)}
+          productName={selectedReviewItem?.productName ?? ""}
+          productImage={selectedReviewItem?.productItemImage ?? ""}
+          isPending={reviewMutation.isPending}
+          existingReview={null}
+          isOpen={!!selectedReviewItem}
+          onClose={() => setSelectedReviewItem(null)}
           onSubmit={handleReviewSubmit}
         />
       </div>
