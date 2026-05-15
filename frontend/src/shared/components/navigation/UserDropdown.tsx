@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
+import UserAvatar from "../ui/user-avatar";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface UserDropdownProps {
   onLogout?: () => void;
-  hasNewActivity?: boolean; // optional prop for dot
 }
 
-export function UserDropdown({ onLogout, hasNewActivity }: UserDropdownProps) {
+export function UserDropdown({ onLogout }: UserDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -19,22 +22,21 @@ export function UserDropdown({ onLogout, hasNewActivity }: UserDropdownProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
   return (
     <div className="relative" ref={ref}>
       {/* Avatar Button */}
       <button
         type="button"
         onClick={() => setIsOpen((o) => !o)}
-        className="relative flex h-9 w-9 items-center justify-center rounded-full bg-yellow-300 text-accent transition-all hover:ring-2 hover:ring-accent"
-        aria-expanded={isOpen}
+        className="cursor-pointer"
         aria-haspopup="true"
       >
-        JD
-        {/* Notification Dot */}
-        {hasNewActivity && (
-          <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-black ring-2 ring-white" />
-        )}
+        <UserAvatar
+          src={user?.avatar}
+          firstName={user?.first_name}
+          lastName={user?.last_name}
+          isOnline={true}
+        />
       </button>
 
       {/* Dropdown Menu */}
@@ -46,7 +48,7 @@ export function UserDropdown({ onLogout, hasNewActivity }: UserDropdownProps) {
           <Link
             to="/account/orders"
             onClick={() => setIsOpen(false)}
-            className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-accent"
+            className="block px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 hover:text-gray-950"
             role="menuitem"
           >
             Dashboard

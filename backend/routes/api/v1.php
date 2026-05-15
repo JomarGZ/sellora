@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\ShippingOptionController;
 use App\Http\Controllers\Api\V1\ShoppingCartController;
 use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\UserAddressController;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,7 +61,9 @@ Route::name('api.v1.')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group(function () {
-
+        Route::get('me', [UserController::class, 'me'])->name('me.show');
+        Route::post('me/avatar', [UserController::class, 'updateAvatar'])->name('me.avatar.update');
+        Route::put('me/profile', [UserController::class, 'update'])->name('me.update');
         /*
         |--------------------------------------------------------------------------
         | Auth Actions
@@ -96,6 +99,7 @@ Route::name('api.v1.')->group(function () {
             Route::delete('/{userAddress}', [UserAddressController::class, 'destroy'])->name('destroy');
             Route::put('/{userAddress}/default', [UserAddressController::class, 'setDefault'])->name('set.default');
         });
+
 
         /*
         |--------------------------------------------------------------------------

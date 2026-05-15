@@ -1,10 +1,11 @@
 // src/routes/ProtectedRoute.tsx
 import { Outlet, useNavigate } from "@tanstack/react-router";
-import { useAuth } from "@/providers/AuthProvider";
 import { useEffect } from "react";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function ProtectedRoute() {
   const { user, isInitializing } = useAuth();
+
   const navigate = useNavigate();
 
   useEffect(() => {

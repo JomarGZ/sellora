@@ -52,7 +52,6 @@ export const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true, // sends HttpOnly refreshToken cookie automatically
   headers: {
-    "Content-Type": "application/json",
     Accept: "application/json",
   },
 });

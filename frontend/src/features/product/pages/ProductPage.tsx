@@ -22,9 +22,9 @@ import { ProductReviews } from "@/features/product/components/sections/ProductRe
 import { useParams } from "@tanstack/react-router";
 import type { ProductDetailResponse } from "../types";
 import { useProductReviews, useProductShow } from "../api/product.queries";
-import { useAuth } from "@/providers/AuthProvider";
 import type { ProductItem, ProductReviewResponse } from "@/shared/types";
 import { productRoute } from "@/app/routers/router";
+import { useAuth } from "@/providers/AuthProvider";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
