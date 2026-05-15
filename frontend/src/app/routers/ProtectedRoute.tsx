@@ -1,20 +1,20 @@
 // src/routes/ProtectedRoute.tsx
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useMe } from "@/features/auth/api/user.queries";
+import { useAuth } from "@/providers/AuthProvider";
 
 export default function ProtectedRoute() {
-  const { data: user, isLoading } = useMe();
+  const { user, isInitializing } = useAuth();
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (!isInitializing && !user) {
       navigate({ to: "/login" });
     }
-  }, [isLoading, user, navigate]);
+  }, [isInitializing, user, navigate]);
 
-  if (isLoading) {
+  if (isInitializing) {
     return <div>Loading...</div>;
   }
 

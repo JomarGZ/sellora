@@ -18,20 +18,31 @@ import {
   type ReactNode,
 } from "react";
 
-// ── Constants ─────────────────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
 
-const REFRESH_BEFORE_EXPIRY_MS = 15 * 60 * 1000;
-const MIN_REFRESH_INTERVAL_MS = 30 * 1000;
+/** Refresh the access token this many ms before it expires. */
+const REFRESH_BEFORE_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
 
-// ── Context ───────────────────────────────────────────────────────────────
+/** Minimum delay between proactive refresh attempts (safety guard). */
+const MIN_REFRESH_INTERVAL_MS = 30 * 1000; // 30 seconds
+
+// ── Context shape ─────────────────────────────────────────────────────────────
 
 interface AuthContextValue {
+  user: User | null;
+  setUser: (user: User | null) => void;
   isLoggingOut: boolean;
+  /** True while the app is checking for an existing session on first load. */
   isInitializing: boolean;
-  isHydrated: boolean;
   logout: () => Promise<void>;
+  /**
+   * Call this after storing a new access token (login / register) to kick
+   * off the proactive refresh schedule for that token.
+   */
   scheduleProactiveRefresh: () => void;
 }
+
+// ── Context ───────────────────────────────────────────────────────────────────
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -41,47 +52,42 @@ export function useAuth(): AuthContextValue {
   return ctx;
 }
 
-// ── Provider ───────────────────────────────────────────────────────────────
+// ── Provider ──────────────────────────────────────────────────────────────────
 
 interface AuthProviderProps {
   children: ReactNode;
+  initialUser?: User | null;
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({
+  children,
+  initialUser = null,
+}: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const { showToast } = useAppToast();
-  const [isHydrated, setIsHydrated] = useState(false);
+
   const proactiveRefreshTimer = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
 
-  useEffect(() => {
-    async function init() {
-      try {
-        const { data } = await client.post("/v1/refresh-token");
-
-        setToken(data.data.accessToken);
-
-        // prime React Query cache immediately
-        queryClient.setQueryData(["me"], data.data.user);
-      } catch {
-        clearToken();
-        queryClient.clear();
-      } finally {
-        setIsHydrated(true); // 👈 allow /me query after this
-      }
-    }
-
-    init();
-  }, []);
-  // ── Proactive Refresh ────────────────────────────────────────────────────
+  // ── Proactive token refresh ─────────────────────────────────────────────────
+  // Reads the decoded expiry from the current in-memory token (via
+  // getTokenExpiresIn) and schedules a refresh to fire 15 minutes before
+  // expiry. After each successful refresh, reschedules itself for the new token.
+  // This keeps long-lived sessions alive without the user ever hitting a 401.
 
   const scheduleProactiveRefresh = useCallback(() => {
     if (proactiveRefreshTimer.current) {
       clearTimeout(proactiveRefreshTimer.current);
+      proactiveRefreshTimer.current = null;
     }
 
     const expiresIn = getTokenExpiresIn();
 
+    // Skip if expiry is unknown or the token is already nearly expired —
+    // the 401 interceptor will handle it reactively in that case.
     if (!expiresIn || expiresIn <= REFRESH_BEFORE_EXPIRY_MS) return;
 
     const delay = Math.max(
@@ -96,42 +102,68 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }>("/v1/refresh-token");
 
         setToken(data.data.accessToken);
+        if (data.data.user) setUser(data.data.user);
 
-        // 🔥 Update React Query user cache (source of truth)
-        queryClient.setQueryData(["me"], data.data.user);
-
+        // Reschedule for the new token's expiry.
         scheduleProactiveRefresh();
       } catch {
-        // silent fail → 401 interceptor handles recovery
+        // Proactive refresh failed quietly — the reactive 401 interceptor
+        // in client.ts will recover the session on the next API call.
       }
     }, delay);
   }, []);
 
-  // ── Session Init (React Query owns user now) ─────────────────────────────
+  // ── Session init on mount ───────────────────────────────────────────────────
+  // On every page load the in-memory token is gone. Call /v1/refresh-token
+  // immediately — the browser sends the HttpOnly refreshToken cookie
+  // automatically. On success, restore the token + user and start the
+  // proactive refresh schedule.
 
   useEffect(() => {
-    if (isHydrated) {
-      scheduleProactiveRefresh();
+    async function initSession() {
+      try {
+        const response = await client.post<{
+          data: { accessToken: string; user: User };
+        }>("/v1/refresh-token");
+        const { data } = response.data;
+        setToken(data.accessToken);
+        setUser(data.user);
+        scheduleProactiveRefresh();
+      } catch {
+        // No valid refresh token — user is simply not logged in.
+        clearToken();
+        setUser(null);
+      } finally {
+        setIsInitializing(false);
+      }
     }
-  }, [isHydrated, scheduleProactiveRefresh]);
 
-  // ── Session Expired Handler ──────────────────────────────────────────────
+    initSession();
+
+    return () => {
+      if (proactiveRefreshTimer.current) {
+        clearTimeout(proactiveRefreshTimer.current);
+      }
+    };
+  }, [scheduleProactiveRefresh]);
+
+  // ── Session expired (dispatched by the 401 interceptor in client.ts) ────────
+  // When a reactive 401 refresh also fails (refresh token revoked / expired),
+  // the interceptor dispatches this event to avoid a circular import with router.
 
   useEffect(() => {
     function handleSessionExpired() {
       if (proactiveRefreshTimer.current) {
         clearTimeout(proactiveRefreshTimer.current);
+        proactiveRefreshTimer.current = null;
       }
-
+      setUser(null);
       queryClient.clear();
-      clearToken();
-
       showToast({
         severity: "error",
         summary: "Session expired",
         detail: "Please log in again to continue.",
       });
-
       router.navigate({ to: "/login" });
     }
 
@@ -140,36 +172,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
       window.removeEventListener("auth:session-expired", handleSessionExpired);
   }, [showToast]);
 
-  // ── Logout ────────────────────────────────────────────────────────────────
+  // ── Manual logout ───────────────────────────────────────────────────────────
 
   const logout = useCallback(async () => {
     if (proactiveRefreshTimer.current) {
       clearTimeout(proactiveRefreshTimer.current);
+      proactiveRefreshTimer.current = null;
     }
 
+    setIsLoggingOut(true);
     try {
       await client.post("/v1/logout");
-    } catch {}
-
-    clearToken();
-    queryClient.clear();
-
-    showToast({
-      severity: "success",
-      summary: "Logged out",
-    });
-
-    router.navigate({ to: "/login" });
+    } catch {
+      // Always clean up locally even if the server call fails.
+    } finally {
+      clearToken();
+      setUser(null);
+      queryClient.clear();
+      showToast({
+        severity: "success",
+        summary: "Logged out",
+        detail: "You have been successfully logged out.",
+      });
+      router.navigate({ to: "/login" });
+      setIsLoggingOut(false);
+    }
   }, [showToast]);
-
-  // ── Provider ──────────────────────────────────────────────────────────────
 
   return (
     <AuthContext.Provider
       value={{
-        isLoggingOut: false,
-        isInitializing: !isHydrated,
-        isHydrated,
+        user,
+        setUser,
+        isLoggingOut,
+        isInitializing,
         logout,
         scheduleProactiveRefresh,
       }}

@@ -1,12 +1,22 @@
+// src/features/auth/api/login.queries.ts
+
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "@tanstack/react-router";
 import { loginApi } from "./login.api";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
-import { setToken } from "@/shared/api/client";
-import { queryClient } from "@/shared/api/queryClient";
+import { useAuth } from "@/providers/AuthProvider";
 import type { LoginPayload, LoginResponse } from "@/shared/types/auth";
+import { setToken } from "@/shared/api/client";
 
+/**
+ * useLoginMutation
+ *
+ * Usage in LoginForm:
+ *   const { mutate: login, isPending } = useLoginMutation();
+ *   login({ email, password, remember });
+ */
 export function useLoginMutation() {
+  const { setUser, scheduleProactiveRefresh } = useAuth();
   const { showToast } = useAppToast();
   const router = useRouter();
 
@@ -15,24 +25,14 @@ export function useLoginMutation() {
 
     onSuccess(response) {
       const { accessToken, user } = response.data;
-
-      // 1. Save token
       setToken(accessToken);
-
-      // 2. PRIME React Query cache (source of truth)
-      queryClient.setQueryData(["me"], user);
-
-      // 3. (optional but recommended) force refetch if needed
-      queryClient.invalidateQueries({ queryKey: ["me"] });
-
-      // 4. success UI
+      setUser(user);
+      scheduleProactiveRefresh();
       showToast({
         severity: "success",
         summary: "Welcome back",
         detail: response.message ?? "You have successfully logged in.",
       });
-
-      // 5. redirect
       router.navigate({ to: "/account/overview" });
     },
 

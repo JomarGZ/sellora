@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import UserAvatar from "../ui/user-avatar";
-import { useMe } from "@/features/auth/api/user.queries";
+import { useAuth } from "@/providers/AuthProvider";
 
 interface UserDropdownProps {
   onLogout?: () => void;
@@ -9,7 +9,7 @@ interface UserDropdownProps {
 
 export function UserDropdown({ onLogout }: UserDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: user } = useMe();
+  const { user } = useAuth();
 
   const ref = useRef<HTMLDivElement>(null);
 

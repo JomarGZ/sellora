@@ -2,23 +2,32 @@ import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { format } from "date-fns";
 import { Mail, Calendar, Camera } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
 import type { User } from "@/shared/types";
 import UserAvatar from "@/shared/components/ui/user-avatar";
 import { AvatarUploadModal } from "../modal/AvatarUploadModal";
 import { useUploadAvatar } from "../../api/account.queries";
+import { useAuth } from "@/providers/AuthProvider";
 
 type ProfileHeaderProps = {
-  user: User | undefined;
+  user: User | null;
   isLoading?: boolean;
 };
 export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
   const uploadAvatar = useUploadAvatar();
-  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const { setUser } = useAuth();
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
   const handleSaveAvatar = (file: File) => {
     if (!file) return;
-    uploadAvatar.mutate(file);
+    uploadAvatar.mutate(file, {
+      onSuccess: (response) => {
+        const avatar = response.data.avatar_url;
+
+        setUser({
+          ...user,
+          avatar,
+        } as User);
+      },
+    });
   };
   const fullName = user
     ? `${user.first_name} ${user.last_name}`
@@ -83,29 +92,6 @@ export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
           </>
         )}
       </div>
-
-      <div className="z-10 mt-4 md:mt-0">
-        {isLoading ? (
-          <Skeleton width={120} height={40} borderRadius={12} />
-        ) : (
-          <Button
-            variant="outline"
-            className="rounded-xl px-6 font-medium shadow-sm hover-elevate bg-background border-border/60"
-            onClick={() => setEditProfileOpen(true)}
-          >
-            Edit Profile
-          </Button>
-        )}
-      </div>
-
-      {/* {displayCustomer && (
-        <EditProfileModal
-          isOpen={editProfileOpen}
-          onClose={() => setEditProfileOpen(false)}
-          customer={displayCustomer}
-          onSave={handleSaveProfile}
-        />
-      )} */}
 
       {!!user && (
         <AvatarUploadModal
