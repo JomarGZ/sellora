@@ -22,9 +22,9 @@ import { ProductReviews } from "@/features/product/components/sections/ProductRe
 import { useParams } from "@tanstack/react-router";
 import type { ProductDetailResponse } from "../types";
 import { useProductReviews, useProductShow } from "../api/product.queries";
-import { useAuth } from "@/providers/AuthProvider";
 import type { ProductItem, ProductReviewResponse } from "@/shared/types";
 import { productRoute } from "@/app/routers/router";
+import { useMe } from "@/features/auth/api/user.queries";
 
 function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   return (
@@ -352,7 +352,7 @@ function ProductPageContent({
 
 export default function ProductPage() {
   const { slug } = useParams({ from: "/product/$slug" });
-  const { user } = useAuth();
+  const { data: user } = useMe();
   const { data: product, isLoading } = useProductShow(slug);
   const { page = 1 } = productRoute.useSearch();
   const navigate = productRoute.useNavigate();

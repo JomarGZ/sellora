@@ -14,7 +14,7 @@ import { setToken } from "@/shared/api/client";
  *   register({ name, email, password, password_confirmation });
  */
 export function useRegisterMutation() {
-  const { setUser, scheduleProactiveRefresh } = useAuth();
+  const { scheduleProactiveRefresh } = useAuth();
   const { showToast } = useAppToast();
   const router = useRouter();
 
@@ -22,9 +22,8 @@ export function useRegisterMutation() {
     mutationFn: registerApi,
 
     onSuccess(response) {
-      const { accessToken, user } = response.data;
+      const { accessToken } = response.data;
       setToken(accessToken);
-      setUser(user);
       scheduleProactiveRefresh();
       showToast({
         severity: "success",

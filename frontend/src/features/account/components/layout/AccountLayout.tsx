@@ -8,6 +8,7 @@ import { Button } from "@/shared/components/ui/button";
 import { ProfileHeader } from "@/features/account/components/ui/ProfileHeader";
 import AccountMobileNav from "../navigation/AccountMobileNav";
 import { useAuth } from "@/providers/AuthProvider";
+import { useMe } from "@/features/auth/api/user.queries";
 
 function ErrorFallback({ error, resetErrorBoundary }: any) {
   return (
@@ -22,7 +23,8 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 }
 
 export function AccountLayout() {
-  const { logout, user, isInitializing } = useAuth();
+  const { logout } = useAuth();
+  const { data: user, isLoading } = useMe();
   const matches = useMatches();
   const lastMatch = matches[matches.length - 1];
   const pageTitle = lastMatch.context?.pageTitle;
@@ -32,7 +34,7 @@ export function AccountLayout() {
         {/* Profile header always visible */}
         <div className="mb-8">
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <ProfileHeader user={user} isLoading={isInitializing} />
+            <ProfileHeader user={user} isLoading={isLoading} />
           </ErrorBoundary>
         </div>
         {true && <h1 className="text-2xl font-bold mb-6">{pageTitle}</h1>}

@@ -21,19 +21,26 @@ import { useAuth } from "@/providers/AuthProvider";
 import ProtectedRoute from "./ProtectedRoute";
 import GuestRoute from "./GuestRoute";
 import PaymentSuccessPage from "@/features/checkout/pages/PaymentSuccessPage";
+import { useMe } from "@/features/auth/api/user.queries";
 
 const rootRoute = createRootRoute({
   component: RootLayout,
 });
 
 function RootLayout() {
-  const { isInitializing, user, logout } = useAuth();
-  if (isInitializing)
+  const { isInitializing, logout } = useAuth();
+
+  const { data: user, isLoading } = useMe();
+
+  const isLoadingUser = isLoading;
+
+  if (isInitializing || isLoadingUser)
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="rounded-full border-2 border-gray-300 border-t-sky-500 animate-spin h-10 w-10" />
       </div>
     );
+
   return (
     <>
       <HeadContent />

@@ -61,8 +61,8 @@ Route::name('api.v1.')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group(function () {
-
-        Route::put('me/avatar', [UserController::class, 'updateAvatar'])->name('me.avatar.update');
+        Route::get('me', [UserController::class, 'me'])->name('me.show');
+        Route::post('me/avatar', [UserController::class, 'updateAvatar'])->name('me.avatar.update');
         Route::put('me/profile', [UserController::class, 'update'])->name('me.update');
         /*
         |--------------------------------------------------------------------------

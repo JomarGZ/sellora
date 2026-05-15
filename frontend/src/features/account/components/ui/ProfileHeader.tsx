@@ -6,16 +6,19 @@ import { Button } from "@/shared/components/ui/button";
 import type { User } from "@/shared/types";
 import UserAvatar from "@/shared/components/ui/user-avatar";
 import { AvatarUploadModal } from "../modal/AvatarUploadModal";
+import { useUploadAvatar } from "../../api/account.queries";
 
 type ProfileHeaderProps = {
-  user: User | null;
+  user: User | undefined;
   isLoading?: boolean;
 };
 export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
+  const uploadAvatar = useUploadAvatar();
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
-  const handleSaveAvatar = () => {
-    alert("trigger");
+  const handleSaveAvatar = (file: File) => {
+    if (!file) return;
+    uploadAvatar.mutate(file);
   };
   const fullName = user
     ? `${user.first_name} ${user.last_name}`

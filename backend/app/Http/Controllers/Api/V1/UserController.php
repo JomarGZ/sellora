@@ -10,6 +10,13 @@ use Throwable;
 
 class UserController extends ApiController
 {
+    public function me(Request $request)
+    {
+        return $this->success(
+            data: UserResource::make($request->user()),
+            message: 'Retrieved auth user successfully'
+        );
+    }
     public function update(Request $request)
     {
         $user = $request->user();

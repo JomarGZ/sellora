@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { User, Upload, X } from "lucide-react";
@@ -12,8 +13,9 @@ import { User, Upload, X } from "lucide-react";
 interface AvatarUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  isPending?: boolean;
   currentAvatar: string;
-  onSave: (url: string) => void;
+  onSave: (file: File) => void;
 }
 
 export function AvatarUploadModal({
@@ -21,24 +23,23 @@ export function AvatarUploadModal({
   onClose,
   currentAvatar,
   onSave,
+  isPending = false,
 }: AvatarUploadModalProps) {
+  const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(currentAvatar);
-  const [isSaving, setIsSaving] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      setPreview(url);
+      setFile(file);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
   const handleSave = async () => {
-    if (!preview) return;
-    setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setIsSaving(false);
-    onSave(preview);
+    if (!file) return;
+
+    onSave(file);
     onClose();
   };
 
@@ -49,6 +50,7 @@ export function AvatarUploadModal({
           <DialogTitle className="text-xl font-display">
             Update Profile Photo
           </DialogTitle>
+          <DialogDescription>Upload your profile photo</DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col items-center py-6">
@@ -96,10 +98,10 @@ export function AvatarUploadModal({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={!preview || preview === currentAvatar || isSaving}
+            disabled={!preview || preview === currentAvatar || isPending}
             className="rounded-xl px-6"
           >
-            {isSaving ? "Saving..." : "Save Photo"}
+            {isPending ? "Saving..." : "Save Photo"}
           </Button>
         </DialogFooter>
       </DialogContent>

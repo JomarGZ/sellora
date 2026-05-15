@@ -1,19 +1,19 @@
 // src/routes/GuestRoute.tsx
 import { Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useAuth } from "@/providers/AuthProvider";
+import { useMe } from "@/features/auth/api/user.queries";
 
 export default function GuestRoute() {
-  const { user, isInitializing } = useAuth();
+  const { data: user, isLoading } = useMe();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isInitializing && user) {
+    if (!isLoading && user) {
       navigate({ to: "/" }); // redirect logged-in users to home
     }
-  }, [isInitializing, user, navigate]);
+  }, [isLoading, user, navigate]);
 
-  if (isInitializing) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
   if (user) return null; // prevent flash
 
   return <Outlet />;
