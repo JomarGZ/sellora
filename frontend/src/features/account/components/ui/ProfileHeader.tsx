@@ -1,9 +1,11 @@
 import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { format } from "date-fns";
-import { Edit2, Mail, Calendar } from "lucide-react";
+import { Mail, Calendar, Camera } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import type { User } from "@/shared/types";
+import UserAvatar from "@/shared/components/ui/user-avatar";
+import { AvatarUploadModal } from "../modal/AvatarUploadModal";
 
 type ProfileHeaderProps = {
   user: User | null;
@@ -12,7 +14,9 @@ type ProfileHeaderProps = {
 export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [avatarUploadOpen, setAvatarUploadOpen] = useState(false);
-
+  const handleSaveAvatar = () => {
+    alert("trigger");
+  };
   const fullName = user
     ? `${user.first_name} ${user.last_name}`
     : "Customer Name";
@@ -33,16 +37,17 @@ export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
         <Skeleton circle width={120} height={120} />
       ) : (
         <div className="relative group">
-          <img
-            src={"https://i.pravatar.cc/150?img=2"}
-            alt={fullName}
-            className="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-background shadow-md"
+          <UserAvatar
+            size="2xl"
+            src={user.avatar}
+            firstName={user.first_name}
+            lastName={user.last_name}
           />
           <button
-            className="absolute bottom-0 right-0 bg-primary text-primary-foreground p-2 rounded-full shadow-lg hover:scale-105 transition-transform hover-elevate"
+            className="absolute bottom-0 right-0 bg-primary cursor-pointer text-primary-foreground p-2 rounded-full shadow-lg hover:scale-105 transition-transform hover-elevate"
             onClick={() => setAvatarUploadOpen(true)}
           >
-            <Edit2 className="w-4 h-4" />
+            <Camera className="w-4 h-4" />
           </button>
         </div>
       )}
@@ -97,16 +102,16 @@ export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
           customer={displayCustomer}
           onSave={handleSaveProfile}
         />
-      )}
+      )} */}
 
-      {displayCustomer && (
+      {!!user && (
         <AvatarUploadModal
           isOpen={avatarUploadOpen}
           onClose={() => setAvatarUploadOpen(false)}
-          currentAvatar={displayCustomer.avatar}
+          currentAvatar={user.avatar ?? ""}
           onSave={handleSaveAvatar}
         />
-      )} */}
+      )}
     </div>
   );
 }
