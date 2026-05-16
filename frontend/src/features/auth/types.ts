@@ -5,3 +5,8 @@ export interface ExtraLinksProps {
   backText?: string;
   backHref?: string;
 }
+
+export interface ProfilePayload {
+  first_name: string;
+  last_name: string;
+}
