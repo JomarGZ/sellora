@@ -151,15 +151,25 @@ final class AuthController extends ApiController
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $user = User::where('email', $request->email)->first();
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return $this->success(message: 'Password reset link sent to your email');
+        if (! $user) {
+            return $this->error('User not found', 404);
         }
 
-        return $this->error('Unable to send reset link', 500);
+        // create password reset token
+        $token = Password::createToken($user);
+
+        // TODO: send email (custom notification or mail class)
+        // $user->notify(new ResetPasswordNotification($token));
+
+        return $this->success(
+            message: 'Password reset token generated',
+            data: [
+                'email' => $user->email,
+                'token' => $token, // optional: remove this in production if using email only
+            ]
+        );
     }
 
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
