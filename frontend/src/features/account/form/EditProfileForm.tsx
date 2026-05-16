@@ -11,7 +11,6 @@ import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { useAuth } from "@/providers/AuthProvider";
 import { useUpdateProfile } from "@/features/auth/api/user.queries";
 import type { User as UserType } from "@/shared/types";
-import { useEffect } from "react";
 
 export function EditProfileForm() {
   const { user, setUser } = useAuth();
