@@ -37,6 +37,11 @@ final class ProductForm
                         TextInput::make('name')
                             ->required()
                             ->maxLength(255),
+                        Select::make('attributes')
+                            ->relationship('attributes', 'name')
+                            ->multiple()
+                            ->preload()
+                            ->searchable(),
                         RichEditor::make('description')
                             ->columnSpanFull(),
 
@@ -44,58 +49,20 @@ final class ProductForm
                     ->columns(2),
 
                 Section::make('Product Images')
+                    ->description('Upload up to 5 images. Toggle the primary image below.')
                     ->schema([
-                        Repeater::make('images')
-                            ->relationship(name: 'images')
-                            ->schema([
-                                FileUpload::make('image_path')
-                                    ->image()
-                                    ->disk('public')
-                                    ->required()
-                                    ->directory('products')
-                                    ->visibility('public'),
-                                Toggle::make('is_primary')
-                                    ->label('Primary Image')
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get): void {
-                                        if ($state) {
-                                            $images = $get('../../images');
-                                            if (! is_array($images)) {
-                                                return;
-                                            }
-
-                                            foreach (array_keys($images) as $index) {
-                                                $set(sprintf('../../images.%s.is_primary', $index), false);
-                                            }
-
-                                            $set('is_primary', true);
-                                        }
-                                    }),
-
-                            ])
-                            ->columns(2)
-                            ->addActionLabel('Add Image')
-                            ->maxItems(5)
-                            ->minItems(1)
-                            ->afterStateUpdated(function (array $state, callable $set): void {
-                                $hasPrimary = collect($state)->contains('is_primary', true);
-
-                                if (! $hasPrimary && $state !== []) {
-                                    $set('images.0.is_primary', true);
-                                }
-                            })
-                            ->rules(fn (): Closure => function ($attribute, array $value, callable $fail): void {
-                                $primaryCount = collect($value)->where('is_primary', true)->count();
-
-                                if ($primaryCount === 0) {
-                                    $fail('You must select one primary image.');
-                                }
-
-                                if ($primaryCount > 1) {
-                                    $fail('Only one image can be primary.');
-                                }
-                            }),
-                    ]),
+                        FileUpload::make('product_images')
+                            ->label('Images')
+                            ->image()
+                            ->multiple()
+                            ->maxFiles(5)
+                            ->directory('product-images')
+                            ->disk('public')
+                            ->reorderable()
+                            ->appendFiles()
+                            ->dehydrated(false)   // handled in afterCreate / afterSave
+                            ->helperText('Max 5 images. The first image is used as the primary.'),
+                ]),
             ]);
     }
 }
