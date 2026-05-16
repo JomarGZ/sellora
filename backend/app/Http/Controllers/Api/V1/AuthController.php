@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\Api\V1\ChangePasswordRequest;
 use App\Http\Requests\Api\V1\ForgotPasswordRequest;
 use App\Http\Requests\Api\V1\LoginRequest;
 use App\Http\Requests\Api\V1\RegisterRequest;
@@ -151,15 +152,42 @@ final class AuthController extends ApiController
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $user = User::where('email', $request->email)->first();
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return $this->success(message: 'Password reset link sent to your email');
+        if (! $user) {
+            return $this->error('User not found', 404);
         }
 
-        return $this->error('Unable to send reset link', 500);
+        // create password reset token
+        $token = Password::createToken($user);
+
+        // TODO: send email (custom notification or mail class)
+        // $user->notify(new ResetPasswordNotification($token));
+
+        return $this->success(
+            message: 'Password reset token generated',
+            data: [
+                'email' => $user->email,
+                'token' => $token, // optional: remove this in production if using email only
+            ]
+        );
+    }
+
+    public function changePassword(ChangePasswordRequest $request)
+    {
+        $user = $request->user();
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return $this->error('Current password is incorrect', 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        $user->tokens()->delete();
+
+        return $this->success(message: 'Password changed successfully.');
     }
 
     public function resetPassword(ResetPasswordRequest $request): JsonResponse

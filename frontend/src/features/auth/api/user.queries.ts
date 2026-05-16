@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { fetchMe, updateProfile } from "./user.api";
+import { changePassword, fetchMe, updateProfile } from "./user.api";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 
 export function useMe() {
@@ -27,6 +27,28 @@ export function useUpdateProfile() {
         severity: "error",
         summary: "Failed to update",
         detail: error.message ?? "Failed to update user information",
+      });
+    },
+  });
+}
+
+export function useChangePassword() {
+  const { showToast } = useAppToast();
+
+  return useMutation({
+    mutationFn: changePassword,
+    onSuccess: () => {
+      showToast({
+        severity: "success",
+        summary: "Password updated",
+        detail: "Password updated successfully",
+      });
+    },
+    onError: (error) => {
+      showToast({
+        severity: "error",
+        summary: "Failed to change password",
+        detail: error.message ?? "Update password unsuccessful.",
       });
     },
   });
