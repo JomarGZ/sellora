@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Requests\V1\StoreUserAddressRequest;
-use App\Http\Requests\V1\UpdateUserAddressRequest;
+use App\Http\Requests\Api\V1\StoreUserAddressRequest;
+use App\Http\Requests\Api\V1\UpdateUserAddressRequest;
 use App\Http\Resources\V1\UserAddressResource;
 use App\Models\UserAddress;
 use App\Repositories\UserAddressRepository;
