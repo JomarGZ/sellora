@@ -31,7 +31,7 @@ final class EditProduct extends EditRecord
         $data['product_images'] = $this->record
             ->images()
             ->orderBy('sort_order')
-            ->pluck('path')
+            ->pluck('image_path')
             ->toArray();
  
         return $data;
