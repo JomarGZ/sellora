@@ -40,6 +40,9 @@ final class ProductForm
                         Select::make('attributes')
                             ->relationship('attributes', 'name')
                             ->multiple()
+                            ->dehydrated(fn ($record) => ! $record?->productItems()->exists())
+                            ->disabled(fn ($record) => $record?->productItems()->exists())
+                            ->helperText(fn ($record) => $record?->productItems()->exists() ? 'Attributes cannot be modified once variants exist.' : null)
                             ->preload()
                             ->searchable(),
                         RichEditor::make('description')
