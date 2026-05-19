@@ -37,7 +37,10 @@ final class Product extends Model
         'product_category_id',
         'name',
         'description',
+        'is_active'
     ];
+
+    protected $casts = ['is_active' => 'boolean'];
 
     public function getSlugOptions(): SlugOptions
     {
@@ -231,4 +234,9 @@ final class Product extends Model
         };
     }
 
+    #[Scope]
+    protected function isActive(Builder $query)
+    {
+        return $query->where('is_active', true);
+    }
 }

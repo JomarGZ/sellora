@@ -28,6 +28,15 @@ final class ProductForm
                             ->searchable()
                             ->preload()
                             ->required(),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(false)
+                            ->helperText(fn ($record) => match (true) {
+                                ! $record => 'Product cannot be activated during creation.',
+                                ! $record->productItems()->exists() => 'Create at least one product variant before activating.',
+                                default => null
+                            })
+                            ->disabled(fn ($record) => ! $record || ! $record->productItems()->exists()),
                         Select::make('product_category_id')
                             ->label('Category')
                             ->relationship(name: 'category', titleAttribute: 'name')

@@ -28,11 +28,14 @@ final class ProductRepository extends BaseRepository
      */
     public function getNewArrivals(array $columns = ['*'], int $limit = 10): Collection
     {
+         $days = config('store.new_product_days', 14);
         return $this->model->query()
             ->select($columns)
+            ->isActive()
             ->with(['primaryImage', 'brand', 'category'])
             ->withAvg('productItemReviews as avg_rating', 'rating')
             ->withCount('productItemReviews as reviews_count')
+            ->where('created_at', '>=',  now()->subDays($days))
             ->withCount([
                 'orderItems as sold_count' => function ($query) {
                     $query->whereHas('order', function ($q) {
@@ -41,7 +44,7 @@ final class ProductRepository extends BaseRepository
                 },
             ])
             ->withMin('productItems', 'price')
-            ->orderBy('created_at', 'desc')
+            ->latest()
             ->limit($limit)
             ->get();
     }
@@ -56,6 +59,7 @@ final class ProductRepository extends BaseRepository
     {
         return $this->model->query()
             ->select($columns)
+            ->isActive()
             ->with(['primaryImage', 'brand', 'category'])
             ->withAvg('productItemReviews as avg_rating', 'rating')
             ->withCount('productItemReviews as reviews_count')
@@ -89,6 +93,7 @@ final class ProductRepository extends BaseRepository
                 'created_at',
             ])
             ->with(['brand', 'category', 'primaryImage'])
+            ->isActive()
             ->search($filters->search)
             ->filterByCategory($filters->categories)
             ->filterByBrand($filters->brands)
