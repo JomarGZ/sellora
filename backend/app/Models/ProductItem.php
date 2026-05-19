@@ -83,4 +83,9 @@ final class ProductItem extends Model
     {
         return $this->hasMany(ProductItemReview::class);
     }
+
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductItemImage::class)->where('is_primary', true);
+    }
 }

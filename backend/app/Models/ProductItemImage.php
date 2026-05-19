@@ -17,8 +17,11 @@ final class ProductItemImage extends Model
     protected $fillable = [
         'product_item_id',
         'image_path',
+        'is_primary',
+        'sort_order'
     ];
 
+    protected $casts = ['sort_order' => 'integer', 'is_primary' => 'boolean'];
     /**
      * Get the product item that owns the image.
      *
