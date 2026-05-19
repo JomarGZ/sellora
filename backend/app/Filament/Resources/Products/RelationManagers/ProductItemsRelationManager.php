@@ -4,35 +4,26 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Products\RelationManagers;
 
-use App\Models\Attribute;
 use App\Models\AttributeValue;
 use App\Models\ProductItem;
 use App\ProductItemService;
-use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 final class ProductItemsRelationManager extends RelationManager
@@ -65,12 +56,22 @@ final class ProductItemsRelationManager extends RelationManager
                     ->schema([
                         FileUpload::make('item_images')
                             ->label('Images')
+                            ->required()
                             ->image()
                             ->multiple()
                             ->maxFiles(5)
                             ->directory('product-item-images')
                             ->disk('public')
                             ->reorderable()
+                            ->afterStateHydrated(function ($state, $set, $record) {
+                                if (! $record) return;
+
+                                $set('item_images',
+                                    $record->images
+                                        ->pluck('image_path')
+                                        ->toArray()
+                                );
+                            })
                             ->appendFiles()
                             ->helperText('Max 5 images. First image becomes the default.'),
                     ]),
@@ -107,7 +108,7 @@ final class ProductItemsRelationManager extends RelationManager
                         $product = $this->getOwnerRecord();
 
                         $sku = app(ProductItemService::class)->generateSku($product, $data);
-
+                        
                         if (ProductItem::where('sku', $sku)->exists()) {
                             if (ProductItem::where('sku', $sku)->exists()) {
 
@@ -119,11 +120,33 @@ final class ProductItemsRelationManager extends RelationManager
                                 throw ValidationException::withMessages(['sku' => 'This variant already exists']);
                             }
                         }
+                        $data['sku'] = $sku;
                         return app(ProductItemService::class)->create($data, $product);
                     })
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->using(function(ProductItem $record, array $data) {
+                        $product = $this->getOwnerRecord();
+
+                        $sku = app(ProductItemService::class)->generateSku($product, $data);
+
+                        $exists = ProductItem::query()
+                            ->where('sku', $sku)
+                            ->whereKeyNot($record->id)
+                            ->exists();
+
+                        if ($exists) {
+                            Notification::make()
+                                ->title('This variant already exists')
+                                ->danger()
+                                ->send();
+
+                            throw ValidationException::withMessages(['sku' => 'This variant already exists']);
+                        }
+                        $data['sku'] = $sku;
+                        return app(ProductItemService::class)->update($data, $record);
+                    }),
                 DeleteAction::make(),
                 ForceDeleteAction::make(),
                 RestoreAction::make(),
@@ -163,6 +186,17 @@ final class ProductItemsRelationManager extends RelationManager
                         ])
                 )
                 ->searchable()
+                ->afterStateHydrated(function ($state, $set, $record) use ($attribute) {
+
+                    if (! $record) return;
+
+                    $valueId = $record->attributeValues
+                        ->where('attribute_id', $attribute->id)
+                        ->first()
+                        ?->id;
+
+                    $set("attribute_values.{$attribute->id}", $valueId);
+                })
                 ->preload()
                 ->placeholder("Select {$attribute->name}")
                 ->required($isRequired)

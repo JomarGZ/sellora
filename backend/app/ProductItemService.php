@@ -8,7 +8,6 @@ use App\Models\ProductItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class ProductItemService
@@ -19,25 +18,11 @@ class ProductItemService
             ->filter()
             ->values()
             ->all();
-        
-        $attributePart = AttributeValue::whereIn('id', $attributeValueIds)
-            ->orderBy('attribute_id')
-            ->pluck('value')
-            ->map(fn ($v) => Str::slug($v))
-            ->implode('-');
 
         $images = $data['item_images'] ?? [];
         $data['product_id'] = $product->id;
 
-        $baseSku = Str::slug($product->name);
-        $sku = trim("{$baseSku}-{$attributePart}", '-');
 
-        if (ProductItem::where('sku',$sku)->exists()) {
-            throw ValidationException::withMessages([
-                'attribute_values' => 'This product variant already exists.',
-            ]);
-        }
-        $data['sku'] = Str::upper($sku);
         unset($data['attribute_values'], $data['item_images']);
 
         $uploadedFiles = $images;
@@ -63,6 +48,59 @@ class ProductItemService
             throw $e;
         }
 
+    }
+
+    public function update(array $data, ProductItem $productItem)
+    {
+        $attributeValueIds = collect($data['attribute_values'] ?? [])
+            ->filter()
+            ->values()
+            ->all();
+        
+        $images = $data['item_images'] ?? [];
+        $oldImages = $productItem->images()->pluck('image_path')->toArray();
+        try {
+            return DB::transaction(function () use (
+                $data, 
+                $productItem, 
+                $images, 
+                $attributeValueIds, 
+                $oldImages
+                ) {
+
+                $productItem->update([
+                    'price' => $data['price'],
+                    'qty_in_stock' => $data['qty_in_stock'],
+                    'sku' => $data['sku'],
+                ]);
+                
+                $productItem->attributeValues()->sync($attributeValueIds);
+                
+
+                $productItem->images()->delete();
+
+                foreach ($images as $index => $path) {
+
+                    $productItem->images()->create([
+                        'image_path' => $path,
+                        'is_primary' => $index === 0,
+                        'sort_order' => $index,
+                    ]);
+                }
+
+                $deletedImages = array_diff($oldImages, $images);
+
+                foreach($deletedImages as $path) {
+                    Storage::disk('public')->delete($path);
+                }
+
+                return $productItem;
+
+            });
+        } catch (Throwable $e) {
+            throw $e;
+        }
+       
     }
 
     public function generateSku(Product $product, array $data)
