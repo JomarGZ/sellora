@@ -83,7 +83,7 @@ export function ProductOptions({
                       onClick={() => onAttributeSelect(group.name, val.value)}
                       title={`${val.value}${!isAvailable ? " (Out of Stock)" : ""}`}
                       className={cn(
-                        "relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                        "relative w-10 h-10 cursor-pointer rounded-full flex items-center justify-center transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                         isSelected
                           ? "ring-2 ring-primary ring-offset-2"
                           : "ring-1 ring-border hover:ring-primary/40",
@@ -96,7 +96,7 @@ export function ProductOptions({
                       />
                       {!isAvailable && (
                         <div className="absolute inset-0 flex items-center justify-center rotate-45">
-                          <div className="w-full h-[1px] bg-red-500/80" />
+                          <div className="w-full h-px bg-red-500/80" />
                         </div>
                       )}
                     </button>
@@ -109,7 +109,7 @@ export function ProductOptions({
                     onClick={() => onAttributeSelect(group.name, val.value)}
                     disabled={!isAvailable && !isSelected}
                     className={cn(
-                      "min-w-[3rem] px-4 py-2 text-sm font-medium rounded-xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      "min-w-12 px-4 py-2 text-sm cursor-pointer font-medium rounded-xl border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                       isSelected
                         ? "border-primary bg-primary text-primary-foreground shadow-md"
                         : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted",

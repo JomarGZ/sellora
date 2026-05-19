@@ -110,27 +110,37 @@ function ProductPageContent({
   const productData = product?.data;
 
   const handleAttributeChange = (attributeName: string, value: string) => {
-    const updatedAttributes = {
-      ...selectedAttributes,
-      [attributeName]: value,
-    };
-    setSelectedAttributes(updatedAttributes);
+    setSelectedAttributes((prev) => {
+      const isSameValue = prev[attributeName] === value;
 
-    const hasSelectedAllAttributes = productData.attributes.every(
-      (attr) => updatedAttributes[attr.name],
-    );
+      const updatedAttributes = {
+        ...prev,
+        [attributeName]: isSameValue ? undefined : value,
+      };
 
-    if (!hasSelectedAllAttributes) {
-      setSelectedItem(null);
-      return;
-    }
+      const cleanedAttributes = Object.fromEntries(
+        Object.entries(updatedAttributes).filter(([, v]) => v !== undefined),
+      ) as Record<string, string>;
 
-    const matchingItem = productData.variants.find((item) =>
-      item.attribute_values.every(
-        (av) => updatedAttributes[av.attribute_name] === av.value,
-      ),
-    );
-    setSelectedItem(matchingItem || null);
+      const hasSelectedAllAttributes = productData.attributes.every(
+        (attr) => cleanedAttributes[attr.name],
+      );
+
+      if (!hasSelectedAllAttributes) {
+        setSelectedItem(null);
+        return cleanedAttributes;
+      }
+
+      const matchingItem = productData.variants.find((item) =>
+        item.attribute_values.every(
+          (av) => cleanedAttributes[av.attribute_name] === av.value,
+        ),
+      );
+
+      setSelectedItem(matchingItem ?? null);
+
+      return cleanedAttributes;
+    });
   };
 
   const galleryImages = selectedItem?.images?.length
