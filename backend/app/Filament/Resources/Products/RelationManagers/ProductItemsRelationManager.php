@@ -13,6 +13,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
@@ -167,9 +168,10 @@ final class ProductItemsRelationManager extends RelationManager
  
         if ($attributePivots->isEmpty()) {
             return [
-                TextEntry::make('no_attributes')
-                    ->label('')
-                    ->content('No attributes are assigned to this product yet.'),
+               Placeholder::make('no_attributes')
+                    ->label('Attributes')
+                    ->content('No attributes are assigned to this product yet.')
+                    ->columnSpanFull(),
             ];
         }
  
