@@ -3,6 +3,7 @@ import { NewArrivalsSection } from "../components/sections/NewArrivalsSection";
 import { BestSellerSection } from "../components/sections/BestSellerSection";
 import BrandLogos from "../components/sections/BrandLogos";
 import CategoriesShowcase from "../components/sections/CategoriesShowcase";
+import WhyChooseUs from "../components/sections/WhyChooseUs";
 
 export function HomePage() {
   return (
@@ -10,7 +11,7 @@ export function HomePage() {
       <HeroSection />
       <BrandLogos />
       <CategoriesShowcase />
-      {/* 4. Why Choose Us */}
+      <WhyChooseUs />
       <NewArrivalsSection />
       {/* 6. Promo Banner */}
       <BestSellerSection />
