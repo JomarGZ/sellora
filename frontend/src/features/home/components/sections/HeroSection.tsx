@@ -67,7 +67,7 @@ export function HeroSection() {
             {/* Main Visual Container */}
             <div className="relative mx-auto max-w-md lg:max-w-none">
               {/* Backing decorative card decoration */}
-              <div className="absolute -inset-2 rounded-2xl bg-linear-to-r from-sky-400 to-indigo-400 opacity-25 blur-lg" />
+              <div className="absolute" />
 
               {/* Main Image */}
               <div className="relative overflow-hidden rounded-2xl bg-gray-100 shadow-lg aspect-square max-w-[90%] sm:max-w-[85%] lg:max-w-[88%] mx-auto">
