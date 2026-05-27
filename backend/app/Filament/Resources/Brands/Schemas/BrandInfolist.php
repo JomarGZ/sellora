@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Brands\Schemas;
 
 use App\Models\Brand;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -20,6 +21,8 @@ final class BrandInfolist
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),
+                ImageEntry::make('logo')
+                    ->disk('public'),
                 TextEntry::make('updated_at')
                     ->dateTime()
                     ->placeholder('-'),

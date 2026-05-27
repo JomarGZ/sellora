@@ -25,7 +25,14 @@ final class BrandsTable
                     ->searchable(),
                 TextColumn::make('slug')
                     ->searchable(),
-                ImageColumn::make('logo'),
+                ImageColumn::make('logo')
+                    ->disk('public')
+                    ->imageSize(45),
+                TextColumn::make('products_count')
+                    ->label('Products')
+                    ->counts('products')
+                    ->badge()
+                    ->color('success'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

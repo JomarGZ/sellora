@@ -21,8 +21,14 @@ final class ProductCategoriesTable
                     ->searchable(),
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('products_count')
+                    ->label('Products')
+                    ->counts('products')
+                    ->badge()
+                    ->color('success'),
                 TextColumn::make('slug')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

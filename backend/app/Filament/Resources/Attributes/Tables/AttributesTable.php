@@ -21,10 +21,14 @@ final class AttributesTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('values_count')
+                    ->label('Values')
+                    ->counts('values')
+                    ->badge()
+                    ->color('success'),
                 TextColumn::make('created_at')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()

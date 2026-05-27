@@ -8,8 +8,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
-use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -24,31 +24,47 @@ final class ProductsTable
                 ImageColumn::make('primaryImage.image_path')
                     ->label('')
                     ->disk('public')
-                    ->size(40),
-                TextColumn::make('brand.name')
-                    ->searchable(),
-                TextColumn::make('category.name')
-                    ->numeric()
-                    ->sortable(),
+                    ->imageSize(45)
+                    ->circular(),
+
                 TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('slug')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
+                    ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->weight('bold')
+                    ->wrap(),
+
+                TextColumn::make('brand.name')
+                    ->label('Brand')
+                    ->searchable()
+                    ->badge()
+                    ->color('gray'),
+
+                TextColumn::make('category.name')
+                    ->label('Category')
+                    ->badge()
+                    ->color('primary'),
+
                 TextColumn::make('product_items_count')
-                    ->label('SKUs')
-                    ->counts('productItems'),
+                    ->label('Items')
+                    ->counts('productItems')
+                    ->badge()
+                    ->color('success'),
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime('M d, Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->label('Updated')
+                    ->dateTime('M d, Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('slug')
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->searchable(),
             ])
             ->filters([
                 TrashedFilter::make(),
