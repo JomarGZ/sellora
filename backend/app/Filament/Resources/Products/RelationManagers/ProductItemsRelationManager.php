@@ -16,7 +16,6 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
@@ -35,47 +34,52 @@ final class ProductItemsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Section::make('SKU Details')
+                Section::make('Basic Information')
                     ->schema([
-                        TextInput::make('price')
-                            ->required()
-                            ->prefix('$')
-                            ->numeric(),
+                        Section::make('Details')
+                            ->schema([
+                                TextInput::make('price')
+                                    ->required()
+                                    ->prefix('$')
+                                    ->numeric(),
 
-                        TextInput::make('qty_in_stock')
-                            ->numeric()
-                            ->default(1)
-                            ->required(),
-                    ])->columns(3),
+                                TextInput::make('qty_in_stock')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->required(),
+                            ])->columns(2),
+
+                        Section::make('Item Images')
+                            ->description('Up to 5 images for this specific variant.')
+                            ->schema([
+                                FileUpload::make('item_images')
+                                    ->label('Images')
+                                    ->required()
+                                    ->image()
+                                    ->multiple()
+                                    ->maxFiles(5)
+                                    ->directory('product-item-images')
+                                    ->disk('public')
+                                    ->reorderable()
+                                    ->afterStateHydrated(function ($state, $set, $record) {
+                                        if (! $record) return;
+
+                                        $set('item_images',
+                                            $record->images
+                                                ->pluck('image_path')
+                                                ->toArray()
+                                        );
+                                    })
+                                    ->appendFiles()
+                                    ->helperText('Max 5 images. First image becomes the default.'),
+                            ]),
+                    ]),
 
                 Section::make('Attributes')
                     ->description('Select values for each attribute assigned to this product.')
                     ->schema(fn () => $this->buildAttributeFields()),
 
-                Section::make('Item Images')
-                    ->description('Up to 5 images for this specific variant.')
-                    ->schema([
-                        FileUpload::make('item_images')
-                            ->label('Images')
-                            ->required()
-                            ->image()
-                            ->multiple()
-                            ->maxFiles(5)
-                            ->directory('product-item-images')
-                            ->disk('public')
-                            ->reorderable()
-                            ->afterStateHydrated(function ($state, $set, $record) {
-                                if (! $record) return;
-
-                                $set('item_images',
-                                    $record->images
-                                        ->pluck('image_path')
-                                        ->toArray()
-                                );
-                            })
-                            ->appendFiles()
-                            ->helperText('Max 5 images. First image becomes the default.'),
-                    ]),
+               
             ]);
     }
 
@@ -105,6 +109,7 @@ final class ProductItemsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->slideOver()
                     ->using(function(array $data, string $model) {
                         $product = $this->getOwnerRecord();
 
@@ -127,6 +132,7 @@ final class ProductItemsRelationManager extends RelationManager
             ])
             ->recordActions([
                 EditAction::make()
+                    ->slideOver()
                     ->using(function(ProductItem $record, array $data) {
                         $product = $this->getOwnerRecord();
 
