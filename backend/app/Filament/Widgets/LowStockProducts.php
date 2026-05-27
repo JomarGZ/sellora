@@ -9,20 +9,33 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
-use Illuminate\Database\Eloquent\Builder;
 
 final class LowStockProducts extends TableWidget
 {
+    protected int|string|array $columnSpan = 'full';
+
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => ProductItem::query())
+              ->query(
+                    ProductItem::query()
+                        ->with(['product', 'attributeValues'])
+                        ->where('qty_in_stock', '<', 10)
+                        ->orderBy('qty_in_stock', 'asc')
+                )
             ->columns([
                 TextColumn::make('product.name')
+                    ->label('Product')
                     ->searchable(),
-                TextColumn::make('sku')
-                    ->label('SKU')
-                    ->searchable(),
+                TextColumn::make('attributes')
+                    ->label('Variants')
+                    ->state(function ($record) {
+                        return $record->attributeValues
+                            ->pluck('value')
+                            ->toArray();
+                    })
+                    ->badge()
+                    ->separator(','),
                 TextColumn::make('price')
                     ->money()
                     ->sortable(),
@@ -30,10 +43,10 @@ final class LowStockProducts extends TableWidget
                     ->label('Stock')
                     ->badge()
                     ->color(fn ($state) => match (true) {
-                        $state <= 10 => 'danger',
-                        $state <= 30 => 'warning',
-                        default => 'success'
-                    }
+                            $state <= 10 => 'danger',
+                            $state <= 30 => 'warning',
+                            default => 'success'
+                        }
                     ),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -64,10 +77,4 @@ final class LowStockProducts extends TableWidget
             ]);
     }
 
-    protected function getTableQuery(): Builder
-    {
-        return ProductItem::query()
-            ->where('qty_in_stock', '<', 10)
-            ->orderBy('qty_in_stock', 'asc');
-    }
 }
