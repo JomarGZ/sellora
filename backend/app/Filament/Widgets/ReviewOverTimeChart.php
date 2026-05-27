@@ -9,6 +9,8 @@ use Filament\Widgets\ChartWidget;
 
 final class ReviewOverTimeChart extends ChartWidget
 {
+    protected static ?int $sort = 7;
+
     protected ?string $heading = 'Review Over Time';
 
     protected function getData(): array

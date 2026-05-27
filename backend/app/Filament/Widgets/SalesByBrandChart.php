@@ -7,30 +7,31 @@ namespace App\Filament\Widgets;
 use App\Models\OrderItem;
 use Filament\Widgets\ChartWidget;
 
-final class SalesByCategoryChart extends ChartWidget
+final class SalesByBrandChart extends ChartWidget
 {
-    protected static ?int $sort = 1;
-    protected ?string $heading = 'Sales By Category Chart';
+    protected static ?int $sort = 2;
+
+    protected ?string $heading = 'Sales By Brand';
 
     protected function getData(): array
     {
         $data = OrderItem::query()
-            ->selectRaw('product_categories.name as category_name, SUM(order_items.quantity * order_items.price) as total_sales')
+            ->selectRaw('brands.name as brand_name, SUM(order_items.quantity * order_items.price) as total_sales')
             ->join('product_items', 'order_items.product_item_id', '=', 'product_items.id')
             ->join('products', 'product_items.product_id', '=', 'products.id')
-            ->join('product_categories', 'products.product_category_id', '=', 'product_categories.id')
-            ->groupBy('category_name')
+            ->join('brands', 'products.brand_id', '=', 'brands.id')
+            ->groupBy('brands.name')
             ->orderByDesc('total_sales')
             ->get();
 
         $colors = [
-            '#3B82F6', // blue
-            '#10B981', // green
-            '#F59E0B', // amber
-            '#EF4444', // red
-            '#8B5CF6', // purple
-            '#EC4899', // pink
-            '#14B8A6', // teal
+            '#3B82F6',
+            '#10B981',
+            '#F59E0B',
+            '#EF4444',
+            '#8B5CF6',
+            '#EC4899',
+            '#14B8A6',
         ];
 
         $backgroundColors = $data->map(function ($_, $index) use ($colors) {
@@ -41,18 +42,18 @@ final class SalesByCategoryChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => 'Sales',
-                    'data' => $data->pluck('total_sales')->toArray(),
+                    'data' => $data->pluck('total_sales'),
                     'backgroundColor' => $backgroundColors,
                     'borderColor' => '#ffffff',
                     'borderWidth' => 2,
                 ],
             ],
-            'labels' => $data->pluck('category_name')->toArray(),
+            'labels' => $data->pluck('brand_name'),
         ];
     }
 
     protected function getType(): string
     {
-        return 'pie';
+        return 'doughnut'; // 👈 better than pie for brands
     }
 }

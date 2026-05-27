@@ -6,16 +6,18 @@ namespace App\Filament\Widgets;
 
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Carbon;
 
 final class AovOverTimeChart extends ChartWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 4;
 
     protected ?string $heading = 'Average Order Value (AOV)';
 
     protected function getData(): array
     {
-        $data = Order::selectRaw('DATE(created_at) as date, SUM(order_total) / COUNT(*) as aov')
+        $data = Order::query()
+            ->selectRaw('DATE(created_at) as date, AVG(order_total) as aov')
             ->where('created_at', '>=', now()->subDays(7))
             ->groupBy('date')
             ->orderBy('date')
@@ -25,15 +27,34 @@ final class AovOverTimeChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => 'AOV',
-                    'data' => $data->pluck('aov')->toArray(),
+                    'data' => $data->pluck('aov'),
+                    'tension' => 0.4,
                 ],
             ],
-            'labels' => $data->pluck('date')->toArray(),
+            'labels' => $data->pluck('date')->map(
+                fn ($date) => Carbon::parse($date)->format('M d')
+            ),
         ];
     }
 
     protected function getType(): string
     {
         return 'line';
+    }
+
+    protected function getOptions(): array
+    {
+        return [
+            'responsive' => true,
+            'maintainAspectRatio' => false,
+            'plugins' => [
+                'legend' => [
+                    'display' => true,
+                ],
+                'tooltip' => [
+                    'enabled' => true,
+                ],
+            ],
+        ];
     }
 }

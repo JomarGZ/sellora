@@ -9,6 +9,8 @@ use Filament\Widgets\ChartWidget;
 
 final class OrdersPerDayChart extends ChartWidget
 {
+    protected static ?int $sort = 6;
+
     protected ?string $heading = 'Orders Per Day';
 
     protected function getData(): array

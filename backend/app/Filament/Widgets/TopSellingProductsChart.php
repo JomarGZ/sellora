@@ -9,6 +9,7 @@ use Filament\Widgets\ChartWidget;
 
 final class TopSellingProductsChart extends ChartWidget
 {
+    protected static ?int $sort = 3;
     protected ?string $heading = 'Top Selling Products';
 
     protected function getData(): array
