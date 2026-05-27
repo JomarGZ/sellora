@@ -1,13 +1,15 @@
 import { HeroSection } from "../components/sections/HeroSection";
 import { NewArrivalsSection } from "../components/sections/NewArrivalsSection";
 import { BestSellerSection } from "../components/sections/BestSellerSection";
+import BrandLogos from "../components/sections/BrandLogos";
+import CategoriesShowcase from "../components/sections/CategoriesShowcase";
 
 export function HomePage() {
   return (
     <>
       <HeroSection />
-      {/* 2. Brand Logos / Trusted By */}
-      {/* 3. Categories Showcase */}
+      <BrandLogos />
+      <CategoriesShowcase />
       {/* 4. Why Choose Us */}
       <NewArrivalsSection />
       {/* 6. Promo Banner */}
