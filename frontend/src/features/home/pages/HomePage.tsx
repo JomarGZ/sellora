@@ -5,6 +5,8 @@ import BrandLogos from "../components/sections/BrandLogos";
 import CategoriesShowcase from "../components/sections/CategoriesShowcase";
 import WhyChooseUs from "../components/sections/WhyChooseUs";
 import { Testimonials } from "../components/sections/Testimonials";
+import { PromoBanner } from "../components/sections/PromoBanner";
+import { Newsletter } from "../components/sections/NewsLetter";
 
 export function HomePage() {
   return (
@@ -14,11 +16,10 @@ export function HomePage() {
       <CategoriesShowcase />
       <WhyChooseUs />
       <NewArrivalsSection />
-      {/* 6. Promo Banner */}
+      <PromoBanner />
       <BestSellerSection />
-      {/* 8. Testimonials */}
       <Testimonials />
-      {/* 9. Newsletter CTA */}
+      <Newsletter />
     </>
   );
 }

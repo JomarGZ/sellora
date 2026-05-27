@@ -11,9 +11,20 @@ export function NewArrivalsSection() {
     <>
       {products.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <h2 className="mb-8 text-2xl font-semibold text-gray-900 sm:text-3xl">
-            New Arrivals
-          </h2>
+          <div className="mx-auto mb-10 max-w-3xl text-center">
+            <span className="mb-3 inline-block rounded-full border border-neutral-200 bg-white px-4 py-1 text-xs font-medium text-neutral-600 shadow-sm">
+              Just In
+            </span>
+
+            <h2 className="text-4xl font-bold tracking-tight text-neutral-900 md:text-5xl">
+              New Arrivals
+            </h2>
+
+            <p className="mt-4 text-neutral-500">
+              Discover our latest products, freshly added and trending among
+              shoppers right now.
+            </p>
+          </div>
           <ErrorBoundary
             FallbackComponent={({
               error,
