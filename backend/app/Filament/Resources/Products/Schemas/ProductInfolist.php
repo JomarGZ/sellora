@@ -19,7 +19,6 @@ final class ProductInfolist
             ->components([
 
                 Section::make('Product Information')
-                    ->columns(2)
                     ->schema([
                         Group::make([
                             TextEntry::make('name')
@@ -34,10 +33,12 @@ final class ProductInfolist
 
                         Group::make([
                             TextEntry::make('brand.name')
+                                ->label('Brand')
                                 ->badge()
                                 ->color('primary'),
 
                             TextEntry::make('category.name')
+                                ->label('Category')
                                 ->badge()
                                 ->color('success'),
                         ]),

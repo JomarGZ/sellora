@@ -20,6 +20,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
@@ -190,7 +191,7 @@ final class ProductItemsRelationManager extends RelationManager
                     AttributeValue::where('attribute_id', $attribute->id)
                         ->get()
                         ->mapWithKeys(fn ($av) => [
-                            $av->id => $this->formatAttributeValueLabel($av),
+                            $av->id =>  Str::upper($this->formatAttributeValueLabel($av)),
                         ])
                 )
                 ->searchable()

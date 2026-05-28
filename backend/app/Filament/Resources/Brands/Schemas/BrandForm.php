@@ -21,7 +21,6 @@ final class BrandForm
                     ->directory('brands')
                     ->visibility('public')
                     ->disk('public')
-                    ->required(),
             ]);
     }
 }

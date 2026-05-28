@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignIdFor(ProductCategory::class)->constrained()->restrictOnDelete();
             $table->string('name');
             $table->string('slug')->unique();
+            $table->boolean('is_active')->default(false);
             $table->text('description');
             $table->timestamps();
 

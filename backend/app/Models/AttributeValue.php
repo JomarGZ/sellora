@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * @property Attribute $attribute
@@ -26,7 +25,6 @@ final class AttributeValue extends Model
         'attribute_id',
         'value',
         'hex_color',
-        'image',
     ];
 
     /**
@@ -57,11 +55,6 @@ final class AttributeValue extends Model
         if ($this->hex_color) {
             return ['type' => 'color', 'value' => $this->hex_color];
         }
-
-        if ($this->image) {
-            return ['type' => 'image', 'value' => url(Storage::url($this->image))];
-        }
-
         return null;
     }
 }

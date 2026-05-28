@@ -18,6 +18,8 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(ProductItem::class)->constrained()->cascadeOnDelete();
             $table->string('image_path');
+            $table->boolean('is_primary')->default(false);
+            $table->unsignedTinyInteger('sort_order')->default(0);
             $table->timestamps();
         });
     }

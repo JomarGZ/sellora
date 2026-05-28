@@ -36,10 +36,6 @@ final class ValuesRelationManager extends RelationManager
                     ->maxLength(255),
                 TextInput::make('hex_color')
                     ->hexColor(),
-                FileUpload::make('image')
-                    ->image()
-                    ->visibility('public')
-                    ->disk('public'),
             ]);
     }
 

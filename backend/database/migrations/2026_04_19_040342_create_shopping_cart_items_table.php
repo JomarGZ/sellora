@@ -21,6 +21,9 @@ return new class extends Migration
             $table->foreignIdFor(ShoppingCart::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(ProductItem::class)->constrained()->cascadeOnDelete();
             $table->unsignedInteger('quantity');
+            $table->timestamp('priority_at')
+                ->nullable()
+                ->index();
             $table->timestamps();
         });
     }

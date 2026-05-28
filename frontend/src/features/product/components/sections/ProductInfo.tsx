@@ -77,11 +77,11 @@ export function ProductInfo({
           <span className="text-3xl font-bold tracking-tight text-foreground">
             {displayPrice}
           </span>
-          {originalPrice && originalPrice > (selectedItem?.price ?? 0) && (
+          {/* {originalPrice && originalPrice > (selectedItem?.price ?? 0) && (
             <span className="text-lg text-muted-foreground line-through">
               {formatPrice(originalPrice)}
             </span>
-          )}
+          )} */}
         </div>
 
         <div className="flex flex-wrap gap-2 mb-1.5">

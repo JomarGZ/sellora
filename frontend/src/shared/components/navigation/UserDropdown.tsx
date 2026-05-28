@@ -35,7 +35,7 @@ export function UserDropdown({ onLogout }: UserDropdownProps) {
           src={user?.avatar}
           firstName={user?.first_name}
           lastName={user?.last_name}
-          isOnline={true}
+          isOnline={false}
         />
       </button>
 
