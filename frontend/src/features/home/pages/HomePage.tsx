@@ -18,7 +18,7 @@ export function HomePage() {
       <NewArrivalsSection />
       <PromoBanner />
       <BestSellerSection />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <Newsletter />
     </>
   );
