@@ -1,39 +1,35 @@
 import { Link } from "@tanstack/react-router";
-
 const categories = [
   {
-    title: "Electronics",
-    to: "/shop?categories=menswear",
+    title: "Men's Clothing",
+    to: "/shop?category=mens-clothing",
     image:
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1200&auto=format&fit=crop",
+      "https://plus.unsplash.com/premium_photo-1688497830977-f9ab9f958ca7?q=80&w=1051&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     large: true,
   },
   {
-    title: "Gaming",
-    to: "/shop?categories=gaming",
-
+    title: "Women's Clothing",
+    to: "/shop?category=womens-clothing",
     image:
-      "https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop",
   },
   {
-    title: "Fashion",
-    to: "/shop?categories=fashion",
-
+    title: "Streetwear",
+    to: "/shop?category=streetwear",
     image:
-      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop",
   },
   {
-    title: "Accessories",
-    to: "/shop?categories=accessories",
-
+    title: "Activewear",
+    to: "/shop?category=activewear",
     image:
-      "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1200&auto=format&fit=crop",
   },
   {
-    title: "Home Living",
-    to: "/shop?categories=Home-Living",
+    title: "Formal Wear",
+    to: "/shop?category=formal-wear",
     image:
-      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1635913906376-53130718255a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
 ];
 
