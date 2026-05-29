@@ -33,9 +33,7 @@ class SocialAuthController extends Controller
 
         $tokens = $this->authService->generateTokens($user);
 
-        $response = redirect(
-            'http://localhost:3000'
-        );
+        $response = redirect(config('app.frontend_url'));
 
         $response->withCookie(
             $this->authService->refreshTokenCookie($tokens['refreshToken'])
