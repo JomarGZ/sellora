@@ -2,32 +2,32 @@ import { Link } from "@tanstack/react-router";
 const categories = [
   {
     title: "Men's Clothing",
-    to: "/shop?category=mens-clothing",
+    to: "/shop?categories=mens-clothing",
     image:
       "https://plus.unsplash.com/premium_photo-1688497830977-f9ab9f958ca7?q=80&w=1051&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     large: true,
   },
   {
     title: "Women's Clothing",
-    to: "/shop?category=womens-clothing",
+    to: "/shop?categories=womens-clothing",
     image:
       "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1200&auto=format&fit=crop",
   },
   {
     title: "Streetwear",
-    to: "/shop?category=streetwear",
+    to: "/shop?categories=streetwear",
     image:
       "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=1200&auto=format&fit=crop",
   },
   {
     title: "Activewear",
-    to: "/shop?category=activewear",
+    to: "/shop?categories=activewear",
     image:
       "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=1200&auto=format&fit=crop",
   },
   {
     title: "Formal Wear",
-    to: "/shop?category=formal-wear",
+    to: "/shop?categories=formal-wear",
     image:
       "https://images.unsplash.com/photo-1635913906376-53130718255a?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
