@@ -44,18 +44,11 @@ const SocialRegisterButtons = () => (
     </div>
 
     {/* Buttons */}
-    <div className="grid grid-cols-2 gap-3">
+    <div className="flex justify-center">
       <Button variant="social" size="lg" asChild>
-        <a href="#">
+        <a href="http://localhost/api/v1/auth/google/redirect">
           <GoogleIcon />
           Sign up with Google
-        </a>
-      </Button>
-
-      <Button variant="social" size="lg" asChild>
-        <a href="#">
-          <FacebookIcon />
-          Sign up with Facebook
         </a>
       </Button>
     </div>

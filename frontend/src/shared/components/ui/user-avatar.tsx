@@ -74,6 +74,7 @@ export default function UserAvatar({
         <img
           src={src}
           alt={`${firstName} ${lastName ?? ""}`}
+          referrerPolicy="no-referrer"
           className="h-full w-full rounded-full object-cover"
         />
       ) : (

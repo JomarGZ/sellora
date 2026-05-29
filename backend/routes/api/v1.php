@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\ProductItemReviewController;
 use App\Http\Controllers\Api\V1\ProductReviewController;
 use App\Http\Controllers\Api\V1\ShippingOptionController;
 use App\Http\Controllers\Api\V1\ShoppingCartController;
+use App\Http\Controllers\Api\V1\SocialAuthController;
 use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\UserAddressController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -32,6 +33,8 @@ Route::name('api.v1.')->group(function () {
     Route::middleware('throttle:auth')->group(function () {
         Route::post('register', [AuthController::class, 'register'])->name('register');
         Route::post('login', [AuthController::class, 'login'])->name('login');
+        Route::get('auth/google/callback', [SocialAuthController::class, 'callback'])->name('auth.google.callback');
+        Route::get('auth/google/redirect', [SocialAuthController::class, 'redirect'])->name('auth.google.redirect');
     });
 
     /*

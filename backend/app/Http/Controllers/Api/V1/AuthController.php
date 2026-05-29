@@ -23,7 +23,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
 final class AuthController extends ApiController
@@ -50,7 +49,7 @@ final class AuthController extends ApiController
             'accessToken' => $tokens['accessToken'],
         ], 'User registered successfully. Please check your email to verify your account.');
 
-        $response->withCookie($this->refreshTokenCookie($tokens['refreshToken']));
+        $response->withCookie($this->service->refreshTokenCookie($tokens['refreshToken']));
 
         return $response;
 
@@ -81,7 +80,7 @@ final class AuthController extends ApiController
             'accessToken' => $tokens['accessToken'],
         ], message: 'You have successfully logged in.');
 
-        $response->withCookie($this->refreshTokenCookie($tokens['refreshToken']));
+        $response->withCookie($this->service->refreshTokenCookie($tokens['refreshToken']));
 
         return $response;
     }
@@ -112,7 +111,7 @@ final class AuthController extends ApiController
             'user' => UserResource::make($user),
             'accessToken' => $tokens['accessToken'],
         ], message: 'Token refreshed successfully');
-        $response->withCookie($this->refreshTokenCookie($tokens['refreshToken']));
+        $response->withCookie($this->service->refreshTokenCookie($tokens['refreshToken']));
 
         return $response;
     }
@@ -219,18 +218,5 @@ final class AuthController extends ApiController
         );
     }
 
-    private function refreshTokenCookie(string $refreshToken): Cookie
-    {
-        $rtExpiration = config('sanctum.rt_expiration');
-        $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
-
-        return cookie(
-            'refreshToken',
-            $refreshToken,
-            $refreshTokenMinutes,
-            secure: app()->isProduction(),
-            httpOnly: true,
-            sameSite: 'Strict'
-        );
-    }
+    
 }

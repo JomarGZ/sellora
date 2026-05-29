@@ -23,7 +23,7 @@ final class UserResource extends JsonResource
             'id' => $this->id,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
-            'avatar' => $this->avatar ? asset(Storage::url($this->avatar)) : null,
+            'avatar' => $this->avatar ? (str_starts_with($this->avatar, 'http') ? $this->avatar : asset(Storage::url($this->avatar)))  : null,
             'email' => $this->email,
             'email_verified_at' => $this->email_verified_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

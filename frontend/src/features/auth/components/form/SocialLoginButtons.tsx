@@ -41,17 +41,11 @@ const SocialLoginButtons = () => (
       </span>
       <div className="h-px flex-1 bg-border" />
     </div>
-    <div className="grid grid-cols-2 gap-3">
+    <div className="flex justify-center">
       <Button variant="social" size="lg" asChild>
-        <a href="#">
+        <a href="http://localhost/api/v1/auth/google/redirect">
           <GoogleIcon />
-          Google
-        </a>
-      </Button>
-      <Button variant="social" size="lg" asChild>
-        <a href="#">
-          <FacebookIcon />
-          Facebook
+          Login with Google
         </a>
       </Button>
     </div>

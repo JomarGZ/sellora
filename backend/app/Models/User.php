@@ -96,6 +96,11 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
         return $this->hasMany(ProductItemReview::class);
     }
 
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
     protected function fullName(): Attribute
     {
         return Attribute::make(

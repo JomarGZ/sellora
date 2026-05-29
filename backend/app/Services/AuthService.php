@@ -10,6 +10,7 @@ use App\Repositories\UserRepository;
 use Exception;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Support\Facades\Password;
 
 final readonly class AuthService
@@ -67,6 +68,21 @@ final readonly class AuthService
             'accessToken' => $accessToken->plainTextToken,
             'refreshToken' => $refreshToken->plainTextToken,
         ];
+    }
+
+    public function refreshTokenCookie(string $refreshToken): Cookie
+    {
+        $rtExpiration = config('sanctum.rt_expiration');
+        $refreshTokenMinutes = is_int($rtExpiration) ? $rtExpiration : (24 * 60);
+
+        return cookie(
+            'refreshToken',
+            $refreshToken,
+            $refreshTokenMinutes,
+            secure: app()->isProduction(),
+            httpOnly: true,
+            sameSite: 'Strict'
+        );
     }
 
     public function sendResetPasswordLink(string $email): string
