@@ -24,9 +24,7 @@ use Stripe\StripeClient;
 final class CheckoutService
 {
     public function __construct(
-        private OrderRepository $orderRepo,
         private PaymentRepository $paymentRepo,
-        private CartRepository $cartRepository,
         private InventoryService $inventory,
         private StripeClient $stripe,
     ) {}
@@ -99,45 +97,6 @@ final class CheckoutService
         });
     }
 
-    // ── Handle existing order safely ──────────────────────────────────
-    private function handleExistingOrder(Order $order): array
-    {
-        $payment = $order->payment;
-
-        // 🚫 Already paid
-        if ($payment->status === PaymentStatus::Paid) {
-            return [
-                'order' => $order,
-                'checkout_url' => null,
-                'message' => 'Order already paid',
-            ];
-        }
-
-        // 🔁 Reuse session if still valid
-        if ($payment->stripe_session_id) {
-            try {
-                $session = $this->stripe->checkout->sessions->retrieve(
-                    $payment->stripe_session_id
-                );
-
-                if ($session->status === 'open') {
-                    return [
-                        'order' => $order,
-                        'checkout_url' => $session->url,
-                        'message' => 'Reusing existing checkout session',
-                    ];
-                }
-            } catch (Exception $e) {
-                // ignore
-            }
-        }
-
-        return [
-            'order' => $order,
-            'checkout_url' => null,
-            'message' => 'Session expired, create new checkout',
-        ];
-    }
 
     private function buildLineItems(Collection $items): array
     {

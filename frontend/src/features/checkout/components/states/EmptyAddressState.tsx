@@ -1,5 +1,5 @@
 import { MapPin } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
+import { Link } from "@tanstack/react-router";
 
 export function EmptyAddressState() {
   return (
@@ -11,12 +11,12 @@ export function EmptyAddressState() {
       <p className="mt-1 text-sm text-muted-foreground">
         Add a delivery address to continue
       </p>
-      <Button
-        variant="outline"
-        className="mt-4 border-selection text-selection hover:bg-selection-light"
+      <Link
+        to="/account/addresses"
+        className="mt-4 border-selection border py-2 px-3 rounded-sm hover:bg-gray-300 text-selection hover:bg-selection-light"
       >
         Add Address
-      </Button>
+      </Link>
     </div>
   );
 }

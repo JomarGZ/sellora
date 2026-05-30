@@ -68,6 +68,23 @@ class OrderPreviewService
                 ]);
             }
 
+                    /*
+            |--------------------------------------------------------------------------
+            | SHIPPING
+            |--------------------------------------------------------------------------
+            */
+
+            $shippingMethod = ShippingMethod::first();
+            
+            if (! $shippingMethod) {
+
+                throw ValidationException::withMessages([
+                    'shipping_method' => 'No shipping method available.',
+                ]);
+            }
+
+            $shippingFee = $shippingMethod->price;
+
             /*
             |--------------------------------------------------------------------------
             | CALCULATE TOTALS
@@ -99,15 +116,7 @@ class OrderPreviewService
                 );
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | SHIPPING
-            |--------------------------------------------------------------------------
-            */
-
-            $shippingMethod = ShippingMethod::firstOrFail();
-
-            $shippingFee = $shippingMethod->price;
+    
 
             /*
             |--------------------------------------------------------------------------

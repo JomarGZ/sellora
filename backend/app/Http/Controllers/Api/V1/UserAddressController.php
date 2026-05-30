@@ -31,10 +31,14 @@ final class UserAddressController extends ApiController
 
     public function default()
     {
+        $address = $this->repository->getDefault(auth()->id());
+
         return $this->success(
-            data: UserAddressResource::make($this->repository->getDefault(auth()->id())),
+            data: $address
+                ? UserAddressResource::make($address)
+                : null,
             message: 'Retrieved default address successfully.'
-        ) ;
+        );
     }
 
     public function show(UserAddress $userAddress)
