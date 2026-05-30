@@ -29,7 +29,7 @@ final class ProductItemReviewRepository extends BaseRepository
                 $q->where('slug', $slug);
             })
             ->with([
-                'user:id,first_name,last_name,email_verified_at',
+                'user:id,first_name,avatar,last_name,email_verified_at',
                 'productItem:id,sku,price,product_id',
                 'productItem.attributeValues.attribute'
             ])

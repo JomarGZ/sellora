@@ -6,6 +6,7 @@ import { EmptyState } from "../../states/EmptyState";
 import type { ProductReview, ProductReviewResponse } from "@/shared/types";
 import { formatAttributeDescription } from "@/shared/lib/utils";
 import { Pagination } from "../ui/Pagination";
+import UserAvatar from "@/shared/components/ui/user-avatar";
 
 interface ProductReviewsProps {
   reviewSummary: ProductReview;
@@ -20,6 +21,7 @@ export function ProductReviews({
   productReviews,
   commentListPage,
 }: ProductReviewsProps) {
+  console.log(productReviews);
   return (
     <div className="space-y-10">
       {/* Summary */}
@@ -80,10 +82,11 @@ export function ProductReviews({
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-display font-bold">
-                      {review.user.first_name.charAt(0).toUpperCase()}
-                      {review.user.last_name.charAt(0).toUpperCase()}
-                    </div>
+                    <UserAvatar
+                      src={review.user?.avatar}
+                      firstName={review.user.first_name}
+                      lastName={review.user.last_name}
+                    />
                     <div>
                       <p className="font-semibold text-foreground flex items-center gap-2">
                         {`${review.user.first_name} ${review.user.last_name}`}
