@@ -11,7 +11,7 @@ final class SalesByBrandChart extends ChartWidget
 {
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Sales By Brand';
+    protected ?string $heading = 'Brand Sales Performance';
 
     protected function getData(): array
     {
