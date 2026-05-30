@@ -6,7 +6,6 @@ namespace App\Repositories;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
-use App\Models\OrderItem;
 
 final class OrderRepository extends BaseRepository
 {
@@ -16,7 +15,7 @@ final class OrderRepository extends BaseRepository
     }
 
 
-    public function getPaginatedUserOrders(int $userId, ?OrderStatus $status = null, int $perPage = 2)
+    public function getPaginatedUserOrders(int $userId, ?OrderStatus $status = null, int $perPage = 5)
     {
         return $this->model->query()
             ->where('user_id', $userId)

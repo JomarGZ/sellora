@@ -4,6 +4,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import type { OrderItem } from "@/shared/types";
 import { formatAttributeDescription } from "@/shared/lib/utils";
 import type { ReviewPayload } from "../../types";
+import { Link } from "@tanstack/react-router";
 
 interface OrderItemCardProps {
   item: OrderItem;
@@ -57,14 +58,13 @@ const OrderItemCard = ({ item, onReview }: OrderItemCardProps) => {
         {/* Item-level actions */}
         <div className="flex flex-wrap gap-1.5 mt-2">
           {canBuyAgain && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 text-xs gap-1 px-2 text-primary"
+            <Link
+              to={`/product/${item.product_item.product?.slug}`}
+              className="inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-all hover:bg-primary hover:text-white hover:shadow-sm active:scale-95"
             >
-              <ShoppingCart className="h-3 w-3" />
+              <ShoppingCart className="h-3.5 w-3.5" />
               Buy Again
-            </Button>
+            </Link>
           )}
           {canReview && (
             <Button
