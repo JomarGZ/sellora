@@ -31,7 +31,7 @@ final class CartRepository extends BaseRepository implements ICartRepository
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->with([
                 'items',
-                'items.product' => fn ($q) => $q->where('status', 'active'),
+                'items.productItem' => fn ($q) => $q->where('status', 'active'),
             ])
             ->latest()
             ->first();
