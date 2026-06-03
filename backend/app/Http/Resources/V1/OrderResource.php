@@ -11,18 +11,20 @@ final class OrderResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id' => $this->id,
-            'status' => $this->status->value,        // ✅ "paid" not the enum object
-            'status_label' => $this->status->label(),      // ✅ "Payment confirmed"
-            'is_paid' => $this->status->isPaid(),     // ✅ boolean for frontend
-            'order_total' => $this->order_total,
-            'subtotal' => $this->subtotal,
-            'shipping_fee' => $this->shipping_fee,
-            'currency' => $this->currency,
-            'idempotency_key' => $this->idempotency_key,
-            'created_at' => $this->created_at->toISOString(),
-            'order_items' => OrderItemResource::collection($this->whenLoaded('items')),
-            'payment' => new PaymentResource($this->whenLoaded('payment')),
+            'id'         => $this->resource->id,
+            'status'     => $this->resource->status,
+            'currency'   => $this->resource->currency,
+            'subtotal'   => $this->resource->subtotal,
+            'shipping'   => $this->resource->shipping_fee,
+            'total'      => $this->resource->total,
+            'placed_at'  => $this->resource->created_at->toIso8601String(),
+            'items'      => $this->resource->items->map(fn ($item) => [
+                'product_name' => $item->product_name,
+                'product_sku'  => $item->product_sku,
+                'quantity'     => $item->quantity,
+                'unit_price'   => $item->unit_price,
+                'line_total'   => $item->line_total,
+            ]),
         ];
     }
 }

@@ -43,12 +43,12 @@ export function CartItemCard({
     .join(", ");
 
   const subtotal = item.product_item.price * item.quantity;
-  const isOutOfStock = Number(item.product_item.qty_in_stock) <= 0;
+  const isOutOfStock = Number(item.product_item.qty) <= 0;
   return (
     <div
       className={cn(
         "flex gap-4 p-4 bg-white dark:bg-card rounded-2xl border border-border/50 shadow-sm relative group",
-        Number(item.product_item.qty_in_stock) <= 0 && "opacity-60",
+        Number(item.product_item.qty) <= 0 && "opacity-60",
       )}
     >
       <div className="flex items-center">
@@ -81,7 +81,7 @@ export function CartItemCard({
               {attributeDescription}
             </p>
             <p className="text-xs text-muted-foreground">
-              Stock: {item.product_item.qty_in_stock}
+              Stock: {item.product_item.qty}
             </p>
           </div>
           <div className="text-right">
@@ -121,7 +121,7 @@ export function CartItemCard({
               <Button
                 variant="ghost"
                 size="icon"
-                disabled={quantity === Number(item.product_item.qty_in_stock)}
+                disabled={quantity === Number(item.product_item.qty)}
                 className="h-7 w-7 rounded-md cursor-pointer"
                 onClick={() => handleQuantityChange(quantity + 1)}
               >

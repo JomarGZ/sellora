@@ -25,7 +25,7 @@ export type Summary = {
       id: number;
       sku: string;
       price: number;
-      qty_in_stock: number;
+      qty: number;
       in_stock: boolean;
     };
   }[];

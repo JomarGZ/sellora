@@ -4,17 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\CheckoutType;
-use App\Enums\OrderStatus;
 use Database\Factories\OrderFactory;
-use DomainException;
-use Illuminate\Database\Eloquent\Attributes\Scope;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 final class Order extends Model
 {
@@ -23,31 +17,52 @@ final class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'shipping_method_id',
+        'checkout_id',
+        'stripe_payment_intent_id',
+        'items_snapshot',
+        'total',
         'status',
         'subtotal',
         'shipping_fee',
         'shopping_cart_id',
-        'order_total',
         'currency',
         'idempotency_key',
-        'checkout_type',
     ];
 
     protected $casts = [
-        'status' => OrderStatus::class,
-        'checkout_type' => CheckoutType::class,
         'subtotal' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
-        'order_total' => 'decimal:2',
+        'items_snapshot' => 'array',
+        'total'          => 'decimal:2',
     ];
 
+    const STATUS_CONFIRMED  = 'confirmed';
+    const STATUS_PROCESSING = 'processing';
+    const STATUS_SHIPPED    = 'shipped';
+    const STATUS_DELIVERED  = 'delivered';
+    const STATUS_REFUNDED   = 'refunded';
+    const STATUS_CANCELLED  = 'cancelled';
+
+    const STATUS_OPTIONS = [
+        self::STATUS_CONFIRMED  => 'Confirmed',
+        self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_SHIPPED    => 'Shipped',
+        self::STATUS_DELIVERED  => 'Delivered',
+        self::STATUS_REFUNDED   => 'Refunded',
+        self::STATUS_CANCELLED  => 'Cancelled',
+    ];
+    
     /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function checkout()
+    {
+        return $this->belongsTo(Checkout::class, 'checkout_id');
     }
 
     /**
@@ -66,46 +81,10 @@ final class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    /** @return HasOne<Payment, $this> */
-    public function payment(): HasOne
-    {
-        return $this->hasOne(Payment::class);
-    }
+  
 
     public function address()
     {
         return $this->hasOne(OrderAddress::class);
     }
-
-    public function transitionTo(OrderStatus $next): void
-    {
-        if (! $this->status->canTransitionTo($next)) {
-            throw new DomainException(
-                "Illegal order transition: {$this->status->value} → {$next->value} "
-                ."(order #{$this->id})"
-            );
-        }
-
-        $this->update(['status' => $next]);
-    }
-
-    public function scopePaid($query)
-    {
-        return $query->where('status', OrderStatus::Paid);
-    }
-
-    public function scopePending($query)
-    {
-        return $query->where('status', OrderStatus::Pending);
-    }
-
-    #[Scope]
-    protected function filterByStatus(Builder $query, ?OrderStatus $status)
-    {
-        return $query->when(
-            $status,
-            fn (Builder $q) => $q->where('status', $status)
-        );
-    }
-    
 }

@@ -17,7 +17,7 @@ final class AovOverTimeChart extends ChartWidget
     protected function getData(): array
     {
         $data = Order::query()
-            ->selectRaw('DATE(created_at) as date, AVG(order_total) as aov')
+            ->selectRaw('DATE(created_at) as date, AVG(total) as aov')
             ->where('created_at', '>=', now()->subDays(7))
             ->groupBy('date')
             ->orderBy('date')

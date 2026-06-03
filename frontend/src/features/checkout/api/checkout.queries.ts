@@ -8,7 +8,7 @@ import {
   getCurrentCheckout,
   getDefaultShipping,
   placeOrder,
-  snapshotOrderPreview,
+  createPreview,
 } from "./checkout.api";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
 
@@ -33,7 +33,7 @@ export function useCheckoutSnapshot(
   const { showToast } = useAppToast();
 
   return useMutation({
-    mutationFn: snapshotOrderPreview,
+    mutationFn: createPreview,
     onError(error: any) {
       showToast({
         severity: "error",

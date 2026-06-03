@@ -4,25 +4,61 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Enums\OrderStatus;
+use App\DTOs\CartSnapshotDTO;
+use App\DTOs\CartSnapshotItemDTO;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Repositories\Contracts\IOrderRepository;
 
-final class OrderRepository extends BaseRepository
+final class OrderRepository extends BaseRepository implements IOrderRepository
 {
     public function __construct(Order $order)
     {
         parent::__construct($order);
     }
 
-
-    public function getPaginatedUserOrders(int $userId, ?OrderStatus $status = null, int $perPage = 5)
-    {
-        return $this->model->query()
-            ->where('user_id', $userId)
-            ->with(['items.productItem.images','items.productItem.attributeValues', 'items.review', 'items.productItem.product'])
-            ->filterByStatus($status)
-            ->latest()
-            ->paginate($perPage);
+   public function createFromSnapshot(
+        string          $checkoutId,
+        string          $userId,
+        string          $paymentIntentId,
+        CartSnapshotDTO $snapshot,
+    ): Order {
+        // Create the order header row.
+        $order = $this->model->create([
+            'checkout_id'              => $checkoutId,
+            'user_id'                  => $userId,
+            'stripe_payment_intent_id' => $paymentIntentId,
+            'items_snapshot'           => $snapshot->toArray(),
+            'subtotal'                 => $snapshot->subtotal,
+            'shipping_fee'             => $snapshot->shippingFee,
+            'total'                    => $snapshot->total,
+            'currency'                 => $snapshot->currency,
+            'status'                   => Order::STATUS_CONFIRMED,
+        ]);
+ 
+        // Create denormalized line items from snapshot.
+        // We do NOT re-read from products here — the snapshot is the
+        // authoritative record of what was purchased at what price.
+        $lineItems = array_map(
+            fn (CartSnapshotItemDTO $item) => [
+                'order_id'     => $order->id,
+                'product_item_id'   => $item->productItemId,
+                'product_name' => $item->productName,
+                'product_sku'  => $item->productSku,
+                'quantity'     => $item->quantity,
+                'unit_price'   => $item->unitPrice,
+                'line_total'   => $item->lineTotal,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ],
+            $snapshot->items
+        );
+        
+ 
+        // Bulk insert is significantly faster than N individual inserts.
+        OrderItem::insert($lineItems);
+ 
+        return $order;
     }
 
 }

@@ -24,7 +24,7 @@ final class ProductItemFactory extends Factory
             'product_id' => Product::factory(),
             'sku' => fake()->unique()->bothify('SKU-####-???'),
             'price' => fake()->randomFloat(2, 10, 10000),
-            'qty_in_stock' => fake()->numberBetween(0, 200),
+            'qty' => fake()->numberBetween(0, 200),
         ];
     }
 
@@ -38,7 +38,7 @@ final class ProductItemFactory extends Factory
     public function outOfStock(): static
     {
         return $this->state(fn (): array => [
-            'qty_in_stock' => 0,
+            'qty' => 0,
         ]);
     }
 

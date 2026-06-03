@@ -125,7 +125,7 @@ export interface ProductItem {
   price: number;
   in_stock: boolean;
   product?: Product;
-  qty_in_stock: number;
+  qty: number;
   images: ProductItemImage[];
   attribute_values: AttributeValue[];
 }

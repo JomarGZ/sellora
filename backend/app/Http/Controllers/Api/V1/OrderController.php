@@ -14,10 +14,11 @@ class OrderController extends ApiController
     
     public function index(Request $request)
     {
-        $status = $request->filled('status') ? OrderStatus::from($request->string('status')) : null;
+        // $status = $request->filled('status') ? OrderStatus::from($request->string('status')) : null;
 
-        $orders = $this->orderRepository->getPaginatedUserOrders(auth()->id(), $status);
+        // $orders = $this->orderRepository->getPaginatedUserOrders(auth()->id(), $status);
 
-        return OrderResource::collection($orders);
+        // return OrderResource::collection($orders);
+        return '';
     }
 }

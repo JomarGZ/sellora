@@ -4,14 +4,23 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Models\ShoppingCartItem;
+use App\Models\CartItem;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class ShoppingCartItemRepository extends BaseRepository
 {
-    public function __construct(ShoppingCartItem $model)
+    public function __construct(CartItem $model)
     {
         parent::__construct($model);
+    }
+
+    public function getUserSelectedCartItemsForCheckout(User $user, array $selectedCartItemIds)
+    {
+        return $this->model->whereIn('id', $selectedCartItemIds)
+            ->whereHas('cart', fn ($q) => $q->where('user_id', $user->id))
+            ->with('productItem.product')
+            ->get();
     }
 
     public function paginateByCartId(int $cartId, int $perPage = 5): LengthAwarePaginator
@@ -24,7 +33,6 @@ final class ShoppingCartItemRepository extends BaseRepository
                 'productItem.attributeValues.attribute',
                 'productItem.images',
             ])
-            ->orderByDesc('priority_at')
             ->latest()
             ->paginate($perPage);
     }

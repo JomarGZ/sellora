@@ -36,7 +36,7 @@ final class ProductDetailResource extends JsonResource
                 'count' => $this->reviews_count ?? 0,
                 'ratings' => $this->rating_breakdown
             ],
-            'total_stock' => (int) $this->product_items_sum_qty_in_stock,
+            'total_stock' => (int) $this->product_items_sum_qty,
             'brand' => BrandResource::make($this->whenLoaded('brand')),
             'category' => CategoryResource::make($this->whenLoaded('category')),
             'images' => ProductImageResource::collection($this->whenLoaded('images')),

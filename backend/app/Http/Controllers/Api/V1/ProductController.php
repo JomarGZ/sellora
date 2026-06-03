@@ -37,7 +37,7 @@ final class ProductController extends ApiController
             'images:id,product_id,image_path,is_primary',
             'brand:id,name,slug,logo',
             'category:id,name,slug',
-            'productItems:id,product_id,sku,price,qty_in_stock',
+            'productItems:id,product_id,sku,price,qty',
             'productItems.images:id,product_item_id,image_path',
             'productItems.attributeValues:id,attribute_id,value,hex_color,image',
             'productItems.attributeValues.attribute:id,name',
@@ -47,7 +47,7 @@ final class ProductController extends ApiController
             ->loadCount('productItemReviews as reviews_count')
             ->loadMin('productItems', 'price')
             ->loadMax('productItems', 'price')
-            ->loadSum('productItems', 'qty_in_stock');
+            ->loadSum('productItems', 'qty');
         
         $ratingBreakdown = $product->productItemReviews()
             ->selectRaw('rating, COUNT(*) as total')

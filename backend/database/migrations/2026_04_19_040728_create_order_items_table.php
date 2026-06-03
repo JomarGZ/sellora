@@ -17,13 +17,16 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table): void {
             $table->id();
-            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdFor(ProductItem::class)->constrained()->restrictOnDelete();
-            $table->unsignedBigInteger('quantity');
-            $table->decimal('price', 10, 2);
+            $table->foreignId('order_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('product_item_id')->nullable()->constrained()->nullOnDelete();
             $table->string('product_name');
-            $table->string('sku');
+            $table->string('product_sku');
+            $table->unsignedInteger('quantity');
+            $table->decimal('unit_price', 10, 2);
+            $table->decimal('line_total', 10, 2);
             $table->timestamps();
+ 
+            $table->index('order_id');
         });
     }
 

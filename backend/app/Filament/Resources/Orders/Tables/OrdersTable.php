@@ -17,8 +17,6 @@ final class OrdersTable
                 TextColumn::make('user.fullName')
                     ->label('Customer')
                     ->searchable(),
-                TextColumn::make('shippingMethod.name')
-                    ->searchable(),
                 TextColumn::make('status')
                     ->badge()
                     ->searchable(),
@@ -28,7 +26,7 @@ final class OrdersTable
                 TextColumn::make('shipping_fee')
                     ->money()
                     ->sortable(),
-                TextColumn::make('order_total')
+                TextColumn::make('total')
                     ->money()
                     ->sortable(),
                 TextColumn::make('currency')

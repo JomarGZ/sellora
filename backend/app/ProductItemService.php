@@ -70,7 +70,7 @@ class ProductItemService
 
                 $productItem->update([
                     'price' => $data['price'],
-                    'qty_in_stock' => $data['qty_in_stock'],
+                    'qty' => $data['qty'],
                     'sku' => $data['sku'],
                 ]);
                 

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Widgets;
 
-use App\Enums\OrderStatus;
 use App\Models\Order;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -15,14 +14,24 @@ final class EcommerceStatsOverview extends StatsOverviewWidget
     {
         return [
             Stat::make('Total Revenue (Paid)', '$ '.number_format(
-                (float) Order::WHERE('status', OrderStatus::Paid)->sum('order_total'),
+                (float) Order::whereIn('status',  [
+                            Order::STATUS_CONFIRMED,
+                            Order::STATUS_PROCESSING,
+                            Order::STATUS_SHIPPED,
+                            Order::STATUS_DELIVERED,
+                        ])->sum('total'),
                 2
             ))
                 ->chart(
                     collect(range(6, 0))
-                        ->map(fn ($daysAgo) => Order::where('status', OrderStatus::Paid)
+                        ->map(fn ($daysAgo) => Order::whereIn('status', [
+                            Order::STATUS_CONFIRMED,
+                            Order::STATUS_PROCESSING,
+                            Order::STATUS_SHIPPED,
+                            Order::STATUS_DELIVERED,
+                        ])
                             ->whereDate('created_at', now()->subDays($daysAgo))
-                            ->sum('order_total')
+                            ->sum('total')
                         )->toArray()
                 )
                 ->description('Last 7 days revenue trend')

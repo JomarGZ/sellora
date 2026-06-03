@@ -17,7 +17,7 @@ final class OrderInfolist
                     ->label('User'),
                 TextEntry::make('shippingMethod.name')
                     ->label('Shipping method'),
-                TextEntry::make('order_total')
+                TextEntry::make('total')
                     ->numeric(),
                 TextEntry::make('status')
                     ->badge(),

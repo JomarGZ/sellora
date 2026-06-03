@@ -23,11 +23,11 @@ final class InventoryService
             $productItem = ProductItem::lockForUpdate()
                 ->findOrFail($item->product_item_id);
 
-            if ($productItem->qty_in_stock < $item->quantity) {
+            if ($productItem->qty < $item->quantity) {
                 throw new OutOfStockException(
                     sku: $productItem->sku,
                     requested: $item->quantity,
-                    available: $productItem->qty_in_stock
+                    available: $productItem->qty
                 );
             }
         });
@@ -42,8 +42,8 @@ final class InventoryService
         foreach ($items as $item) {
             $updated = DB::table('product_items')
                 ->where('id', $item['product_item_id'])
-                ->where('qty_in_stock', '>=', $item['quantity']) // safety net
-                ->decrement('qty_in_stock', $item['quantity']);
+                ->where('qty', '>=', $item['quantity']) // safety net
+                ->decrement('qty', $item['quantity']);
 
             if ($updated === 0) {
                 // Should not reach here in normal flow, but log for monitoring.

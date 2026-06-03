@@ -88,7 +88,7 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
 
     public function shoppingCart(): HasOne
     {
-        return $this->hasOne(ShoppingCart::class);
+        return $this->hasOne(Cart::class);
     }
 
     public function productItemReviews()

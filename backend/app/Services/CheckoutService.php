@@ -4,115 +4,183 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DTOs\V1\CheckoutDTO;
-use App\DTOs\V1\CheckoutItemDTO;
-use App\Enums\CheckoutType;
-use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\ShippingMethod;
-use App\Models\User;
-use App\Repositories\CartRepository;
-use App\Repositories\OrderRepository;
-use App\Repositories\PaymentRepository;
-use Exception;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use App\DTOs\CartSnapshotDTO;
+use App\Exceptions\CartEmptyException;
+use App\Exceptions\CartOwnershipException;
+use App\Exceptions\InsufficientStockException;
+use App\Models\Cart;
+use App\Models\Checkout;
+use App\Models\CartItem;
+use App\Repositories\Contracts\ICartRepository;
+use App\Repositories\Contracts\ICheckoutRepository;
+use App\Repositories\Contracts\IProductItemRepository;
 use Stripe\StripeClient;
 
 final class CheckoutService
 {
+     // Stripe session TTL. 30 minutes gives users enough time
+    // to complete payment without holding stock indefinitely.
+    private const SESSION_TTL_MINUTES = 30;
+ 
     public function __construct(
-        private PaymentRepository $paymentRepo,
-        private InventoryService $inventory,
-        private StripeClient $stripe,
+        private readonly ICartRepository     $cartRepository,
+        private readonly ICheckoutRepository $checkoutRepository,
+        private readonly IProductItemRepository  $productRepository,
+        private readonly StripeClient                $stripe,
     ) {}
-
-    public function checkout(User $user, Order $order): array
+ 
+    /**
+     * Initiate a checkout session.
+     *
+     * Returns the Checkout model with the Stripe session URL attached
+     * so the controller can redirect the user.
+     *
+     * Transaction boundary: the Stripe API call is intentionally
+     * OUTSIDE the DB transaction. Stripe calls are slow (~200ms)
+     * and non-rollbackable. If we held a DB transaction open during
+     * the Stripe call, we'd block concurrent checkouts for 200ms+
+     * per request, and a Stripe timeout would leave the transaction
+     * in a broken state. Instead:
+     *   1. Validate everything inside a transaction (fast).
+     *   2. Call Stripe outside the transaction (slow, external).
+     *   3. Update the checkout record with the session ID.
+     *   4. Reserve stock (atomic increments, no transaction needed).
+     */
+    public function initiate(int $userId, string $idempotencyKey): Checkout
     {
-        $authUserDefaultAddress = $user?->defaultAddress()->first();
-        $order->load('items.productItem');
-        if (! $authUserDefaultAddress) {
-            throw new Exception('User must have a default address to proceed with checkout.');
+        // ── Step 1: Load and validate the cart ─────────────────
+        $cart = $this->cartRepository->findActiveCartWithItems($userId);
+ 
+        if (!$cart) {
+            throw new CartOwnershipException($userId);
         }
-        // ── Idempotency guard ─────────────────────────────────────────
-  
-        return DB::transaction(function () use ($order, $authUserDefaultAddress) {
-
-            // ── Lock stock ─────────────────────────────────────────────
-            $this->inventory->ensureStockAvailable($order->items);
-
-            $orderItems = $order->items;
-
-            $order->address()->create([
-                'first_name' => $authUserDefaultAddress->first_name,
-                'last_name' => $authUserDefaultAddress->last_name,
-                'phone' => $authUserDefaultAddress->phone,
-                'country' => $authUserDefaultAddress->country->name,
-                'city' => $authUserDefaultAddress->city->name,
-                'street_address' => $authUserDefaultAddress->street_address,
-            ]);
-
-            // ── Create Stripe session ─────────────────────────────────
-            $session = $this->stripe->checkout->sessions->create([
-                'payment_method_types' => ['card'],
-                'line_items' => $this->buildLineItems($orderItems),
-                'customer_email' => $order->user->email ?? null,
-
-                'shipping_options' => [
-                    [
-                        'shipping_rate_data' => [
-                            'type' => 'fixed_amount',
-                            'fixed_amount' => [
-                                'amount' => (int) round($order->shipping_fee * 100),
-                                'currency' => 'usd',
-                            ],
-                            'display_name' => ucfirst($order->shippingMethod->name ?? 'Shipping'),
-                        ],
-                    ],
-                ],
-                'mode' => 'payment',
-                'success_url' => config('app.frontend_url').'/checkout/success',
-                'cancel_url' => config('app.frontend_url').'/account/cart',
-                'metadata' => [
-                    'order_id' => $order->id,
-                ],
-            ]);
-            // ── Create Payment ─────────────────────────────────────────
-            $this->paymentRepo->create([
-                'order_id' => $order->id,
-                'stripe_session_id' => $session->id,
-                'amount' => $order->order_total,
-                'status' => PaymentStatus::Pending,
-                'payment_provider' => 'stripe',
-                'stripe_checkout_url' => $session->url,
-            ]);
-
-            return [
-                'order' => $order,
-                'checkout_url' => $session->url,
-                'message' => 'Checkout created',
-            ];
-        });
-    }
-
-
-    private function buildLineItems(Collection $items): array
-    {
-        return $items->map(function (OrderItem $item) {
-            $productItem = $item->productItem;
-            
-            return [
+ 
+        if ($cart->items->isEmpty()) {
+            throw new CartEmptyException();
+        }
+ 
+        // ── Step 2: Validate stock (read-only, no locks yet) ───
+        // We do a quick optimistic check before touching Stripe.
+        // The authoritative check happens inside the webhook job
+        // with a pessimistic lock. This check is a fast fail for
+        // obviously unavailable items.
+        foreach ($cart->items as $item) {
+            if (!$item->productItem) {
+                throw new InsufficientStockException(
+                    $item->product_item_id, 'Unknown (deactivated)', $item->quantity, 0
+                );
+            }
+ 
+            if ($item->productItem->availableQty() < $item->quantity) {
+                throw new InsufficientStockException(
+                    $item->product_item_id,
+                    $item->productItem->product->name,
+                    $item->quantity,
+                    $item->productItem->availableQty()
+                );
+            }
+        }
+ 
+        // ── Step 3: Build the cart snapshot ───────────────────
+        // The shipping fee is recalculated here (same logic as
+        // preview) so the snapshot captures the definitive amount.
+        $shippingFee = $this->calculateShippingFee($cart);
+        $snapshot    = CartSnapshotDTO::fromCart($cart, $shippingFee);
+        $expiresAt   = now()->addMinutes(self::SESSION_TTL_MINUTES);
+ 
+        // ── Step 4: Persist the checkout record ───────────────
+        // We store the snapshot BEFORE calling Stripe. If Stripe
+        // fails, we have a checkout record in 'pending' state with
+        // no session ID. The cleanup job will expire it gracefully.
+        $checkout = $this->checkoutRepository->create([
+            'shopping_cart_id'=> $cart->id,
+            'user_id'         => $userId,
+            'idempotency_key' => $idempotencyKey,
+            'cart_snapshot'   => $snapshot->toArray(),
+            'status'          => Checkout::STATUS_PENDING,
+            'expires_at'      => $expiresAt,
+        ]);
+ 
+        // ── Step 5: Create Stripe Checkout Session ────────────
+        // Each cart item maps to a Stripe line item. We use the
+        // snapshot amounts, not live prices, so the Stripe total
+        // matches exactly what the user saw in the preview.
+        $lineItems = array_map(
+            fn ($item) => [
                 'price_data' => [
-                    'currency' => 'usd',
-                    'unit_amount' => (int) round($productItem->price * 100),
+                    'currency'     => $snapshot->currency,
+                    'unit_amount'  => (int) bcmul($item->unitPrice, '100', 0),
                     'product_data' => [
-                        'name' => $productItem->product->name,
+                        'name' => $item->productName,
                     ],
                 ],
                 'quantity' => $item->quantity,
+            ],
+            $snapshot->items
+        );
+ 
+        // Add shipping as a separate line item if applicable.
+        if (bccomp($snapshot->shippingFee, '0.00', 2) > 0) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency'     => $snapshot->currency,
+                    'unit_amount'  => (int) bcmul($snapshot->shippingFee, '100', 0),
+                    'product_data' => ['name' => 'Shipping'],
+                ],
+                'quantity' => 1,
             ];
-        })->values()->toArray();
+        }
+ 
+        $stripeSession = $this->stripe->checkout->sessions->create([
+            'mode'        => 'payment',
+            'line_items'  => $lineItems,
+            'success_url' => config('app.frontend_url') . '/checkout/success?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url'  => config('app.frontend_url') . '/checkout/cancel',
+            'expires_at'  => $expiresAt->timestamp,
+            'metadata'    => [
+                // Attach our checkout ID so the webhook can find this record.
+                'checkout_id' => $checkout->id,
+                'user_id'     => $userId,
+            ],
+            // Pass idempotency key to Stripe so duplicate requests to
+            // this endpoint return the same session.
+        ], [
+            'idempotency_key' => $idempotencyKey,
+        ]);
+ 
+        // ── Step 6: Attach Stripe session ID to checkout ──────
+        $checkout->update([
+            'stripe_session_id' => $stripeSession->id,
+        ]);
+ 
+        // ── Step 7: Soft-reserve stock ────────────────────────
+        // Increment reserved_qty for each item. This reduces
+        // available-to-sell for other users immediately.
+        // These are atomic increments — no transaction needed.
+        foreach ($snapshot->items as $item) {
+            $this->productRepository->incrementReservedQty(
+                $item->productItemId,
+                $item->quantity
+            );
+        }
+ 
+        // ── Step 8: Lock the cart ─────────────────────────────
+        // Prevents the user from modifying the cart after
+        // the Stripe session has been created.
+        $this->cartRepository->lockCart($cart);
+ 
+        // Refresh so the caller gets the full model with session ID.
+        return $checkout->fresh();
+    }
+ 
+    private function calculateShippingFee(Cart $cart): string
+    {
+        $subtotal = $cart->items->reduce(
+            fn (string $carry, CartItem $item)
+                => bcadd($carry, bcmul((string) $item->unit_price, (string) $item->quantity, 2), 2),
+            '0.00'
+        );
+ 
+        return bccomp($subtotal, '100.00', 2) >= 0 ? '0.00' : '9.99';
     }
 }

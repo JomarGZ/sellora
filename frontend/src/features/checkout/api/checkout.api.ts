@@ -7,8 +7,8 @@ export async function checkout(payload: CheckoutPayload) {
   return data;
 }
 
-export async function snapshotOrderPreview(ids: number[]) {
-  const { data } = await client.post("/v1/checkout/snapshot", { ids });
+export async function createPreview(ids: number[]) {
+  const { data } = await client.post("/v1/checkout/createPreview", { ids });
   return data;
 }
 

@@ -23,10 +23,17 @@ final class OrderItem extends Model
         'quantity',
         'product_name',
         'sku',
+        'product_id',
+        'product_sku',
+        'unit_price',
+        'line_total',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'quantity'   => 'integer',
+        'unit_price' => 'decimal:2',
+        'line_total' => 'decimal:2',
     ];
 
     /**
