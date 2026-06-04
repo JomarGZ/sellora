@@ -28,7 +28,7 @@ final class CheckoutPreviewResource extends JsonResource
             'all_items_in_stock' => $this->dto->allItemsInStock,
             'items'             => array_map(
                 fn ($item) => [
-                    'product_id'   => $item->productId,
+                    'product_item_id'   => $item->productItemId,
                     'product_name' => $item->productName,
                     'product_sku'  => $item->productSku,
                     'quantity'     => $item->quantity,

@@ -184,7 +184,7 @@ final class CartService
         if ($productItem->availableQty() < $quantity) {
             throw new InsufficientStockException(
                 productItemId:   $productItem->id,
-                productName: $productItem->name,
+                productName: $productItem->product->name,
                 requested:   $quantity,
                 available:   $productItem->availableQty(),
             );

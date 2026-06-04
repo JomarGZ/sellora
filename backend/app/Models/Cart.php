@@ -79,4 +79,16 @@ final class Cart extends Model
             ->whereNotNull('expires_at')
             ->where('expires_at', '<', now());
     }
+
+    public function subtotal(): string
+    {
+        if (!$this->relationLoaded('items')) {
+            return '0.00';
+        }
+
+        return $this->items->reduce(
+            fn (string $carry, CartItem $item) => bcadd($carry, $item->lineTotal(), 2),
+            '0.00'
+        );
+    }
 }

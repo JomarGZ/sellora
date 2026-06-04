@@ -14,7 +14,6 @@ use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\Api\V1\AddCartItemRequest;
 use App\Http\Requests\Api\V1\UpdateCartItemRequest;
 use App\Http\Resources\V1\CartResource;
-use App\Repositories\ShoppingCartItemRepository;
 use App\Services\CartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,10 +28,10 @@ final class CartController extends ApiController
     {
         $cart = $this->cartService->getOrCreateCart($request->user()->id);
  
-        return response()->json([
-            'success' => true,
-            'data'    => new CartResource($cart),
-        ]);
+        return $this->success(
+            data: new CartResource($cart),
+            message: 'Cart retrieved successfully.'
+        );
     }
 
      public function addItem(AddCartItemRequest $request): JsonResponse
@@ -44,45 +43,51 @@ final class CartController extends ApiController
                 quantity:  $request->validated('quantity'),
             );
  
-            return response()->json([
-                'success' => true,
-                'message' => 'Item added to cart.',
-                'data'    => new CartResource($cart),
-            ], 201);
+            return $this->success(
+                data: new CartResource($cart),
+                message: 'Item added to cart.'
+            );
  
         } catch (CartExpiredException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'code'    => 'CART_EXPIRED',
-            ], 410); // 410 Gone — the resource existed but is no longer available
+            return $this->error(
+                message: $e->getMessage(),
+                code: 410,
+                errors: [
+                    'code' => 'CART_EXPIRED',
+                ]
+            );
  
         } catch (ProductItemNotAvailableException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'code'    => 'PRODUCT_UNAVAILABLE',
-            ], 422);
+            return $this->error(
+                message: $e->getMessage(),
+                code: 422,
+                errors: [
+                    'code' => 'PRODUCT_UNAVAILABLE',
+                ]
+            );
  
         } catch (InsufficientStockException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Insufficient stock for the requested quantity.',
-                'code'    => 'INSUFFICIENT_STOCK',
-                'details' => [
-                    'product_item_id'   => $e->productItemId,
-                    'product_name' => $e->productName,
-                    'requested'    => $e->requested,
-                    'available'    => $e->available,
-                ],
-            ], 409);
+            return $this->error(
+                message: 'Insufficient stock for the requested quantity.',
+                code: 409,
+                errors: [
+                    'detail' => [
+                        'product_item_id'   => $e->productItemId,
+                        'product_name' => $e->productName,
+                        'requested'    => $e->requested,
+                        'available'    => $e->available,
+                    ]
+                ]
+            );
  
         } catch (CartNotModifiableException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'code'    => 'CART_NOT_MODIFIABLE',
-            ], 409);
+            return $this->error(
+                message: $e->getMessage(),
+                code: 409,
+                errors: [
+                    'code' => 'CART_NOT_MODIFIABLE',
+                ]
+            );
         }
     }
 
@@ -106,45 +111,45 @@ final class CartController extends ApiController
             ]);
  
         } catch (CartNotFoundException | CartItemNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 404);
+            return $this->notFound(message: $e->getMessage());
  
         } catch (CartExpiredException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'code'    => 'CART_EXPIRED',
-            ], 410);
+            return $this->error(
+                message: $e->getMessage(),
+                code: 410,
+            );
  
         } catch (InsufficientStockException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Insufficient stock for the requested quantity.',
-                'code'    => 'INSUFFICIENT_STOCK',
-                'details' => [
-                    'product_item_id'   => $e->productItemId,
-                    'product_name' => $e->productName,
-                    'requested'    => $e->requested,
-                    'available'    => $e->available,
-                ],
-            ], 409);
- 
+            return $this->error(
+                message: 'Insufficient stock for the requested quantity.',
+                code: 409,
+                errors: [
+                    'detail' => [
+                        'product_item_id'   => $e->productItemId,
+                        'product_name' => $e->productName,
+                        'requested'    => $e->requested,
+                        'available'    => $e->available,
+                    ]
+                ]
+            );
         } catch (CartNotModifiableException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'code'    => 'CART_NOT_MODIFIABLE',
-            ], 409);
+            return $this->error(
+                message: $e->getMessage(),
+                code: 409,
+                errors: [
+                    'code' => 'CART_NOT_MODIFIABLE',
+                ]
+            );
  
         } catch (ProductItemNotAvailableException $e) {
             // Product deactivated after being added to the cart.
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-                'code'    => 'PRODUCT_UNAVAILABLE',
-            ], 422);
+            return $this->error(
+                message: $e->getMessage(),
+                code: 422,
+                errors: [
+                    'code' => 'PRODUCT_UNAVAILABLE',
+                ]
+            );
         }
     }
 }

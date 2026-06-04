@@ -23,7 +23,7 @@ final class OrderInfolist
                     ->badge(),
                 TextEntry::make('checkout_type')
                     ->badge(),
-                TextEntry::make('shopping_cart_id')
+                TextEntry::make('cart_id')
                     ->numeric()
                     ->placeholder('-'),
                 TextEntry::make('subtotal')

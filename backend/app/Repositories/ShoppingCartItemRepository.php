@@ -26,7 +26,7 @@ final class ShoppingCartItemRepository extends BaseRepository
     public function paginateByCartId(int $cartId, int $perPage = 5): LengthAwarePaginator
     {
         return $this->model
-            ->where('shopping_cart_id', $cartId)
+            ->where('cart_id', $cartId)
             ->with([
                 'productItem',
                 'productItem.product',
@@ -40,7 +40,7 @@ final class ShoppingCartItemRepository extends BaseRepository
     public function findByProduct(int $cartId, int $productItemId)
     {
         return $this->model
-            ->where('shopping_cart_id', $cartId)
+            ->where('cart_id', $cartId)
             ->where('product_item_id', $productItemId)
             ->lockForUpdate()
             ->first();
@@ -49,7 +49,7 @@ final class ShoppingCartItemRepository extends BaseRepository
     public function findById(int $cartId, int $cartItemId)
     {
         return $this->model
-            ->where('shopping_cart_id', $cartId)
+            ->where('cart_id', $cartId)
             ->where('id', $cartItemId)
             ->first();
     }
@@ -57,7 +57,7 @@ final class ShoppingCartItemRepository extends BaseRepository
     public function clearPurchased(int $cartId, array $productItemIds)
     {
         return $this->model
-            ->where('shopping_cart_id', $cartId)
+            ->where('cart_id', $cartId)
             ->whereIn('product_item_id', $productItemIds)
             ->delete();
     }
@@ -65,7 +65,7 @@ final class ShoppingCartItemRepository extends BaseRepository
     public function getByIdsAndCartId(int $cartId, array $ids)
     {
         return $this->model
-            ->where('shopping_cart_id', $cartId)
+            ->where('cart_id', $cartId)
             ->whereIn('id', $ids)
             ->with('productItem')
             ->get();

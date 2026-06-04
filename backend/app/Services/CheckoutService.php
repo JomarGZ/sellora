@@ -93,7 +93,7 @@ final class CheckoutService
         // fails, we have a checkout record in 'pending' state with
         // no session ID. The cleanup job will expire it gracefully.
         $checkout = $this->checkoutRepository->create([
-            'shopping_cart_id'=> $cart->id,
+            'cart_id'=> $cart->id,
             'user_id'         => $userId,
             'idempotency_key' => $idempotencyKey,
             'cart_snapshot'   => $snapshot->toArray(),

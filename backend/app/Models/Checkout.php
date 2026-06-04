@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Checkout extends Model
 {
     protected $fillable = [
-        'shopping_cart_id',
+        'cart_id',
         'user_id',
         'idempotency_key',
         'stripe_session_id',

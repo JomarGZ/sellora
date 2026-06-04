@@ -70,7 +70,7 @@ final class CheckoutController extends ApiController
                 message: 'One or more items are out of stock.',
                 code: 409,
                 errors: [
-                    'product_id'   => $e->productItemId,
+                    'product_item_id'   => $e->productItemId,
                     'product_name' => $e->productName,
                     'requested'    => $e->requested,
                     'available'    => $e->available,

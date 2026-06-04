@@ -24,7 +24,7 @@ final class Order extends Model
         'status',
         'subtotal',
         'shipping_fee',
-        'shopping_cart_id',
+        'cart_id',
         'currency',
         'idempotency_key',
     ];

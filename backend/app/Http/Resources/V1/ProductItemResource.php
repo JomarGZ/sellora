@@ -27,6 +27,8 @@ final class ProductItemResource extends JsonResource
             'price' => $this->price,
             'qty' => $this->qty,
             'in_stock' => $this->qty > 0,
+            'available_qty' => $this->availableQty(),
+            'status' => $this->status,
             'product' => ProductResource::make($this->whenLoaded('product')),
             'attribute_values' => $this->whenLoaded(
                 'attributeValues',
