@@ -42,7 +42,7 @@ final class CheckoutController extends ApiController
         }
     }
 
-     public function initiate(CheckoutInitiateRequest $request): JsonResponse
+    public function initiate(CheckoutInitiateRequest $request): JsonResponse
     {
         try {
             $checkout = $this->checkoutService->initiate(

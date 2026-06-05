@@ -9,6 +9,7 @@ use App\DTOs\CartSnapshotItemDTO;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Repositories\Contracts\IOrderRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class OrderRepository extends BaseRepository implements IOrderRepository
 {
@@ -59,6 +60,45 @@ final class OrderRepository extends BaseRepository implements IOrderRepository
         OrderItem::insert($lineItems);
  
         return $order;
+    }
+
+    public function updateStatus(Order $order, string $newStatus): void
+    {
+        $order->update(['status' => $newStatus]);
+    }
+
+    public function paginateForUser(
+        string $userId,
+        int    $perPage = 15,
+        array  $filters = [],
+    ): LengthAwarePaginator {
+        $query = Order::query()
+            ->where('user_id', $userId)
+            ->with('items')
+            ->latest(); // created_at DESC — most recent orders first
+ 
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+ 
+        return $query->paginate($perPage);
+    }
+
+    public function findForUserWithItems(string $orderId, string $userId): ?Order
+    {
+        return Order::query()
+            ->where('id', $orderId)
+            ->where('user_id', $userId)
+            ->with('items')
+            ->first();
+    }
+ 
+    public function findWithItems(string $orderId): ?Order
+    {
+        return Order::query()
+            ->where('id', $orderId)
+            ->with(['items', 'user'])
+            ->first();
     }
 
 }

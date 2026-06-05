@@ -46,7 +46,6 @@ export function CartItemList({
                 cartId: cart.data.id,
                 quantity,
               });
-              console.log("update");
             }}
             onRemove={(id) => deleteCartItem.mutate(id)}
             isRemoving={

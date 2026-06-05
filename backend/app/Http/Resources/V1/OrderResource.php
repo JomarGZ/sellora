@@ -11,20 +11,39 @@ final class OrderResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'         => $this->resource->id,
-            'status'     => $this->resource->status,
-            'currency'   => $this->resource->currency,
-            'subtotal'   => $this->resource->subtotal,
-            'shipping'   => $this->resource->shipping_fee,
-            'total'      => $this->resource->total,
-            'placed_at'  => $this->resource->created_at->toIso8601String(),
-            'items'      => $this->resource->items->map(fn ($item) => [
-                'product_name' => $item->product_name,
-                'product_sku'  => $item->product_sku,
-                'quantity'     => $item->quantity,
-                'unit_price'   => $item->unit_price,
-                'line_total'   => $item->line_total,
-            ]),
+            'id'       => $this->id,
+            'status'   => $this->status,
+            'currency' => $this->currency,
+ 
+            // ── Financial summary ──────────────────────────────
+            'subtotal'     => $this->subtotal,
+            'shipping_fee' => $this->shipping_fee,
+            'total'        => $this->total,
+ 
+            // ── State machine hints for the frontend ───────────
+            // The frontend renders action buttons based on this list.
+            // An empty array means the order is in a terminal state.
+            'allowed_transitions' => $this->allowedTransitions(),
+            'is_terminal'         => $this->isTerminal(),
+ 
+            // ── Line items ─────────────────────────────────────
+            'items'       => OrderItemResource::collection($this->relationLoaded('items') ? $this->items : []),
+            'items_count' => $this->items?->count() ?? 0,
+ 
+            // ── Timestamps ─────────────────────────────────────
+            'placed_at'  => $this->created_at->toIso8601String(),
+            'updated_at' => $this->updated_at->toIso8601String(),
+            $this->mergeWhen(
+                $request->user()?->is_admin,
+                [
+                    'stripe_payment_intent_id' => $this->stripe_payment_intent_id,
+                    'checkout_id'              => $this->checkout_id,
+                    'user'                     => [
+                        'id'    => $this->user?->id,
+                        'email' => $this->user?->email,
+                    ],
+                ]
+            ),
         ];
     }
 }

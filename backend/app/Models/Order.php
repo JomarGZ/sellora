@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Database\Factories\OrderFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,6 +60,24 @@ final class Order extends Model
         self::STATUS_REFUNDED   => 'Refunded',
         self::STATUS_CANCELLED  => 'Cancelled',
     ];
+
+    const TRANSITIONS = [
+        self::STATUS_CONFIRMED  => [self::STATUS_PROCESSING, self::STATUS_CANCELLED],
+        self::STATUS_PROCESSING => [self::STATUS_SHIPPED,    self::STATUS_CANCELLED],
+        self::STATUS_SHIPPED    => [self::STATUS_DELIVERED,  self::STATUS_REFUNDED],
+        self::STATUS_DELIVERED  => [self::STATUS_REFUNDED],
+        self::STATUS_REFUNDED   => [],
+        self::STATUS_CANCELLED  => [],
+    ];
+
+    const ALL_STATUSES = [
+        self::STATUS_CONFIRMED,
+        self::STATUS_PROCESSING,
+        self::STATUS_SHIPPED,
+        self::STATUS_DELIVERED,
+        self::STATUS_REFUNDED,
+        self::STATUS_CANCELLED,
+    ];
     
     /**
      * @return BelongsTo<User, $this>
@@ -98,5 +118,40 @@ final class Order extends Model
     public static function saleStatus(): array
     {
         return self::SALE_STATUSES;
+    }
+
+    public function allowedTransitions(): array
+    {
+        return self::TRANSITIONS[$this->status] ?? [];
+    }
+
+
+    public function canTransitionTo(string $newStatus): bool
+    {
+        return in_array($newStatus, $this->allowedTransitions(), true);
+    }
+
+    public function isTerminal(): bool
+    {
+        return empty($this->allowedTransitions());
+    }
+
+    public function isConfirmed(): bool  { return $this->status === self::STATUS_CONFIRMED; }
+    public function isProcessing(): bool { return $this->status === self::STATUS_PROCESSING; }
+    public function isShipped(): bool    { return $this->status === self::STATUS_SHIPPED; }
+    public function isDelivered(): bool  { return $this->status === self::STATUS_DELIVERED; }
+    public function isRefunded(): bool   { return $this->status === self::STATUS_REFUNDED; }
+    public function isCancelled(): bool  { return $this->status === self::STATUS_CANCELLED; }
+ 
+    #[Scope]
+    public function forUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    #[Scope]
+    public function withStatus(Builder $query, string $status): Builder
+    {
+        return $query->where('status', $status);
     }
 }

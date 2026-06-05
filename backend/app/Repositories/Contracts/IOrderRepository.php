@@ -4,6 +4,7 @@ namespace App\Repositories\Contracts;
 
 use App\DTOs\CartSnapshotDTO;
 use App\Models\Order;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface IOrderRepository
 {
@@ -13,4 +14,16 @@ interface IOrderRepository
         string          $paymentIntentId,
         CartSnapshotDTO $snapshot,
     ): Order;
+
+    public function updateStatus(Order $order, string $newStatus): void;
+
+    public function paginateForUser(
+        string $userId,
+        int    $perPage = 15,
+        array  $filters = [],
+    ): LengthAwarePaginator;
+
+    public function findForUserWithItems(string $orderId, string $userId): ?Order;
+
+    public function findWithItems(string $orderId): ?Order;
 }

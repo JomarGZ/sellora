@@ -70,8 +70,7 @@ Route::name('api.v1.')->group(function () {
         Route::get('me', [UserController::class, 'me'])->name('me.show');
         Route::post('me/avatar', [UserController::class, 'updateAvatar'])->name('me.avatar.update');
         Route::put('me/profile', [UserController::class, 'update'])->name('me.update');
-        Route::get('checkout/preview',  [CheckoutController::class, 'preview']);
-        Route::post('checkout/initiate', [CheckoutController::class, 'initiate']);
+    
         
         /*
         |--------------------------------------------------------------------------
@@ -151,6 +150,8 @@ Route::name('api.v1.')->group(function () {
 
         Route::prefix('orders')->name('order.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
+            Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+            Route::patch('/{order}/status', [OrderController::class, 'updateStatus'])->name('updateStatus');
         });
 
 
@@ -160,9 +161,8 @@ Route::name('api.v1.')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::prefix('checkout')->name('checkout.')->group(function () {
-            Route::post('/', [CheckoutController::class, 'checkout'])->name('store');
-            Route::post('/createPreview', [CheckoutController::class, 'createPreview'])->name('createPreview');
-            Route::get('/current', [CheckoutController::class, 'current'])->name('current');
+            Route::get('/preview',  [CheckoutController::class, 'preview'])->name('preview');
+            Route::post('/initiate', [CheckoutController::class, 'initiate'])->name('initiate');
         });
 
         /*
