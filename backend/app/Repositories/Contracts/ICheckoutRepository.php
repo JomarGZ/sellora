@@ -7,6 +7,10 @@ use App\Models\Checkout;
 interface ICheckoutRepository extends IRepository
 {
     /**
+     * Find checkout by idempotency key.
+     */
+    public function findByIdempotencyKey(string $idempotencyKey): ?Checkout;
+    /**
      * Find a checkout by the Stripe payment intent ID.
      * Used by the webhook job for idempotency checks.
      */

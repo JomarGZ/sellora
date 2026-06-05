@@ -16,6 +16,15 @@ class CheckoutRepository extends BaseRepository implements ICheckoutRepository
         parent::__construct($checkout);
     }
 
+    public function findByIdempotencyKey(string $idempotencyKey): ?Checkout
+    {
+        return $this->model
+            ->where('idempotency_key', $idempotencyKey)
+            ->where('status', Checkout::STATUS_PENDING)
+            ->where('expires_at', '>', now())
+            ->first();
+    }
+
     public function findByPaymentIntentId(string $paymentIntentId): ?Checkout
     {
         return $this->model->query()

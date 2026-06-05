@@ -10,6 +10,8 @@ class CartSnapshotItemDTO
         public int $productItemId,
         public string $productName,
         public string $productSku,
+        public string $productItemImageUrl,
+        public string $attributes,
         public int $quantity,
         public string $unitPrice,
         public string $lineTotal,
@@ -19,8 +21,15 @@ class CartSnapshotItemDTO
     {
         return new self(
             productItemId: $item->product_item_id,
-            productName: $item->productItem->product->name,
+            productName: $item->productItem->product->name ?? '',
             productSku: $item->productItem->sku,
+
+            productItemImageUrl: $item->productItem->primaryImage?->image_path ?? '',
+
+            attributes: $item->productItem->attributeValues
+                ->map(fn ($av) => "{$av->attribute->name}: {$av->value}")
+                ->implode(', '),
+
             quantity: $item->quantity,
             unitPrice: number_format((float) $item->unit_price, 2, '.', ''),
             lineTotal: bcmul((string) $item->unit_price, (string) $item->quantity, 2),
@@ -33,6 +42,8 @@ class CartSnapshotItemDTO
             'product_item_id' => $this->productItemId,
             'product_name' => $this->productName,
             'product_sku' => $this->productSku,
+            'product_item_image_url' => $this->productItemImageUrl,
+            'attributes' => $this->attributes,
             'quantity' => $this->quantity,
             'unit_price' => $this->unitPrice,
             'line_total' => $this->lineTotal,
@@ -45,6 +56,8 @@ class CartSnapshotItemDTO
             productItemId: $data['product_item_id'],
             productName: $data['product_name'],
             productSku: $data['product_sku'],
+            productItemImageUrl: $data['product_item_image_url'] ?? '',
+            attributes: $data['attributes'] ?? '',
             quantity: (int) $data['quantity'],
             unitPrice: $data['unit_price'],
             lineTotal: $data['line_total'],

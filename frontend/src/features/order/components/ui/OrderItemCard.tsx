@@ -7,7 +7,7 @@ import type { ReviewPayload } from "../../types";
 import { Link } from "@tanstack/react-router";
 
 interface OrderItemCardProps {
-  item: OrderItem;
+  item: any;
   onReview: (payload: ReviewPayload) => void;
 }
 

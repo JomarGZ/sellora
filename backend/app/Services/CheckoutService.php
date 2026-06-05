@@ -48,6 +48,11 @@ final class CheckoutService
      */
     public function initiate(int $userId, string $idempotencyKey): Checkout
     {
+        $existingCheckout = $this->checkoutRepository->findByIdempotencyKey($idempotencyKey);
+
+        if ($existingCheckout) {
+            return $existingCheckout;
+        }
         // ── Step 1: Load and validate the cart ─────────────────
         $cart = $this->cartRepository->findActiveCartWithItems($userId);
  
@@ -67,7 +72,10 @@ final class CheckoutService
         foreach ($cart->items as $item) {
             if (!$item->productItem) {
                 throw new InsufficientStockException(
-                    $item->product_item_id, 'Unknown (deactivated)', $item->quantity, 0
+                    $item->product_item_id, 
+                    'Unknown (deactivated)', 
+                    $item->quantity, 
+                    0
                 );
             }
  

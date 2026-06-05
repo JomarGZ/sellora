@@ -29,6 +29,9 @@ final class CartService
  
         return $cart->load([
             'items',
+            'items.productItem.product',
+            'items.productItem.attributeValues',
+            'items.productItem.images',
             'items.productItem' => fn ($q) => $q->where('status', 'active'),
         ]);
     }

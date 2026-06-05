@@ -91,7 +91,7 @@ final class CartController extends ApiController
         }
     }
 
-     public function updateItem(
+    public function updateItem(
         UpdateCartItemRequest $request,
         int                $cartId,
         int                $itemId
@@ -104,11 +104,9 @@ final class CartController extends ApiController
                 quantity: $request->validated('quantity'),
             );
  
-            return response()->json([
-                'success' => true,
-                'message' => 'Cart item updated.',
-                'data'    => new CartResource($cart),
-            ]);
+            return $this->success(
+                message: 'Cart item updated.',
+                data: new CartResource($cart));
  
         } catch (CartNotFoundException | CartItemNotFoundException $e) {
             return $this->notFound(message: $e->getMessage());

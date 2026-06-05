@@ -14,22 +14,12 @@ final class EcommerceStatsOverview extends StatsOverviewWidget
     {
         return [
             Stat::make('Total Revenue (Paid)', '$ '.number_format(
-                (float) Order::whereIn('status',  [
-                            Order::STATUS_CONFIRMED,
-                            Order::STATUS_PROCESSING,
-                            Order::STATUS_SHIPPED,
-                            Order::STATUS_DELIVERED,
-                        ])->sum('total'),
+                (float) Order::whereIn('status',  Order::saleStatus())->sum('total'),
                 2
             ))
                 ->chart(
                     collect(range(6, 0))
-                        ->map(fn ($daysAgo) => Order::whereIn('status', [
-                            Order::STATUS_CONFIRMED,
-                            Order::STATUS_PROCESSING,
-                            Order::STATUS_SHIPPED,
-                            Order::STATUS_DELIVERED,
-                        ])
+                        ->map(fn ($daysAgo) => Order::whereIn('status', Order::saleStatus())
                             ->whereDate('created_at', now()->subDays($daysAgo))
                             ->sum('total')
                         )->toArray()

@@ -39,7 +39,7 @@ final class ProductController extends ApiController
             'category:id,name,slug',
             'productItems:id,product_id,sku,price,qty',
             'productItems.images:id,product_item_id,image_path',
-            'productItems.attributeValues:id,attribute_id,value,hex_color,image',
+            'productItems.attributeValues:id,attribute_id,value,hex_color',
             'productItems.attributeValues.attribute:id,name',
         ]);
 
@@ -83,7 +83,7 @@ final class ProductController extends ApiController
     {
         $limit = (int) $request->query('limit', 10);
         $result = $this->service->getNewArrivals(limit: $limit);
-
+        logger('data', ['result' => $result]);
         return $this->success(
             data: ProductResource::collection($result),
             message: 'New arrivals retrieved successfully.'

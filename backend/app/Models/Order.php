@@ -43,6 +43,13 @@ final class Order extends Model
     const STATUS_REFUNDED   = 'refunded';
     const STATUS_CANCELLED  = 'cancelled';
 
+    public const SALE_STATUSES = [
+        self::STATUS_CONFIRMED,
+        self::STATUS_PROCESSING,
+        self::STATUS_SHIPPED,
+        self::STATUS_DELIVERED,
+    ];
+
     const STATUS_OPTIONS = [
         self::STATUS_CONFIRMED  => 'Confirmed',
         self::STATUS_PROCESSING => 'Processing',
@@ -86,5 +93,10 @@ final class Order extends Model
     public function address()
     {
         return $this->hasOne(OrderAddress::class);
+    }
+
+    public static function saleStatus(): array
+    {
+        return self::SALE_STATUSES;
     }
 }

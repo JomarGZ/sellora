@@ -70,8 +70,8 @@ Route::name('api.v1.')->group(function () {
         Route::get('me', [UserController::class, 'me'])->name('me.show');
         Route::post('me/avatar', [UserController::class, 'updateAvatar'])->name('me.avatar.update');
         Route::put('me/profile', [UserController::class, 'update'])->name('me.update');
-        Route::get('preview',  [CheckoutController::class, 'preview']);
-        Route::post('initiate', [CheckoutController::class, 'initiate']);
+        Route::get('checkout/preview',  [CheckoutController::class, 'preview']);
+        Route::post('checkout/initiate', [CheckoutController::class, 'initiate']);
         
         /*
         |--------------------------------------------------------------------------
