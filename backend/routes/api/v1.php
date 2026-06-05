@@ -65,7 +65,7 @@ Route::name('api.v1.')->group(function () {
     | Protected (Authenticated Users)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group(function () {
+    Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function () {
         Route::put('me/change-password', [AuthController::class, 'changePassword'])->name('me.password.change');
         Route::get('me', [UserController::class, 'me'])->name('me.show');
         Route::post('me/avatar', [UserController::class, 'updateAvatar'])->name('me.avatar.update');
@@ -173,16 +173,6 @@ Route::name('api.v1.')->group(function () {
         Route::prefix('reviews')->name('reviews.')->group(function () {
             Route::post('/', [ProductItemReviewController::class, 'store'])->name('store');
         });
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | External / Webhooks / Public Callbacks
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('checkout')->name('checkout.')->group(function () {
-        Route::get('/verify', [CheckoutController::class, 'verifySession'])->name('verify');
-        Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
     });
 
     /*

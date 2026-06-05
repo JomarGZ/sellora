@@ -19,7 +19,12 @@ class OrderPolicy
 
     public function updateStatus(User $user, Order $order): bool
     {
-        return $this->isAdmin($user);
+        return $user->id === $order->user_id || $this->isAdmin($user);
+    }
+
+    public function cancel(User $user, Order $order)
+    {
+        return $user->id === $order->user_id || $this->isAdmin($user);
     }
 
     private function isAdmin(User $user): bool

@@ -92,7 +92,6 @@ final class CartService
         }
  
         $this->refreshExpiry($cart);
-        logger('trigger');
  
         return $this->cartRepository->findForUserWithItems($cartId, $userId);
     }

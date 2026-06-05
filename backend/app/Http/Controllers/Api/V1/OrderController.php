@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Exceptions\InvalidOrderTransitionException;
 use App\Exceptions\OrderNotFoundException;
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\Api\V1\UpdateOrderStatusRequest;
 use App\Http\Resources\V1\OrderCollection;
 use App\Http\Resources\V1\OrderResource;
 use App\Models\Order;
@@ -25,11 +27,13 @@ class OrderController extends ApiController
         // Validate the optional status filter at the controller level.
         // This is lightweight input sanitisation, not business logic.
         if (isset($filters['status']) && !in_array($filters['status'], Order::ALL_STATUSES, true)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid status filter.',
-                'valid'   => Order::ALL_STATUSES,
-            ], 422);
+            return $this->error(
+                message: 'Invalid status filter.',
+                code: 422,
+                errors: [
+                    'valid_status' => Order::ALL_STATUSES
+                ]
+                );
         }
  
         $paginator = $this->orderService->listForUser(
@@ -65,7 +69,7 @@ class OrderController extends ApiController
         );
     }
 
-    public function show(Request $request, string $orderId): JsonResponse
+    public function show(Request $request, int $orderId): JsonResponse
     {
         try {
             $order = $this->orderService->getForUser(
@@ -77,16 +81,54 @@ class OrderController extends ApiController
             // the repository's user_id scoping.
             Gate::authorize('view', $order);
  
-            return response()->json([
-                'success' => true,
-                'data'    => new OrderResource($order),
-            ]);
+            return $this->success(
+                data: new OrderResource($order),
+                message: 'Retrieve order successfully.'
+            );
  
         } catch (OrderNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 404);
+            return $this->error(
+                message: $e->getMessage(),
+                code: 404
+            );
+        }
+    }
+
+    public function updateStatus(
+        UpdateOrderStatusRequest $request,
+        int                   $orderId
+    ): JsonResponse {
+        logger('trigger');
+
+        try {
+            $order = $this->orderService->updateStatus(
+                orderId:   $orderId,
+                newStatus: $request->validated('status'),
+            );
+ 
+            return $this->success(
+                message: "Order status updated to '{$order->status}'.",
+                data: new OrderResource($order),
+            );
+ 
+        } catch (OrderNotFoundException $e) {
+            return $this->error(
+                message: $e->getMessage(),
+                code: 404
+            );
+ 
+        } catch (InvalidOrderTransitionException $e) {
+            return $this->error(
+                message:  $e->getMessage(),
+                code: 409,
+                errors: [
+                    'details' => [
+                        'from_status'         => $e->fromStatus,
+                        'to_status'           => $e->toStatus,
+                        'allowed_transitions' => $e->allowedTransitions,
+                    ]
+                ]
+            ); 
         }
     }
  

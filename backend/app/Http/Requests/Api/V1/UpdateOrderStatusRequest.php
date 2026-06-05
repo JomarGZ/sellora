@@ -13,12 +13,12 @@ class UpdateOrderStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $order = $this->route('order');
+        $order = Order::find($this->route('order'));
  
         // Delegate authorization to the policy.
         // Laravel resolves OrderPolicy::updateStatus automatically
         // because the route parameter is type-hinted as Order.
-        return $this->user()->can('updateStatus', $order);
+        return $order && $this->user()->can('cancel', $order);
     }
 
     /**
@@ -32,14 +32,14 @@ class UpdateOrderStatusRequest extends FormRequest
             'status' => [
                 'required',
                 'string',
-                Rule::in(Order::ALL_STATUSES),
+                Rule::in([]),
             ],
         ];
     }
 
     public function messages(): array
     {
-        $valid = implode(', ', Order::ALL_STATUSES);
+        $valid = implode(', ', []);
  
         return [
             'status.in' => "Status must be one of: {$valid}.",
