@@ -44,7 +44,7 @@ export function useCheckoutPreview(options?: UseMutationOptions<any, any>) {
       showToast({
         severity: "error",
         summary: "Failed",
-        detail: "Unable to proceed to add to cart",
+        detail: "Unable to proceed to checkout",
       });
     },
     ...options,

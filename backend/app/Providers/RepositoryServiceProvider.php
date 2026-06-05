@@ -29,13 +29,10 @@ final class RepositoryServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(IProductItemRepository::class, ProductItemRepository::class);
         $this->app->bind(IProductFilterRepository::class, ProductFilterRepository::class);
         $this->app->bind(IOrderRepository::class, OrderRepository::class);
         $this->app->bind(IOrderAddressRepository::class, OrderAddressRepository::class);
         $this->app->bind(IOrderItemRepository::class, OrderItemRepository::class);
-        $this->app->bind(IOrderItemRepository::class, OrderItemRepository::class);
-        $this->app->bind(IPaymentRepository::class, PaymentRepository::class);
         $this->app->bind(ICartRepository::class, CartRepository::class);
         $this->app->bind(ICheckoutRepository::class, CheckoutRepository::class);
         $this->app->bind(IOrderRepository::class, OrderRepository::class);
