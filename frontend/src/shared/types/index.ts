@@ -144,23 +144,32 @@ export interface AttributeValue {
 export interface Order {
   id: number;
   status: string;
-  is_paid: boolean;
-  order_total: number;
-  subtotal: number;
-  shipping_fee: number;
   currency: string;
-  created_at: string;
-  order_items: OrderItem[];
+  subtotal: string;
+  shipping_fee: string;
+  total: string;
+  allowed_transitions: string[];
+  is_terminal: boolean;
+  items: OrderItem[];
+  items_count: number;
+  placed_at: string;
+  updated_at: string;
 }
 
 export interface OrderItem {
   id: number;
-  price: number;
-  already_reviewed: boolean;
   product_item_id: number;
-  product_item: ProductItem;
-  qty: number;
-  sku: string;
+  product_name: string;
+  product_slug: string;
+  product_image_url: string;
+  product_sku: string;
+  can_review: boolean;
+  is_reviewed: boolean;
+  in_stock: boolean;
+  attributes: string;
+  quantity: number;
+  unit_price: string;
+  line_total: string;
 }
 
 export type ProductResponse = ApiResponse<Product[]> &

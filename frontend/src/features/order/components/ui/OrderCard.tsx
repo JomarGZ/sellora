@@ -24,17 +24,32 @@ const OrderCard = ({ order, onReview }: OrderCardProps) => {
             <OrderStatusBadge status={order.status} />
           </div>
           <p className="text-xs text-muted-foreground">
-            {format(parseISO(order.created_at), "MMM d, yyyy")}
+            {format(parseISO(order.placed_at), "MMM d, yyyy")}
           </p>
         </div>
 
         {/* Body – items */}
-        <OrderItemsList items={order.order_items} onReview={onReview} />
-
-        {/* Footer */}
+        <OrderItemsList items={order.items} onReview={onReview} />
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t border-border pt-3 mt-1">
+          {/* Breakdown */}
+          <div className="text-sm text-muted-foreground space-y-1">
+            <p>
+              Subtotal:{" "}
+              <span className="text-foreground font-medium">
+                ${order.subtotal}
+              </span>
+            </p>
+            <p>
+              Shipping:{" "}
+              <span className="text-foreground font-medium">
+                ${order.shipping_fee}
+              </span>
+            </p>
+          </div>
+
+          {/* Total */}
           <p className="text-base font-bold text-foreground">
-            Total: ${order.order_total}
+            Total: ${order.total}
           </p>
           {/* <OrderActions order={order} callbacks={callbacks} /> */}
         </div>

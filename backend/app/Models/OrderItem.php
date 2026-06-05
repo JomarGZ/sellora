@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Database\Factories\OrderItemFactory;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Builder;
 
 final class OrderItem extends Model
 {
@@ -21,6 +19,8 @@ final class OrderItem extends Model
         'product_item_id',
         'price',
         'quantity',
+        'attributes',
+        'image',
         'product_name',
         'sku',
         'product_id',
@@ -55,5 +55,10 @@ final class OrderItem extends Model
     public function review()
     {
         return $this->hasOne(ProductItemReview::class);
+    }
+
+    public function isReviewed()
+    {
+        return $this->review !== null;
     }
 }

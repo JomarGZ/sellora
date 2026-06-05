@@ -13,6 +13,7 @@ const OrderHistorySection = () => {
   const { page = 1 } = accountOrdersRoute.useSearch();
   const navigate = accountOrdersRoute.useNavigate();
   const { data: orders, isLoading, refetch } = useOrdersList(page);
+  console.log(orders);
   const [selectedReviewItem, setSelectedReviewItem] =
     useState<ReviewPayload | null>(null);
   const reviewMutation = useReviewOrderItem();

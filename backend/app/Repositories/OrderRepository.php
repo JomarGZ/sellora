@@ -46,6 +46,8 @@ final class OrderRepository extends BaseRepository implements IOrderRepository
                 'product_item_id'   => $item->productItemId,
                 'product_name' => $item->productName,
                 'product_sku'  => $item->productSku,
+                'attributes'   => $item->attributes,
+                'image'        => $item->productItemImageUrl,
                 'quantity'     => $item->quantity,
                 'unit_price'   => $item->unitPrice,
                 'line_total'   => $item->lineTotal,
@@ -74,7 +76,7 @@ final class OrderRepository extends BaseRepository implements IOrderRepository
     ): LengthAwarePaginator {
         $query = Order::query()
             ->where('user_id', $userId)
-            ->with('items')
+            ->with('items.productItem')
             ->latest(); // created_at DESC — most recent orders first
  
         if (!empty($filters['status'])) {

@@ -23,9 +23,7 @@ class CartSnapshotItemDTO
             productItemId: $item->product_item_id,
             productName: $item->productItem->product->name ?? '',
             productSku: $item->productItem->sku,
-
             productItemImageUrl: $item->productItem->primaryImage?->image_path ?? '',
-
             attributes: $item->productItem->attributeValues
                 ->map(fn ($av) => "{$av->attribute->name}: {$av->value}")
                 ->implode(', '),

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\V1;
 
+use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @mixin OrderItem
@@ -24,7 +26,13 @@ final class OrderItemResource extends JsonResource
             'id'           => $this->id,
             'product_item_id'   => $this->product_item_id, 
             'product_name' => $this->product_name,
+            'in_stock'     => $this->relationLoaded('productItem') && ($this->productItem?->inStock() ?? false), 
+            'can_review'   => $this->order?->status === Order::STATUS_DELIVERED,
+            'is_reviewed'  => $this->isReviewed(),
+            'product_slug' => $this->productItem?->product?->slug,
+            'product_image_url' => $this->image ? url(Storage::url($this->image)) : null,
             'product_sku'  => $this->product_sku,
+            'attributes'   => $this->attributes,
             'quantity'     => $this->quantity,
             'unit_price'   => $this->unit_price,
             'line_total'   => $this->line_total,

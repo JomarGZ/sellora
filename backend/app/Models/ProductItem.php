@@ -104,6 +104,11 @@ final class ProductItem extends Model
         return max(0, $this->qty - $this->reserved_qty);
     }
 
+    public function inStock()
+    {
+        return $this->availableQty() > 0;
+    }
+
     protected function Available(Builder $query)
     {
         $query->where('status', 'active');
