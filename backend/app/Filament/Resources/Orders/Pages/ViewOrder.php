@@ -35,6 +35,24 @@ final class ViewOrder extends ViewRecord
                     return $order;
                 }),
        
+            Action::make('rejectCancel')
+                ->label('Reject Cancel')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->visible(fn (Order $record) => $record->canRejectCancellation())
+                ->action(function (Order $record) {
+                    $order = app(\App\Services\OrderService::class)
+                        ->rejectCancellation($record);
+
+                    Notification::make()
+                        ->title('Cancellation Rejected')
+                        ->body("Order #{$order->id} cancellation has been rejected.")
+                        ->success()
+                        ->send();
+
+                    return $order;
+                }),
+       
         ];
     }
 }

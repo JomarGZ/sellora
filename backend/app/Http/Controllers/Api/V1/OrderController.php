@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Exceptions\InvalidOrderTransitionException;
 use App\Exceptions\OrderCannotBeMarkAsReceivedException;
 use App\Exceptions\OrderCannotRequestCancellationException;
 use App\Exceptions\OrderNotFoundException;
 use App\Http\Controllers\Api\ApiController;
-use App\Http\Requests\Api\V1\UpdateOrderStatusRequest;
 use App\Http\Resources\V1\OrderCollection;
 use App\Http\Resources\V1\OrderResource;
 use App\Models\Order;
@@ -96,43 +94,6 @@ class OrderController extends ApiController
         }
     }
 
-    public function updateStatus(
-        UpdateOrderStatusRequest $request,
-        int                   $orderId
-    ): JsonResponse {
-
-        try {
-            $order = $this->orderService->updateStatus(
-                orderId:   $orderId,
-                newStatus: $request->validated('status'),
-            );
- 
-            return $this->success(
-                message: "Order status updated to '{$order->status}'.",
-                data: new OrderResource($order),
-            );
- 
-        } catch (OrderNotFoundException $e) {
-            return $this->error(
-                message: $e->getMessage(),
-                code: 404
-            );
- 
-        } catch (InvalidOrderTransitionException $e) {
-            return $this->error(
-                message:  $e->getMessage(),
-                code: 409,
-                errors: [
-                    'details' => [
-                        'from_status'         => $e->fromStatus,
-                        'to_status'           => $e->toStatus,
-                        'allowed_transitions' => $e->allowedTransitions,
-                    ]
-                ]
-            ); 
-        }
-    }
-
     public function markAsReceived(Order $order)
     {
         try {
@@ -143,7 +104,7 @@ class OrderController extends ApiController
             );
         } catch (OrderCannotBeMarkAsReceivedException $e) {
             return $this->error(
-                message: 'Ypu cannot mark as received the order.',
+                message: 'You cannot mark as received the order.',
                 code: 422
             );
         }

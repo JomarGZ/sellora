@@ -70,7 +70,7 @@ final class Order extends Model
     const TRANSITIONS = [
         self::STATUS_PROCESSING => [self::STATUS_SHIPPED],
         self::STATUS_SHIPPED    => [self::STATUS_DELIVERED],
-        self::STATUS_CANCEL_REQUESTED => [self::STATUS_CANCELLED, self::STATUS_CANCEL_REJECTED],
+        self::STATUS_CANCEL_REQUESTED => [],
         self::STATUS_DELIVERED  => [],
         self::STATUS_REFUNDED   => [],
         self::STATUS_CANCELLED  => [],
@@ -155,6 +155,11 @@ final class Order extends Model
     }
 
     public function canApproveCancel(): bool
+    {
+        return $this->isCancelRequested();
+    }
+
+    public function canRejectCancellation(): bool
     {
         return $this->isCancelRequested();
     }

@@ -8,7 +8,7 @@ import {
 } from "./cart.api";
 
 import { useAppToast } from "@/shared/components/feedback/AppToast";
-import type { CartItem, CartItemResponse } from "../types";
+import type { CartItemResponse } from "../types";
 
 function invalidateCartRelated(queryClient: any) {
   queryClient.invalidateQueries({ queryKey: ["cart"] });

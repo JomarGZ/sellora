@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import OrderFilters from "@/features/order/components/sections/OrderFilters";
 import OrderList from "@/features/order/components/sections/OrderList";
 import ErrorFallback from "@/features/order/components/states/ErrorFallback";
 import type { ReviewPayload } from "../../types";
 import { ReviewModal } from "../modal/ReviewModal";
-import { useOrdersList, useReviewOrderItem } from "../../api/order.queries";
+import {
+  useOrdersList,
+  useCreateOrderItemReview,
+} from "../../api/order.queries";
 import { accountOrdersRoute } from "@/app/routers/router";
 import type { ReviewFormValues } from "../../validation/review.schema";
 
@@ -13,10 +16,11 @@ const OrderHistorySection = () => {
   const { page = 1 } = accountOrdersRoute.useSearch();
   const navigate = accountOrdersRoute.useNavigate();
   const { data: orders, isLoading, refetch } = useOrdersList(page);
+
   console.log(orders);
   const [selectedReviewItem, setSelectedReviewItem] =
     useState<ReviewPayload | null>(null);
-  const reviewMutation = useReviewOrderItem();
+  const reviewMutation = useCreateOrderItemReview();
 
   const setPage = (newPage: number) => {
     navigate({

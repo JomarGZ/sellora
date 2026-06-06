@@ -9,7 +9,17 @@ export async function getOrders(page?: number): Promise<OrderResponse> {
   return data;
 }
 
-export async function createReviewItem(payload: CreateReviewPayload) {
+export async function createOrderItemReview(payload: CreateReviewPayload) {
   const { data } = await client.post("/v1/reviews", payload);
+  return data;
+}
+
+export async function requestOrderCancellation(orderId: number) {
+  const { data } = await client.patch(`v1/orders/${orderId}/request-cancel`);
+  return data;
+}
+
+export async function markOrderAsReceived(orderId: number) {
+  const { data } = await client.patch(`v1/orders/${orderId}/mark-received`);
   return data;
 }

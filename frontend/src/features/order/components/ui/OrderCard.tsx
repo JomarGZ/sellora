@@ -9,9 +9,20 @@ import type { ReviewPayload } from "../../types";
 interface OrderCardProps {
   order: Order;
   onReview: (payload: ReviewPayload) => void;
+  markReceivedLoading: boolean;
+  requestCancellationLoading: boolean;
+  onMarkReceived: (orderId: number) => void;
+  onRequestCancellation: (orderId: number) => void;
 }
 
-const OrderCard = ({ order, onReview }: OrderCardProps) => {
+const OrderCard = ({
+  order,
+  onReview,
+  markReceivedLoading,
+  requestCancellationLoading,
+  onMarkReceived,
+  onRequestCancellation,
+}: OrderCardProps) => {
   return (
     <Card className="transition-shadow duration-150 hover:shadow-md">
       <CardContent className="p-4 sm:p-5">
@@ -52,7 +63,13 @@ const OrderCard = ({ order, onReview }: OrderCardProps) => {
             Total: ${order.total}
           </p>
         </div>
-        <OrderActions order={order} />
+        <OrderActions
+          order={order}
+          markReceivedLoading={markReceivedLoading}
+          requestCancellationLoading={requestCancellationLoading}
+          onMarkReceived={onMarkReceived}
+          onRequestCancellation={onRequestCancellation}
+        />
       </CardContent>
     </Card>
   );

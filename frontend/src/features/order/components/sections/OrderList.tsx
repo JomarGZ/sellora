@@ -4,6 +4,10 @@ import EmptyState from "../states/EmptyState";
 import OrderCard from "../ui/OrderCard";
 import { Pagination } from "@/features/product/components/ui/Pagination";
 import type { ReviewPayload } from "../../types";
+import {
+  useMarkOrderAsReceived,
+  useRequestOrderCancellation,
+} from "../../api/order.queries";
 
 interface OrderListProps {
   orders: OrderResponse | undefined;
@@ -20,19 +24,33 @@ const OrderList = ({
   setPage,
   onReview,
 }: OrderListProps) => {
+  const requestCancellationMutation = useRequestOrderCancellation();
+  const markAsReceivedMutation = useMarkOrderAsReceived();
   if (isLoading) return <OrderListSkeleton />;
   if (orders?.data?.length === 0) return <EmptyState />;
   return (
     <>
       <div className="space-y-4">
         {orders?.data.map((order) => (
-          <OrderCard key={order.id} order={order} onReview={onReview} />
+          <OrderCard
+            key={order.id}
+            onMarkReceived={(orderId: number) =>
+              markAsReceivedMutation.mutate(orderId)
+            }
+            markReceivedLoading={markAsReceivedMutation.isPending}
+            onRequestCancellation={(orderId: number) =>
+              requestCancellationMutation.mutate(orderId)
+            }
+            requestCancellationLoading={requestCancellationMutation.isPending}
+            order={order}
+            onReview={onReview}
+          />
         ))}
       </div>
       <div>
         <Pagination
           currentPage={page}
-          totalPages={orders?.meta.last_page ?? 1}
+          totalPages={orders?.pagination?.last_page ?? 1}
           onPageChange={setPage}
         />
       </div>

@@ -22,7 +22,7 @@ class OrderService
 
     public function listForUser(int $userId, array $filters = []): LengthAwarePaginator
     {
-        $perPage = min((int) ($filters['per_page'] ?? 15), 50);
+        $perPage = min((int) ($filters['per_page'] ?? 10), 50);
  
         return $this->orderRepository->paginateForUser(
             userId:  $userId,
@@ -132,6 +132,21 @@ class OrderService
             $order->update([
                 'status' => Order::STATUS_CANCELLED,
                 'refunded_at' => now()
+            ]);
+
+            return $order->fresh();
+        });
+    }
+
+    public function rejectCancellation(Order $order) 
+    {
+        if (! $order->canRejectCancellation()) {
+            throw new \DomainException('Cannot approve cancellation.');
+        }
+        return DB::transaction(function () use ($order) {
+
+            $order->update([
+                'status' => Order::STATUS_PROCESSING, // or previous status
             ]);
 
             return $order->fresh();
