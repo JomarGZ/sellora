@@ -51,8 +51,8 @@ const OrderCard = ({ order, onReview }: OrderCardProps) => {
           <p className="text-base font-bold text-foreground">
             Total: ${order.total}
           </p>
-          {/* <OrderActions order={order} callbacks={callbacks} /> */}
         </div>
+        <OrderActions order={order} />
       </CardContent>
     </Card>
   );

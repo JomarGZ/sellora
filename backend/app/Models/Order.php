@@ -22,6 +22,8 @@ final class Order extends Model
         'checkout_id',
         'stripe_payment_intent_id',
         'items_snapshot',
+        'delivered_at',
+        'received_at',
         'total',
         'status',
         'subtotal',
@@ -34,6 +36,8 @@ final class Order extends Model
     protected $casts = [
         'subtotal' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
+        'delivered_at' => 'datetime',
+        'received_at' => 'datetime',
         'items_snapshot' => 'array',
         'total'          => 'decimal:2',
     ];
@@ -44,6 +48,7 @@ final class Order extends Model
     const STATUS_DELIVERED  = 'delivered';
     const STATUS_REFUNDED   = 'refunded';
     const STATUS_CANCELLED  = 'cancelled';
+    const STATUS_COMPLETED  = 'completed';
 
     public const SALE_STATUSES = [
         self::STATUS_CONFIRMED,
@@ -64,8 +69,8 @@ final class Order extends Model
     const TRANSITIONS = [
         self::STATUS_CONFIRMED  => [self::STATUS_PROCESSING, self::STATUS_CANCELLED],
         self::STATUS_PROCESSING => [self::STATUS_SHIPPED,    self::STATUS_CANCELLED],
-        self::STATUS_SHIPPED    => [self::STATUS_DELIVERED,  self::STATUS_REFUNDED],
-        self::STATUS_DELIVERED  => [self::STATUS_REFUNDED],
+        self::STATUS_SHIPPED    => [self::STATUS_DELIVERED],
+        self::STATUS_DELIVERED  => [],
         self::STATUS_REFUNDED   => [],
         self::STATUS_CANCELLED  => [],
     ];
@@ -77,6 +82,7 @@ final class Order extends Model
         self::STATUS_DELIVERED,
         self::STATUS_REFUNDED,
         self::STATUS_CANCELLED,
+        self::STATUS_COMPLETED
     ];
     
     /**
@@ -142,6 +148,19 @@ final class Order extends Model
     public function isDelivered(): bool  { return $this->status === self::STATUS_DELIVERED; }
     public function isRefunded(): bool   { return $this->status === self::STATUS_REFUNDED; }
     public function isCancelled(): bool  { return $this->status === self::STATUS_CANCELLED; }
+
+    public function canCancel(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_CONFIRMED,
+            self::STATUS_PROCESSING
+        ], true);
+    }
+
+    public function canMarkAsReceived(): bool
+    {
+        return $this->isDelivered() && $this->received_at === null;
+    }
  
     #[Scope]
     public function forUser(Builder $query, int $userId): Builder

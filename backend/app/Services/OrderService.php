@@ -55,8 +55,12 @@ class OrderService
         }
  
         $previousStatus = $order->status;
- 
-        $this->orderRepository->updateStatus($order, $newStatus);
+        if ($newStatus === Order::STATUS_DELIVERED) {
+            $order->delivered_at = now();
+        }
+        $this->orderRepository->updateStatus($order, $newStatus, [
+            'delivered_at' => $order->delivered_at
+        ]);
  
         Log::info('Order status updated', [
             'order_id'        => $order->id,

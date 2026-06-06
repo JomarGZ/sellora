@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Orders\Pages;
 
+use App\Enums\RefundReasonType;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Models\Order;
 use App\Services\RefundService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 
 final class ViewOrder extends ViewRecord
@@ -43,12 +45,19 @@ final class ViewOrder extends ViewRecord
                 app(RefundService::class)->refundPayment(
                     checkout: $checkout,
                     paymentIntentId: $record->stripe_payment_intent_id,
-                    reason: $data['reason'],
+                    reasonType: RefundReasonType::CUSTOMER_REQUEST,
                 );
 
                 $record->update([
                     'status' => Order::STATUS_REFUNDED,
                 ]);
+
+
+                Notification::make()
+                    ->title('Refund successful')
+                    ->body("Order #{$record->id} has been refunded.")
+                    ->success()
+                    ->send();
             }),
         ];
     }

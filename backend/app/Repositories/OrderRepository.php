@@ -64,9 +64,11 @@ final class OrderRepository extends BaseRepository implements IOrderRepository
         return $order;
     }
 
-    public function updateStatus(Order $order, string $newStatus): void
+    public function updateStatus(Order $order, string $newStatus, array $extra = []): void
     {
-        $order->update(['status' => $newStatus]);
+        $order->update(array_merge([
+            'status' => $newStatus
+        ], $extra));
     }
 
     public function paginateForUser(

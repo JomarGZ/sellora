@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\DTOs\CartSnapshotDTO;
+use App\Enums\RefundReasonType;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Checkout;
 use App\Models\Order;
@@ -243,7 +244,7 @@ class ProcessSuccessfulpaymentJob implements ShouldQueue
             $refundService->refundPayment(
                 $checkout,
                 $this->paymentIntentId,
-                $e->getMessage()
+                RefundReasonType::DUPLICATE
             );
  
             // Release the soft reservation since we're not completing this order.

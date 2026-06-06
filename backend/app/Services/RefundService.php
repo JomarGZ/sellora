@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\RefundReasonType;
 use App\Models\Checkout;
 use App\Repositories\Contracts\ICheckoutRepository;
 use Illuminate\Support\Facades\Log;
@@ -22,24 +23,25 @@ class RefundService
      * gets all their money back. No partial refunds here —
      * we only refund when the entire order fails stock validation.
      */
-    public function refundPayment(Checkout $checkout, string $paymentIntentId, string $reason): void
+    public function refundPayment(Checkout $checkout, string $paymentIntentId, RefundReasonType $reasonType): void
     {
         try {
+            $stripeReason = $this->mapToStripeReason($reasonType);
             $this->stripe->refunds->create([
                 'payment_intent' => $paymentIntentId,
-                'reason'         => 'duplicate', // closest Stripe enum for "we can't fulfil"
+                'reason'         => $stripeReason, // closest Stripe enum for "we can't fulfil"
                 'metadata'       => [
                     'checkout_id'    => $checkout->id,
-                    'internal_reason' => $reason,
+                    'internal_reason' => $reasonType->value,
                 ],
             ]);
  
-            $this->checkoutRepository->markFailed($checkout, $reason);
+            $this->checkoutRepository->markFailed($checkout, $reasonType->value);
  
             Log::info('Refund issued successfully', [
                 'checkout_id'       => $checkout->id,
                 'payment_intent_id' => $paymentIntentId,
-                'reason'            => $reason,
+                'reason'            => $stripeReason,
             ]);
         } catch (\Stripe\Exception\ApiErrorException $e) {
             // Log and re-throw. The job will retry, which means Stripe
@@ -54,5 +56,14 @@ class RefundService
  
             throw $e;
         }
+    }
+
+    public function mapToStripeReason(RefundReasonType $type): string
+    {
+        return match($type) {
+            RefundReasonType::FRAUD => 'fraudulent',
+            RefundReasonType::CUSTOMER_REQUEST => 'requested_by_customer',
+            RefundReasonType::DUPLICATE => 'duplicate',
+        };
     }
 }

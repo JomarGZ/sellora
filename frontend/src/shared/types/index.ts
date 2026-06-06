@@ -147,6 +147,8 @@ export interface Order {
   currency: string;
   subtotal: string;
   shipping_fee: string;
+  can_mark_as_received: boolean;
+  can_cancel: boolean;
   total: string;
   allowed_transitions: string[];
   is_terminal: boolean;

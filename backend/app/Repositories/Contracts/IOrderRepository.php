@@ -15,7 +15,7 @@ interface IOrderRepository
         CartSnapshotDTO $snapshot,
     ): Order;
 
-    public function updateStatus(Order $order, string $newStatus): void;
+    public function updateStatus(Order $order, string $newStatus, array $extra = []): void;
 
     public function paginateForUser(
         string $userId,
