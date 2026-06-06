@@ -7,6 +7,7 @@ use App\Exceptions\InvalidOrderTransitionException;
 use App\Exceptions\OrderCannotRequestCancellationException;
 use App\Exceptions\OrderCannotBeMarkAsReceivedException;
 use App\Exceptions\OrderNotFoundException;
+use App\Models\Checkout;
 use App\Models\Order;
 use App\Repositories\Contracts\IOrderRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -114,16 +115,24 @@ class OrderService
         }
 
         return DB::transaction(function () use ($order) {
-
-            $order->update([
-                'status' => Order::STATUS_CANCELLED,
-            ]);
-
+            $checkout = $order->checkout;
+            if (! $checkout) {
+                throw new \RuntimeException('Checkout not found for order.');
+            }
             app(RefundService::class)->refundPayment(
                 checkout: $order->checkout,
                 paymentIntentId: $order->stripe_payment_intent_id,
                 reasonType: RefundReasonType::CUSTOMER_REQUEST,
             );
+
+            $checkout->update([
+                'status' => Checkout::STATUS_REFUNDED
+            ]);
+            
+            $order->update([
+                'status' => Order::STATUS_CANCELLED,
+                'refunded_at' => now()
+            ]);
 
             return $order->fresh();
         });

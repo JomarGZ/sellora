@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\InvalidOrderTransitionException;
+use App\Exceptions\OrderCannotBeMarkAsReceivedException;
 use App\Exceptions\OrderCannotRequestCancellationException;
 use App\Exceptions\OrderNotFoundException;
 use App\Http\Controllers\Api\ApiController;
@@ -134,7 +135,18 @@ class OrderController extends ApiController
 
     public function markAsReceived(Order $order)
     {
-            return '';
+        try {
+            $updatedOrder = $this->orderService->markAsReceived($order);
+            return $this->success(
+                data: new OrderResource($updatedOrder),
+                message: 'Mark Received Successfully.'
+            );
+        } catch (OrderCannotBeMarkAsReceivedException $e) {
+            return $this->error(
+                message: 'Ypu cannot mark as received the order.',
+                code: 422
+            );
+        }
     }
 
     public function cancel(Order $order)

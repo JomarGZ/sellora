@@ -153,6 +153,7 @@ Route::name('api.v1.')->group(function () {
             Route::get('/{order}', [OrderController::class, 'show'])->name('show');
             Route::patch('/{order}/status', [OrderController::class, 'updateStatus'])->name('updateStatus');
             Route::patch('/{order}/request-cancel', [OrderController::class, 'cancel'])->name('cancel');
+            Route::patch('/{order}/mark-received', [OrderController::class, 'markAsReceived'])->name('markReceived');
         });
 
 
