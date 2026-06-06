@@ -20,45 +20,24 @@ final class ViewOrder extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('refund')
-            ->label('Refund')
-            ->icon('heroicon-o-arrow-uturn-left')
-            ->color('danger')
-            ->visible(fn (Order $record) =>
-                $record->status !== Order::STATUS_REFUNDED &&
-                $record->status !== Order::STATUS_CANCELLED
-            )
-            ->requiresConfirmation()
-            ->form([
-                Textarea::make('reason')
-                    ->required()
-                    ->label('Reason for refund'),
-            ])
-            ->action(function (Order $record, array $data) {
+            Action::make('approveCancel')
+                ->label('Approve Cancel')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->visible(fn (Order $record) => $record->canApproveCancel())
+                ->action(function (Order $record) {
+                    $order = app(\App\Services\OrderService::class)
+                        ->approveCancellation($record);
 
-                $checkout = $record->checkout;
+                    Notification::make()
+                        ->title('Cancellation approved')
+                        ->body("Order #{$order->id} has been cancelled and refunded.")
+                        ->success()
+                        ->send();
 
-                if (! $checkout) {
-                    throw new \Exception('Checkout not found for this order.');
-                }
-
-                app(RefundService::class)->refundPayment(
-                    checkout: $checkout,
-                    paymentIntentId: $record->stripe_payment_intent_id,
-                    reasonType: RefundReasonType::CUSTOMER_REQUEST,
-                );
-
-                $record->update([
-                    'status' => Order::STATUS_REFUNDED,
-                ]);
-
-
-                Notification::make()
-                    ->title('Refund successful')
-                    ->body("Order #{$record->id} has been refunded.")
-                    ->success()
-                    ->send();
-            }),
+                    return $order;
+                }),
+       
         ];
     }
 }

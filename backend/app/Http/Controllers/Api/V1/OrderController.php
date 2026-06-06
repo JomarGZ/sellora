@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Exceptions\InvalidOrderTransitionException;
+use App\Exceptions\OrderCannotRequestCancellationException;
 use App\Exceptions\OrderNotFoundException;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\Api\V1\UpdateOrderStatusRequest;
@@ -98,7 +99,6 @@ class OrderController extends ApiController
         UpdateOrderStatusRequest $request,
         int                   $orderId
     ): JsonResponse {
-        logger('trigger');
 
         try {
             $order = $this->orderService->updateStatus(
@@ -131,5 +131,28 @@ class OrderController extends ApiController
             ); 
         }
     }
+
+    public function markAsReceived(Order $order)
+    {
+            return '';
+    }
+
+    public function cancel(Order $order)
+    {
+        try {
+            $order = $this->orderService->requestCancellation($order);
+
+            return $this->success(
+                data: new OrderResource($order),
+                message: 'Cancel request submitted successfully.'
+            );
+        } catch (OrderCannotRequestCancellationException $e) {
+           return $this->error(
+                message: $e->getMessage() ?: 'You cannot request cancellation for this order.',
+                code: 422,
+            );
+        }
+    }
+
  
 }

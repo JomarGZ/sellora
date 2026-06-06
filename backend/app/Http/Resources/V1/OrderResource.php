@@ -20,7 +20,7 @@ final class OrderResource extends JsonResource
             'shipping_fee' => $this->shipping_fee,
             'total'        => $this->total,
             'can_mark_as_received' => $this->canMarkAsReceived(),
-            'can_cancel' => $this->canCancel(),
+            'can_cancel' => $this->canRequestCancel(),
             // ── State machine hints for the frontend ───────────
             // The frontend renders action buttons based on this list.
             // An empty array means the order is in a terminal state.

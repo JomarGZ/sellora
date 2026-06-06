@@ -2,11 +2,15 @@
 
 namespace App\Services;
 
+use App\Enums\RefundReasonType;
 use App\Exceptions\InvalidOrderTransitionException;
+use App\Exceptions\OrderCannotRequestCancellationException;
+use App\Exceptions\OrderCannotBeMarkAsReceivedException;
 use App\Exceptions\OrderNotFoundException;
 use App\Models\Order;
 use App\Repositories\Contracts\IOrderRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class OrderService
@@ -70,5 +74,58 @@ class OrderService
  
         // Reload to return the fresh model.
         return $order->fresh('items');
+    }
+
+    public function requestCancellation(Order $order)
+    {
+        if (!$order->canRequestCancel()) {
+            throw new OrderCannotRequestCancellationException($order->id);
+        }
+
+        return DB::transaction(function () use ($order) {
+            $order->update([
+                'status' => Order::STATUS_CANCEL_REQUESTED
+            ]);
+
+            return $order->fresh();
+        });
+    }
+
+    public function markAsReceived(Order $order)
+    {
+        if (! $order->canMarkAsReceived()) {
+            throw new OrderCannotBeMarkAsReceivedException($order->id);
+        }
+
+        return DB::transaction(function () use ($order) {
+            $order->update([
+                'status' => Order::STATUS_COMPLETED,
+                'received_at' => now()
+            ]);
+
+            return $order->fresh();
+        });
+    }
+    
+    public function approveCancellation(Order $order)
+    {
+        if (! $order->canApproveCancel()) {
+            throw new \DomainException('Cannot approve cancellation.');
+        }
+
+        return DB::transaction(function () use ($order) {
+
+            $order->update([
+                'status' => Order::STATUS_CANCELLED,
+            ]);
+
+            app(RefundService::class)->refundPayment(
+                checkout: $order->checkout,
+                paymentIntentId: $order->stripe_payment_intent_id,
+                reasonType: RefundReasonType::CUSTOMER_REQUEST,
+            );
+
+            return $order->fresh();
+        });
     }
 }

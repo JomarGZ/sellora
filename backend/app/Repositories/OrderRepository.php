@@ -34,7 +34,7 @@ final class OrderRepository extends BaseRepository implements IOrderRepository
             'shipping_fee'             => $snapshot->shippingFee,
             'total'                    => $snapshot->total,
             'currency'                 => $snapshot->currency,
-            'status'                   => Order::STATUS_CONFIRMED,
+            'status'                   => Order::STATUS_PROCESSING,
         ]);
  
         // Create denormalized line items from snapshot.

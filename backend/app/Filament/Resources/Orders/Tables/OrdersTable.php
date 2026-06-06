@@ -29,7 +29,6 @@ final class OrdersTable
                         fn (string $state): string => Order::STATUS_OPTIONS[$state] ?? $state
                     )
                     ->color(fn (string $state): string => match ($state) {
-                        Order::STATUS_CONFIRMED => 'info',
                         Order::STATUS_PROCESSING => 'warning',
                         Order::STATUS_SHIPPED => 'primary',
                         Order::STATUS_DELIVERED => 'success',

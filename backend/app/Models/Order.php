@@ -42,23 +42,22 @@ final class Order extends Model
         'total'          => 'decimal:2',
     ];
 
-    const STATUS_CONFIRMED  = 'confirmed';
     const STATUS_PROCESSING = 'processing';
     const STATUS_SHIPPED    = 'shipped';
     const STATUS_DELIVERED  = 'delivered';
     const STATUS_REFUNDED   = 'refunded';
+    const STATUS_CANCEL_REQUESTED = 'cancel_requested';
     const STATUS_CANCELLED  = 'cancelled';
+    const STATUS_CANCEL_REJECTED = 'cancel_rejected';
     const STATUS_COMPLETED  = 'completed';
 
     public const SALE_STATUSES = [
-        self::STATUS_CONFIRMED,
         self::STATUS_PROCESSING,
         self::STATUS_SHIPPED,
         self::STATUS_DELIVERED,
     ];
 
     const STATUS_OPTIONS = [
-        self::STATUS_CONFIRMED  => 'Confirmed',
         self::STATUS_PROCESSING => 'Processing',
         self::STATUS_SHIPPED    => 'Shipped',
         self::STATUS_DELIVERED  => 'Delivered',
@@ -67,16 +66,15 @@ final class Order extends Model
     ];
 
     const TRANSITIONS = [
-        self::STATUS_CONFIRMED  => [self::STATUS_PROCESSING, self::STATUS_CANCELLED],
-        self::STATUS_PROCESSING => [self::STATUS_SHIPPED,    self::STATUS_CANCELLED],
+        self::STATUS_PROCESSING => [self::STATUS_SHIPPED],
         self::STATUS_SHIPPED    => [self::STATUS_DELIVERED],
+        self::STATUS_CANCEL_REQUESTED => [self::STATUS_CANCELLED, self::STATUS_CANCEL_REJECTED],
         self::STATUS_DELIVERED  => [],
         self::STATUS_REFUNDED   => [],
         self::STATUS_CANCELLED  => [],
     ];
 
     const ALL_STATUSES = [
-        self::STATUS_CONFIRMED,
         self::STATUS_PROCESSING,
         self::STATUS_SHIPPED,
         self::STATUS_DELIVERED,
@@ -142,19 +140,21 @@ final class Order extends Model
         return empty($this->allowedTransitions());
     }
 
-    public function isConfirmed(): bool  { return $this->status === self::STATUS_CONFIRMED; }
     public function isProcessing(): bool { return $this->status === self::STATUS_PROCESSING; }
+    public function isCancelRequested(): bool { return $this->status === self::STATUS_CANCEL_REQUESTED; }
     public function isShipped(): bool    { return $this->status === self::STATUS_SHIPPED; }
     public function isDelivered(): bool  { return $this->status === self::STATUS_DELIVERED; }
     public function isRefunded(): bool   { return $this->status === self::STATUS_REFUNDED; }
     public function isCancelled(): bool  { return $this->status === self::STATUS_CANCELLED; }
 
-    public function canCancel(): bool
+    public function canRequestCancel(): bool
     {
-        return in_array($this->status, [
-            self::STATUS_CONFIRMED,
-            self::STATUS_PROCESSING
-        ], true);
+        return $this->isProcessing();
+    }
+
+    public function canApproveCancel(): bool
+    {
+        return $this->isCancelRequested();
     }
 
     public function canMarkAsReceived(): bool
