@@ -15,7 +15,7 @@ class OrderService
         private readonly IOrderRepository $orderRepository,
     ) {}
 
-    public function listForUser(string $userId, array $filters = []): LengthAwarePaginator
+    public function listForUser(int $userId, array $filters = []): LengthAwarePaginator
     {
         $perPage = min((int) ($filters['per_page'] ?? 15), 50);
  
@@ -26,7 +26,7 @@ class OrderService
         );
     }
 
-    public function getForUser(string $orderId, string $userId): Order
+    public function getForUser(int $orderId, int $userId): Order
     {
         $order = $this->orderRepository->findForUserWithItems($orderId, $userId);
  
@@ -37,7 +37,7 @@ class OrderService
         return $order;
     }
 
-    public function updateStatus(string $orderId, string $newStatus): Order
+    public function updateStatus(int $orderId, string $newStatus): Order
     {
         // Load without user scoping — status updates are admin operations.
         $order = $this->orderRepository->findWithItems($orderId);

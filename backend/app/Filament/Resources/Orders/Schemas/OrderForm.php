@@ -18,9 +18,6 @@ final class OrderForm
                 Select::make('user_id')
                     ->relationship('user', 'id')
                     ->required(),
-                Select::make('shipping_method_id')
-                    ->relationship('shippingMethod', 'name')
-                    ->required(),
                 TextInput::make('total')
                     ->required()
                     ->numeric(),
