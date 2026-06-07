@@ -37,10 +37,17 @@ final class UserAddressPolicy
             return Response::deny('You do not own this address');
         }
 
-        if ($userAddress->is_default) {
+        if ($user->default_address_id === $userAddress->id) {
             return Response::deny('You cannot delete your default address');
         }
 
         return Response::allow();
+    }
+
+    public function setDefault(User $user, UserAddress $userAddress): Response
+    {
+        return $user->id !== $userAddress->user_id 
+            ? Response::deny('You do not own this address') 
+            : Response::allow();
     }
 }

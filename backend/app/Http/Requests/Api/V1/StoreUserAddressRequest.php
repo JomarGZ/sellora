@@ -31,7 +31,6 @@ final class StoreUserAddressRequest extends FormRequest
             'country_id' => ['required', 'exists:countries,id'],
             'city_id' => ['required', 'exists:cities,id'],
             'street_address' => ['required', 'string'],
-            'is_default' => ['boolean'],
         ];
     }
 

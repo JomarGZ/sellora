@@ -17,7 +17,7 @@ final class UserAddressRepository extends BaseRepository
     public function list(int $userId): Collection
     {
         return $this->model->query()
-            ->with(['country', 'city'])
+            ->with(['country', 'city', 'user:default_address_id,id'])
             ->where('user_id', $userId)
             ->get();
     }

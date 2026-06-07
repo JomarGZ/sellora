@@ -27,7 +27,11 @@ final class UserAddressResource extends JsonResource
             'country' => CountryResource::make($this->whenLoaded('country')),
             'city' => CityResource::make($this->whenLoaded('city')),
             'street_address' => $this->street_address,
-            'is_default' => (bool) $this->is_default,
+            'is_default' => $this->whenLoaded(
+                'user',
+                fn () => $this->user->default_address_id === $this->id,
+                false
+            ),
         ];
     }
 }
