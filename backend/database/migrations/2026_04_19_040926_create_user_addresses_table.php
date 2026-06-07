@@ -25,7 +25,6 @@ return new class extends Migration
             $table->foreignIdFor(Country::class)->constrained()->restrictOnDelete();
             $table->foreignIdFor(City::class)->constrained()->restrictOnDelete();
             $table->string('street_address');
-            $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
     }

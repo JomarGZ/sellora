@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->string('image');
+        Schema::table('users', function (Blueprint $table) {
+            $table->foreignId('default_address_id')->nullable()->constrained('user_addresses')->nullOnDelete();
         });
     }
 
@@ -21,8 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('order_items', function (Blueprint $table) {
-            $table->dropColumn('image');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['default_address_id']);
+            $table->dropColumn('default_address_id');
         });
     }
 };

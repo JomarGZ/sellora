@@ -12,11 +12,6 @@ export async function preview() {
   return data;
 }
 
-export async function getCurrentCheckout(): Promise<CheckoutOrderPreviewResponse> {
-  const { data } = await client.get("/v1/checkout/current");
-  return data;
-}
-
 export async function getDefaultShipping() {
   const { data } = await client.get("/v1/shipping-option/default");
   return data;

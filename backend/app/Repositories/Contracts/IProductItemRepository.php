@@ -8,7 +8,7 @@ use App\Models\ProductItem;
 
 interface IProductItemRepository
 {
-    public function findActiveById(int $productItemId): ?ProductItem;
+    public function findAvailableById(int $productItemId): ?ProductItem;
 
     public function findAndLockById(int $productItemId): ?ProductItem;
  

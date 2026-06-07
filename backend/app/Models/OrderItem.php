@@ -61,4 +61,9 @@ final class OrderItem extends Model
     {
         return $this->review !== null;
     }
+
+    public function itsOrderIsCompleted(): bool
+    {
+        return $this->order?->status === Order::STATUS_COMPLETED;
+    }
 }

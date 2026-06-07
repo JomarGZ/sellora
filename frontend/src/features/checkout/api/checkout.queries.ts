@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-query";
 import {
   checkout,
-  getCurrentCheckout,
   getDefaultShipping,
   placeOrder,
   preview,
@@ -48,13 +47,6 @@ export function useCheckoutPreview(options?: UseMutationOptions<any, any>) {
       });
     },
     ...options,
-  });
-}
-
-export function useCurrentCheckoutPreview() {
-  return useQuery({
-    queryKey: ["checkout-preview-data"],
-    queryFn: getCurrentCheckout,
   });
 }
 

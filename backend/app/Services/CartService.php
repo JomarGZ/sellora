@@ -172,7 +172,7 @@ final class CartService
  
     private function loadAndValidateProduct(int $productItemId): ProductItem
     {
-        $productItem = $this->productItemRepository->findActiveById($productItemId);
+        $productItem = $this->productItemRepository->findAvailableById($productItemId);
  
         if (!$productItem) {
             throw new ProductItemNotAvailableException($productItemId);

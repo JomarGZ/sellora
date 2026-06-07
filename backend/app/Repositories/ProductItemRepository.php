@@ -15,11 +15,12 @@ final class ProductItemRepository extends BaseRepository implements IProductItem
         parent::__construct($productItem);
     }
 
-    public function findActiveById(int $productId): ?ProductItem
+    public function findAvailableById(int $productId): ?ProductItem
     {
         return $this->model->query()
             ->where('id', $productId)
-            ->where('status', 'active')
+            ->where('status', ProductItem::STATUS_ACTIVE)
+            ->whereHas('product', fn ($query) => $query->isActive())
             ->first();
     }
 
@@ -29,6 +30,8 @@ final class ProductItemRepository extends BaseRepository implements IProductItem
         // This blocks any other transaction trying to lock the same row.
         return $this->model->query()
             ->where('id', $productItemId)
+            ->where('status', ProductItem::STATUS_ACTIVE)
+            ->whereHas('product', fn ($query) => $query->isActive())
             ->lockForUpdate()
             ->first();
     }

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Exceptions\CartEmptyException;
 use App\Exceptions\CartOwnershipException;
 use App\Exceptions\InsufficientStockException;
+use App\Exceptions\MissingDefaultAddressException;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\Api\V1\CheckoutInitiateRequest;
 use App\Http\Requests\Api\V1\CheckoutPreviewRequest;
@@ -60,7 +61,7 @@ final class CheckoutController extends ApiController
                 data: new CheckoutResource($checkout),
                 message: 'Checkout initiated successfully.'
             );
-        } catch (CartOwnershipException | CartEmptyException $e) {
+        } catch (CartOwnershipException | CartEmptyException | MissingDefaultAddressException $e) {
             return $this->error(
                 message: $e->getMessage(),
                 code: 422
@@ -76,6 +77,7 @@ final class CheckoutController extends ApiController
                     'available'    => $e->available,
                 ]
             );
+
         } catch (ApiErrorException $e) {
             Log::error('Stripe API error during checkout initiation', [
                 'user_id' => $request->user()->id,

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\V1;
 
-use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -27,7 +26,7 @@ final class OrderItemResource extends JsonResource
             'product_item_id'   => $this->product_item_id, 
             'product_name' => $this->product_name,
             'in_stock'     => $this->relationLoaded('productItem') && ($this->productItem?->inStock() ?? false), 
-            'can_review'   => $this->order?->status === Order::STATUS_DELIVERED,
+            'can_review'   => $this->itsOrderIsCompleted() && ! $this->isReviewed(),
             'is_reviewed'  => $this->isReviewed(),
             'product_slug' => $this->productItem?->product?->slug,
             'product_image_url' => $this->image ? url(Storage::url($this->image)) : null,

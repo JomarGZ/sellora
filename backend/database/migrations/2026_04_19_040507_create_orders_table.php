@@ -22,6 +22,9 @@ return new class extends Migration
             $table->json('items_snapshot');
             $table->decimal('subtotal', 10, 2);
             $table->decimal('shipping_fee', 10, 2)->default(0);
+            $table->timestamp('refunded_at')->nullable();
+            $table->timestamp('delivered_at')->nullable();
+            $table->timestamp('received_at')->nullable();
             $table->decimal('total', 10, 2);
             $table->string('currency', 3)->default('usd');
             $table->string('status')->default('confirmed');

@@ -38,6 +38,9 @@ final class ProductItem extends Model
         'reserved_qty' => 'integer',
     ];
 
+    const STATUS_ACTIVE = 'active';
+    const STATUS_INACTIVE = 'inactive';
+
     /**
      * Get the product that owns the item.
      *

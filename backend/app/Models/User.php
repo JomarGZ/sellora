@@ -45,6 +45,7 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
     protected $fillable = [
         'first_name',
         'last_name',
+        'default_address_id',
         'email',
         'avatar',
         'password',
@@ -78,7 +79,7 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
 
     public function defaultAddress()
     {
-        return $this->hasOne(UserAddress::class)->where('is_default', true);
+        return $this->belongsTo(UserAddress::class, 'default_address_id');
     }
 
     public function orders()

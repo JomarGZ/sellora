@@ -8,12 +8,14 @@ use App\DTOs\CartSnapshotDTO;
 use App\Exceptions\CartEmptyException;
 use App\Exceptions\CartOwnershipException;
 use App\Exceptions\InsufficientStockException;
+use App\Exceptions\MissingDefaultAddressException;
 use App\Models\Cart;
 use App\Models\Checkout;
 use App\Models\CartItem;
 use App\Repositories\Contracts\ICartRepository;
 use App\Repositories\Contracts\ICheckoutRepository;
 use App\Repositories\Contracts\IProductItemRepository;
+use App\Repositories\Contracts\IUserRepository;
 use Stripe\StripeClient;
 
 final class CheckoutService
@@ -23,10 +25,11 @@ final class CheckoutService
     private const SESSION_TTL_MINUTES = 30;
  
     public function __construct(
-        private readonly ICartRepository     $cartRepository,
+        private readonly ICartRepository $cartRepository,
+        private readonly IUserRepository $userRepository,
         private readonly ICheckoutRepository $checkoutRepository,
-        private readonly IProductItemRepository  $productRepository,
-        private readonly StripeClient                $stripe,
+        private readonly IProductItemRepository $productRepository,
+        private readonly StripeClient $stripe,
     ) {}
  
     /**
@@ -55,6 +58,7 @@ final class CheckoutService
         }
         // ── Step 1: Load and validate the cart ─────────────────
         $cart = $this->cartRepository->findActiveCartWithItems($userId);
+
  
         if (!$cart) {
             throw new CartOwnershipException($userId);
@@ -63,7 +67,13 @@ final class CheckoutService
         if ($cart->items->isEmpty()) {
             throw new CartEmptyException();
         }
- 
+        $user = $this->userRepository->find($userId);
+        $defaultAddress = $user->defaultAddress;
+
+        if (!$defaultAddress) {
+            throw new MissingDefaultAddressException();
+        }
+
         // ── Step 2: Validate stock (read-only, no locks yet) ───
         // We do a quick optimistic check before touching Stripe.
         // The authoritative check happens inside the webhook job
