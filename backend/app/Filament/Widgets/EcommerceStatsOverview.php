@@ -14,7 +14,7 @@ final class EcommerceStatsOverview extends StatsOverviewWidget
     {
         return [
             Stat::make('Total Revenue (Paid)', '$ '.number_format(
-                (float) Order::whereIn('status',  Order::saleStatus())->sum('total'),
+                (float) Order::whereIn('status',  Order::saleStatus())->whereNull('refunded_at')->sum('total'),
                 2
             ))
                 ->chart(

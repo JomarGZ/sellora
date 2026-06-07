@@ -57,6 +57,7 @@ final class Order extends Model
         self::STATUS_PROCESSING,
         self::STATUS_SHIPPED,
         self::STATUS_DELIVERED,
+        self::STATUS_COMPLETED
     ];
 
     const STATUS_OPTIONS = [
