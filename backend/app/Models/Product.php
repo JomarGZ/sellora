@@ -21,7 +21,7 @@ use Spatie\Sluggable\SlugOptions;
 /**
  * @property float|null $product_items_min_price
  * @property float|null $product_items_max_price
- * @property int|null $product_items_sum_qty_in_stock
+ * @property int|null $product_items_sum_qty
  */
 #[ObservedBy([ProductObserver::class])]
 final class Product extends Model

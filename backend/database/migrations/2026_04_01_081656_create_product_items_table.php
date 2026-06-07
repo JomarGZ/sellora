@@ -19,7 +19,10 @@ return new class extends Migration
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->string('sku')->nullable()->unique();
             $table->decimal('price', 10, 2);
-            $table->unsignedBigInteger('qty_in_stock')->default(0);
+
+            $table->unsignedBigInteger('qty')->default(0);
+            $table->unsignedBigInteger('reserved_qty')->default(0);
+            $table->string('status')->default('active');
             $table->timestamps();
 
             $table->softDeletes();

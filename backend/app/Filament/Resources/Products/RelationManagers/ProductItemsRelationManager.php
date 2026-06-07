@@ -44,7 +44,7 @@ final class ProductItemsRelationManager extends RelationManager
                                     ->prefix('$')
                                     ->numeric(),
 
-                                TextInput::make('qty_in_stock')
+                                TextInput::make('qty')
                                     ->numeric()
                                     ->default(1)
                                     ->required(),
@@ -93,7 +93,7 @@ final class ProductItemsRelationManager extends RelationManager
                 TextColumn::make('price')
                     ->money('USD'),
 
-                TextColumn::make('qty_in_stock')
+                TextColumn::make('qty')
                     ->label('Stock'),
 
                 TextColumn::make('attributeValues.value')

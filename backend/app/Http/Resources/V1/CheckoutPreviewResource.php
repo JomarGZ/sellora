@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\V1;
 
+use App\DTOs\CheckoutPreviewDTO;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 final class CheckoutPreviewResource extends JsonResource
 {
+
+    public function __construct(public readonly CheckoutPreviewDTO $dto) {}
     /**
      * Transform the resource into an array.
      *
@@ -17,22 +21,25 @@ final class CheckoutPreviewResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'items' => collect($this->resource['items'])->map(fn ($item) => [
-                'product_item_id' => $item['product_item']->id,
-                'sku' => $item['product_item']->sku,
-                'product_name' => $item['product_item']->product->name,
-                'price' => number_format((float) $item['product_item']->price, 2),
-                'qty' => $item['qty'],
-                'subtotal' => number_format($item['subtotal'], 2),
-            ]),
-            'subtotal' => number_format($this->resource['subtotal'], 2),
-            'shipping_fee' => number_format($this->resource['shipping_fee'], 2),
-            'total' => number_format($this->resource['total'], 2),
-            'shipping_method' => $this->resource['shipping_method'] ? [
-                'id' => $this->resource['shipping_method']->id,
-                'name' => $this->resource['shipping_method']->name,
-                'estimated_days' => $this->resource['shipping_method']->estimated_days,
-            ] : null,
+            'cart_id'           => $this->dto->cartId,
+            'currency'          => $this->dto->currency,
+            'subtotal'          => $this->dto->subtotal,
+            'shipping_fee'      => $this->dto->shippingFee,
+            'total'             => $this->dto->total,
+            'all_items_in_stock' => $this->dto->allItemsInStock,
+            'items'             => array_map(
+                fn ($item) => [
+                    'product_item_id'   => $item->productItemId,
+                    'attribute_values' => $item->attributes,
+                    'product_name' => $item->productName,
+                    'product_sku'  => $item->productSku,
+                    'product_item_image_url' => url(Storage::url($item->productItemImageUrl)),
+                    'quantity'     => $item->quantity,
+                    'unit_price'   => $item->unitPrice,
+                    'line_total'   => $item->lineTotal,
+                ],
+                $this->dto->items
+            ),
         ];
     }
 }

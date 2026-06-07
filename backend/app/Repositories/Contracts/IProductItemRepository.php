@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace App\Repositories\Contracts;
 
-use Illuminate\Support\Collection;
+use App\Models\ProductItem;
 
 interface IProductItemRepository
 {
-    public function findByIds(array $ids): Collection;
+    public function findAvailableById(int $productItemId): ?ProductItem;
 
-    public function decrementStock(int $productItemId, int $qty): void;
+    public function findAndLockById(int $productItemId): ?ProductItem;
+ 
+    public function incrementReservedQty(int $productItemId, int $quantity): void;
+  
+    public function decrementReservedQty(int $productItemId, int $quantity): void;
+ 
+    public function deductStockAndClearReservation(int $productItemId, int $quantity): void;
 }

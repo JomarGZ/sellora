@@ -28,7 +28,7 @@ export function PurchaseActions({
   const addToCart = useAddToCartMutation();
   const buyNow = useBuyNowMutation();
   const navigate = useNavigate();
-  const isOutOfStock = selectedItem ? selectedItem.qty_in_stock === 0 : false;
+  const isOutOfStock = selectedItem ? selectedItem.qty === 0 : false;
   const isSelectionIncomplete = hasAttributes && !selectedItem;
   const selectItem = useCartSelection((s) => s.selectItem);
 
@@ -109,14 +109,12 @@ export function PurchaseActions({
           <button
             onClick={() =>
               setQuantity((q) =>
-                selectedItem
-                  ? Math.min(selectedItem.qty_in_stock, q + 1)
-                  : q + 1,
+                selectedItem ? Math.min(selectedItem.qty, q + 1) : q + 1,
               )
             }
             disabled={
               isOutOfStock ||
-              (selectedItem !== null && quantity >= selectedItem.qty_in_stock)
+              (selectedItem !== null && quantity >= selectedItem.qty)
             }
             className="w-10 h-10 rounded-lg flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background disabled:opacity-40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
@@ -175,13 +173,11 @@ export function PurchaseActions({
         </Button>
       </div>
 
-      {selectedItem &&
-        selectedItem.qty_in_stock > 0 &&
-        selectedItem.qty_in_stock <= 5 && (
-          <p className="text-sm text-amber-600 font-medium">
-            Hurry! Only {selectedItem.qty_in_stock} left in stock.
-          </p>
-        )}
+      {selectedItem && selectedItem.qty > 0 && selectedItem.qty <= 5 && (
+        <p className="text-sm text-amber-600 font-medium">
+          Hurry! Only {selectedItem.qty} left in stock.
+        </p>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ namespace App\Http\Resources\V1;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @mixin OrderItem
@@ -21,14 +22,19 @@ final class OrderItemResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'product_item_id' => $this->product_item_id,
+            'id'           => $this->id,
+            'product_item_id'   => $this->product_item_id, 
             'product_name' => $this->product_name,
-            'sku' => $this->sku,
-            'qty' => $this->quantity,
-            'price' => number_format((float) $this->price, 2),
-            'already_reviewed' => $this->review !== null,
-            'product_item' => ProductItemResource::make($this->whenLoaded('productItem'))
+            'in_stock'     => $this->relationLoaded('productItem') && ($this->productItem?->inStock() ?? false), 
+            'can_review'   => $this->itsOrderIsCompleted() && ! $this->isReviewed(),
+            'is_reviewed'  => $this->isReviewed(),
+            'product_slug' => $this->productItem?->product?->slug,
+            'product_image_url' => $this->image ? url(Storage::url($this->image)) : null,
+            'product_sku'  => $this->product_sku,
+            'attributes'   => $this->attributes,
+            'quantity'     => $this->quantity,
+            'unit_price'   => $this->unit_price,
+            'line_total'   => $this->line_total,
         ];
     }
 }

@@ -2,11 +2,8 @@
 import { CartItemCard } from "../item/CartItemCard";
 import { ShoppingBag } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
-import { Pagination } from "@/features/product/components/ui/Pagination";
 import Skeleton from "react-loading-skeleton";
-import { accountCartRoute } from "@/app/routers/router";
 import {
-  useCartQuery,
   useDeleteCartItemMutation,
   useUpdateCartItemQuantityMutation,
 } from "../../api/cart.queries";
@@ -14,29 +11,21 @@ import type { CartItem } from "../../types";
 
 type CartItemListProps = {
   isSelected: (id: number) => boolean;
+  isLoading: boolean;
   onSelectItem: (id: number, checked: boolean) => void;
+  cart: any;
 };
 
-export function CartItemList({ isSelected, onSelectItem }: CartItemListProps) {
-  const { page = 1 } = accountCartRoute.useSearch();
-  const navigate = accountCartRoute.useNavigate();
-  const { data: cartData, isLoading } = useCartQuery(page);
-
+export function CartItemList({
+  isSelected,
+  onSelectItem,
+  isLoading = false,
+  cart,
+}: CartItemListProps) {
   const deleteCartItem = useDeleteCartItemMutation();
   const updateQuantity = useUpdateCartItemQuantityMutation();
 
-  const setPage = (newPage: number) => {
-    navigate({
-      search: (prev: { page?: number }) => {
-        const next = { ...prev };
-        if (newPage === 1) delete next.page;
-        else next.page = newPage;
-        return next;
-      },
-    });
-  };
-
-  if (!isLoading && cartData?.data.length === 0) {
+  if (!isLoading && cart?.data.items.length === 0) {
     return <EmptyCart />;
   }
 
@@ -45,15 +34,19 @@ export function CartItemList({ isSelected, onSelectItem }: CartItemListProps) {
       {isLoading ? (
         <CartSkeleton />
       ) : (
-        cartData?.data.map((item: CartItem) => (
+        cart?.data?.items.map((item: CartItem) => (
           <CartItemCard
             key={item.id}
             item={item}
             isSelected={isSelected(item.id)}
             onSelect={onSelectItem}
-            onUpdateQuantity={(id, quantity) =>
-              updateQuantity.mutate({ id, quantity })
-            }
+            onUpdateQuantity={(id, quantity) => {
+              updateQuantity.mutate({
+                itemId: id,
+                cartId: cart.data.id,
+                quantity,
+              });
+            }}
             onRemove={(id) => deleteCartItem.mutate(id)}
             isRemoving={
               deleteCartItem.isPending && deleteCartItem.variables === item.id
@@ -61,12 +54,6 @@ export function CartItemList({ isSelected, onSelectItem }: CartItemListProps) {
           />
         ))
       )}
-
-      <Pagination
-        currentPage={page}
-        totalPages={cartData?.meta.last_page ?? 1}
-        onPageChange={setPage}
-      />
     </div>
   );
 }

@@ -2,7 +2,6 @@ import { Button } from "@/shared/components/ui/button";
 import { ShoppingCart, Star } from "lucide-react";
 import { Badge } from "@/shared/components/ui/badge";
 import type { OrderItem } from "@/shared/types";
-import { formatAttributeDescription } from "@/shared/lib/utils";
 import type { ReviewPayload } from "../../types";
 import { Link } from "@tanstack/react-router";
 
@@ -12,14 +11,11 @@ interface OrderItemCardProps {
 }
 
 const OrderItemCard = ({ item, onReview }: OrderItemCardProps) => {
-  const canReview = !item.already_reviewed;
-  const canBuyAgain = item.product_item.in_stock;
-
   return (
     <div className="flex items-start gap-3 py-3">
       <img
-        src={item.product_item.images[0].url}
-        alt={item.product_item.product?.name}
+        src={item.product_image_url}
+        alt={item.product_name}
         className="h-14 w-14 rounded-md object-cover bg-secondary shrink-0"
         loading="lazy"
       />
@@ -27,13 +23,12 @@ const OrderItemCard = ({ item, onReview }: OrderItemCardProps) => {
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="text-sm font-medium text-foreground truncate">
-              {item.product_item.product?.name}
+              {item.product_name}
             </p>
             <p className="text-xs text-muted-foreground">
-              {formatAttributeDescription(item.product_item.attribute_values)} ·
-              Qty: {item.qty}
+              {item.attributes} · {item.quantity} × ${item.unit_price}
             </p>
-            {!item.product_item.in_stock && (
+            {!item.in_stock && (
               <Badge
                 variant="outline"
                 className="mt-1 text-[10px] text-destructive border-destructive/20"
@@ -41,7 +36,7 @@ const OrderItemCard = ({ item, onReview }: OrderItemCardProps) => {
                 Out of Stock
               </Badge>
             )}
-            {item.already_reviewed && (
+            {item.is_reviewed && (
               <Badge
                 variant="outline"
                 className="mt-1 text-[10px] text-status-success border-status-success/20"
@@ -51,22 +46,22 @@ const OrderItemCard = ({ item, onReview }: OrderItemCardProps) => {
             )}
           </div>
           <p className="text-sm font-semibold text-foreground whitespace-nowrap">
-            ${(item.price * item.qty).toFixed(2)}
+            ${item.line_total}
           </p>
         </div>
 
         {/* Item-level actions */}
         <div className="flex flex-wrap gap-1.5 mt-2">
-          {canBuyAgain && (
+          {item.in_stock && (
             <Link
-              to={`/product/${item.product_item.product?.slug}`}
+              to={`/product/${item.product_slug}`}
               className="inline-flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-all hover:bg-primary hover:text-white hover:shadow-sm active:scale-95"
             >
               <ShoppingCart className="h-3.5 w-3.5" />
               Buy Again
             </Link>
           )}
-          {canReview && (
+          {item.can_review && (
             <Button
               size="sm"
               variant="ghost"
@@ -74,8 +69,8 @@ const OrderItemCard = ({ item, onReview }: OrderItemCardProps) => {
                 onReview({
                   orderItemId: item.id,
                   productItemId: item.product_item_id,
-                  productItemImage: item.product_item.images[0].url,
-                  productName: item.product_item.product?.name,
+                  productItemImage: item.product_image_url,
+                  productName: item.product_name,
                 });
               }}
               className="h-7 text-xs gap-1 px-2 cursor-pointer text-status-pending"

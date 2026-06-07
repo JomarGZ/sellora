@@ -2,9 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Models\ShippingMethod;
-use App\Models\ShoppingCart;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,17 +16,23 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table): void {
 
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->restrictOnDelete();
-            $table->foreignIdFor(ShippingMethod::class)->constrained()->restrictOnDelete();
-            $table->decimal('order_total', 10, 2);
-            $table->string('status');
-            $table->string('checkout_type');
-            $table->foreignIdFor(ShoppingCart::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('checkout_id')->constrained()->restrictOnDelete();
+            $table->foreignId('user_id')->constrained()->restrictOnDelete();
+            $table->string('stripe_payment_intent_id')->unique();
+            $table->json('items_snapshot');
             $table->decimal('subtotal', 10, 2);
-            $table->decimal('shipping_fee', 10, 2);
-            $table->string('idempotency_key', 255)->nullable()->unique();
-            $table->char('currency', 3)->nullable();
+            $table->decimal('shipping_fee', 10, 2)->default(0);
+            $table->timestamp('refunded_at')->nullable();
+            $table->timestamp('delivered_at')->nullable();
+            $table->timestamp('received_at')->nullable();
+            $table->decimal('total', 10, 2);
+            $table->string('currency', 3)->default('usd');
+            $table->string('status')->default('confirmed');
+            // confirmed | processing | shipped | delivered | refunded | cancelled
             $table->timestamps();
+ 
+            $table->index(['user_id', 'status']);
+            $table->index('stripe_payment_intent_id');
 
         });
     }

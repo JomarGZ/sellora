@@ -1,29 +1,25 @@
+import { useCheckoutPreview } from "@/features/checkout/api/checkout.queries";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Separator } from "@/shared/components/ui/separator";
-import type { Summary } from "../../types";
 import { cn } from "@/shared/lib/utils";
-import { useCheckoutSnapshot } from "@/features/checkout/api/checkout.queries";
 import { useNavigate } from "@tanstack/react-router";
 
 interface CartSummaryProps {
-  summary: Summary | undefined;
+  itemsCount: number;
+  subtotal: number;
   isLoading: boolean;
 }
 
-export function CartSummary({ summary, isLoading = false }: CartSummaryProps) {
-  const navigate = useNavigate();
-  const checkoutSnapshot = useCheckoutSnapshot({
-    onSuccess: () => {
-      navigate({ to: "/checkout" });
-    },
-  });
-  const ids = summary?.items.map((item) => item.id);
+export function CartSummary({
+  itemsCount,
+  isLoading = false,
+  subtotal,
+}: CartSummaryProps) {
+  const CheckoutPreview = useCheckoutPreview();
 
-  const handleCheckoutSnapshot = () => {
-    if (!ids) return;
-
-    checkoutSnapshot.mutate(ids);
+  const handleCheckoutPreview = () => {
+    CheckoutPreview.mutate();
   };
 
   return (
@@ -33,15 +29,13 @@ export function CartSummary({ summary, isLoading = false }: CartSummaryProps) {
       <div className="space-y-3 text-sm mb-6">
         <div className="flex justify-between text-muted-foreground">
           <span>Items</span>
-          <span className="text-foreground font-medium">
-            {summary?.count || 0}
-          </span>
+          <span className="text-foreground font-medium">{itemsCount || 0}</span>
         </div>
         <Separator className="my-2" />
         <div className="flex justify-between text-base font-bold font-display">
           <span>Total</span>
           <span className={cn("text-primary", isLoading && "opacity-60")}>
-            ${summary?.total.toFixed(2) || 0}
+            ${subtotal || 0}
           </span>
         </div>
       </div>
@@ -54,7 +48,7 @@ export function CartSummary({ summary, isLoading = false }: CartSummaryProps) {
       </div>
 
       <Button
-        onClick={handleCheckoutSnapshot}
+        onClick={handleCheckoutPreview}
         className="w-full rounded-xl py-6 text-base font-bold"
         size="lg"
       >

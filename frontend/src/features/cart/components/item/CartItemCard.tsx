@@ -3,7 +3,7 @@ import { Minus, Plus, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { CartItem } from "../../types";
 import { Link } from "@tanstack/react-router";
-import { cn } from "@/shared/lib/utils";
+import { cn, formatAttributeDescription } from "@/shared/lib/utils";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -38,20 +38,17 @@ export function CartItemCard({
     setQuantity(newQuantity);
     debouncedUpdateQuantity(newQuantity);
   };
-  const attributeDescription = item.product_item.attribute_values
-    .map((av) => `${av.attribute_name}: ${av.value}`)
-    .join(", ");
 
   const subtotal = item.product_item.price * item.quantity;
-  const isOutOfStock = Number(item.product_item.qty_in_stock) <= 0;
+  const isOutOfStock = Number(item.product_item.qty) <= 0;
   return (
     <div
       className={cn(
         "flex gap-4 p-4 bg-white dark:bg-card rounded-2xl border border-border/50 shadow-sm relative group",
-        Number(item.product_item.qty_in_stock) <= 0 && "opacity-60",
+        Number(item.product_item.qty) <= 0 && "opacity-60",
       )}
     >
-      <div className="flex items-center">
+      {/* <div className="flex items-center">
         <input
           type="checkbox"
           checked={isSelected}
@@ -59,7 +56,7 @@ export function CartItemCard({
           onChange={(e) => onSelect?.(item.id, e.target.checked)}
           className="h-4 w-4 accent-primary cursor-pointer"
         />
-      </div>
+      </div> */}
       <div className="w-24 h-24 rounded-xl overflow-hidden bg-muted shrink-0">
         <img
           src={item.product_item.images[0]?.url}
@@ -78,10 +75,10 @@ export function CartItemCard({
               {item.product_item.product?.name}
             </Link>
             <p className="text-sm text-muted-foreground">
-              {attributeDescription}
+              {formatAttributeDescription(item.product_item.attribute_values)}
             </p>
             <p className="text-xs text-muted-foreground">
-              Stock: {item.product_item.qty_in_stock}
+              Stock: {item.product_item.qty}
             </p>
           </div>
           <div className="text-right">
@@ -104,7 +101,7 @@ export function CartItemCard({
                 size="icon"
                 className="h-7 w-7 rounded-md cursor-pointer"
                 onClick={() => handleQuantityChange(quantity - 1)}
-                disabled={quantity <= 1}
+                disabled={quantity <= 0}
               >
                 <Minus className="w-3 h-3" />
               </Button>
@@ -121,7 +118,7 @@ export function CartItemCard({
               <Button
                 variant="ghost"
                 size="icon"
-                disabled={quantity === Number(item.product_item.qty_in_stock)}
+                disabled={quantity === Number(item.product_item.qty)}
                 className="h-7 w-7 rounded-md cursor-pointer"
                 onClick={() => handleQuantityChange(quantity + 1)}
               >

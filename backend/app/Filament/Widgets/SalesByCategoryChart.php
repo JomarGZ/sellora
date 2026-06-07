@@ -15,7 +15,7 @@ final class SalesByCategoryChart extends ChartWidget
     protected function getData(): array
     {
         $data = OrderItem::query()
-            ->selectRaw('product_categories.name as category_name, SUM(order_items.quantity * order_items.price) as total_sales')
+            ->selectRaw('product_categories.name as category_name, SUM(order_items.quantity * order_items.unit_price) as total_sales')
             ->join('product_items', 'order_items.product_item_id', '=', 'product_items.id')
             ->join('products', 'product_items.product_id', '=', 'products.id')
             ->join('product_categories', 'products.product_category_id', '=', 'product_categories.id')

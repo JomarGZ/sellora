@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\DTOs\V1\ProductFilterDTO;
-use App\Enums\OrderStatus;
+use App\Models\Order;
 use App\Models\Product;
+use App\Repositories\Contracts\IProductRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * @extends BaseRepository<Product>
  */
-final class ProductRepository extends BaseRepository
+final class ProductRepository extends BaseRepository implements IProductRepository
 {
     public function __construct(Product $product)
     {
@@ -39,7 +40,7 @@ final class ProductRepository extends BaseRepository
             ->withCount([
                 'orderItems as sold_count' => function ($query) {
                     $query->whereHas('order', function ($q) {
-                        $q->where('status', OrderStatus::Completed);
+                        $q->whereIn('status', Order::saleStatus());
                     });
                 },
             ])
@@ -66,7 +67,7 @@ final class ProductRepository extends BaseRepository
             ->withCount([
                 'orderItems as sold_count' => function ($query) {
                     $query->whereHas('order', function ($q) {
-                        $q->where('status', OrderStatus::Completed);
+                        $q->whereIn('status', Order::saleStatus());
                     });
                 },
             ])
@@ -105,7 +106,7 @@ final class ProductRepository extends BaseRepository
             ->withCount([
                 'orderItems as sold_count' => function ($query) {
                     $query->whereHas('order', function ($q) {
-                        $q->where('status', OrderStatus::Completed);
+                        $q->whereIn('status', Order::saleStatus());
                     });
                 },
             ])

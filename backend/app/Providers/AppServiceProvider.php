@@ -25,6 +25,13 @@ final class AppServiceProvider extends ServiceProvider
                 config('stripe.secret_key')
             );
         });
+
+        $this->app->singleton(StripeClient::class, function () {
+            return new StripeClient([
+                'api_key'     => config('services.stripe.secret'),
+                'stripe_version' => config('services.stripe.api_version'),
+            ]);
+        });
     }
 
     public function boot(): void

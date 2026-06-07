@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\CheckoutType;
-use App\Enums\OrderStatus;
-use Database\Factories\OrderFactory;
-use DomainException;
-use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Database\Factories\OrderFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 final class Order extends Model
 {
@@ -23,31 +19,83 @@ final class Order extends Model
 
     protected $fillable = [
         'user_id',
-        'shipping_method_id',
+        'checkout_id',
+        'stripe_payment_intent_id',
+        'items_snapshot',
+        'delivered_at',
+        'received_at',
+        'refunded_at',
+        'total',
         'status',
         'subtotal',
         'shipping_fee',
-        'shopping_cart_id',
-        'order_total',
+        'cart_id',
         'currency',
         'idempotency_key',
-        'checkout_type',
     ];
 
     protected $casts = [
-        'status' => OrderStatus::class,
-        'checkout_type' => CheckoutType::class,
         'subtotal' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
-        'order_total' => 'decimal:2',
+        'delivered_at' => 'datetime',
+        'refunded_at' => 'datetime',
+        'received_at' => 'datetime',
+        'items_snapshot' => 'array',
+        'total'          => 'decimal:2',
     ];
 
+    const STATUS_PROCESSING = 'processing';
+    const STATUS_SHIPPED    = 'shipped';
+    const STATUS_DELIVERED  = 'delivered';
+    const STATUS_REFUNDED   = 'refunded';
+    const STATUS_CANCEL_REQUESTED = 'cancel_requested';
+    const STATUS_CANCELLED  = 'cancelled';
+    const STATUS_CANCEL_REJECTED = 'cancel_rejected';
+    const STATUS_COMPLETED  = 'completed';
+
+    public const SALE_STATUSES = [
+        self::STATUS_PROCESSING,
+        self::STATUS_SHIPPED,
+        self::STATUS_DELIVERED,
+    ];
+
+    const STATUS_OPTIONS = [
+        self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_SHIPPED    => 'Shipped',
+        self::STATUS_DELIVERED  => 'Delivered',
+        self::STATUS_REFUNDED   => 'Refunded',
+        self::STATUS_CANCELLED  => 'Cancelled',
+    ];
+
+    const TRANSITIONS = [
+        self::STATUS_PROCESSING => [self::STATUS_SHIPPED],
+        self::STATUS_SHIPPED    => [self::STATUS_DELIVERED],
+        self::STATUS_CANCEL_REQUESTED => [],
+        self::STATUS_DELIVERED  => [],
+        self::STATUS_REFUNDED   => [],
+        self::STATUS_CANCELLED  => [],
+    ];
+
+    const ALL_STATUSES = [
+        self::STATUS_PROCESSING,
+        self::STATUS_SHIPPED,
+        self::STATUS_DELIVERED,
+        self::STATUS_REFUNDED,
+        self::STATUS_CANCELLED,
+        self::STATUS_COMPLETED
+    ];
+    
     /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function checkout()
+    {
+        return $this->belongsTo(Checkout::class, 'checkout_id');
     }
 
     /**
@@ -66,46 +114,70 @@ final class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    /** @return HasOne<Payment, $this> */
-    public function payment(): HasOne
-    {
-        return $this->hasOne(Payment::class);
-    }
+  
 
     public function address()
     {
         return $this->hasOne(OrderAddress::class);
     }
 
-    public function transitionTo(OrderStatus $next): void
+    public static function saleStatus(): array
     {
-        if (! $this->status->canTransitionTo($next)) {
-            throw new DomainException(
-                "Illegal order transition: {$this->status->value} → {$next->value} "
-                ."(order #{$this->id})"
-            );
-        }
-
-        $this->update(['status' => $next]);
+        return self::SALE_STATUSES;
     }
 
-    public function scopePaid($query)
+    public function allowedTransitions(): array
     {
-        return $query->where('status', OrderStatus::Paid);
+        return self::TRANSITIONS[$this->status] ?? [];
     }
 
-    public function scopePending($query)
+
+    public function canTransitionTo(string $newStatus): bool
     {
-        return $query->where('status', OrderStatus::Pending);
+        return in_array($newStatus, $this->allowedTransitions(), true);
+    }
+
+    public function isTerminal(): bool
+    {
+        return empty($this->allowedTransitions());
+    }
+
+    public function isProcessing(): bool { return $this->status === self::STATUS_PROCESSING; }
+    public function isCancelRequested(): bool { return $this->status === self::STATUS_CANCEL_REQUESTED; }
+    public function isShipped(): bool    { return $this->status === self::STATUS_SHIPPED; }
+    public function isDelivered(): bool  { return $this->status === self::STATUS_DELIVERED; }
+    public function isRefunded(): bool   { return $this->status === self::STATUS_REFUNDED; }
+    public function isCancelled(): bool  { return $this->status === self::STATUS_CANCELLED; }
+
+    public function canRequestCancel(): bool
+    {
+        return $this->isProcessing();
+    }
+
+    public function canApproveCancel(): bool
+    {
+        return $this->isCancelRequested();
+    }
+
+    public function canRejectCancellation(): bool
+    {
+        return $this->isCancelRequested();
+    }
+
+    public function canMarkAsReceived(): bool
+    {
+        return $this->isDelivered() && $this->received_at === null;
+    }
+ 
+    #[Scope]
+    public function forUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
     }
 
     #[Scope]
-    protected function filterByStatus(Builder $query, ?OrderStatus $status)
+    public function withStatus(Builder $query, string $status): Builder
     {
-        return $query->when(
-            $status,
-            fn (Builder $q) => $q->where('status', $status)
-        );
+        return $query->where('status', $status);
     }
-    
 }

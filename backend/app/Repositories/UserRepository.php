@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 use App\Models\User;
+use App\Repositories\Contracts\IUserRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use InvalidArgumentException;
@@ -12,7 +13,7 @@ use InvalidArgumentException;
 /**
  * @extends BaseRepository<User>
  */
-final class UserRepository extends BaseRepository
+final class UserRepository extends BaseRepository implements IUserRepository
 {
     public function __construct(User $user)
     {

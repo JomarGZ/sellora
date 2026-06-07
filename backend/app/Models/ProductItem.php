@@ -9,6 +9,7 @@ use Database\Factories\ProductItemFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,12 +27,19 @@ final class ProductItem extends Model
         'product_id',
         'sku',
         'price',
-        'qty_in_stock',
+        'qty',
+        'reserved_qty',
+        'status',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'qty'          => 'integer',
+        'reserved_qty' => 'integer',
     ];
+
+    const STATUS_ACTIVE = 'active';
+    const STATUS_INACTIVE = 'inactive';
 
     /**
      * Get the product that owns the item.
@@ -41,6 +49,11 @@ final class ProductItem extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function cartItems()
+    {
+        return $this->hasMany(CartItem::class);
     }
 
     /**
@@ -87,5 +100,20 @@ final class ProductItem extends Model
     public function primaryImage()
     {
         return $this->hasOne(ProductItemImage::class)->where('is_primary', true);
+    }
+
+    public function availableQty(): int
+    {
+        return max(0, $this->qty - $this->reserved_qty);
+    }
+
+    public function inStock()
+    {
+        return $this->availableQty() > 0;
+    }
+
+    protected function Available(Builder $query)
+    {
+        $query->where('status', 'active');
     }
 }

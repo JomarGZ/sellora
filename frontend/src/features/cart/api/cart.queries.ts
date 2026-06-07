@@ -4,23 +4,20 @@ import {
   buyNowItem,
   deleteCartItem,
   getCart,
-  getSummary,
   updateCartItemQuantity,
 } from "./cart.api";
 
 import { useAppToast } from "@/shared/components/feedback/AppToast";
-import type { CartItem, CartItemResponse } from "../types";
-import { useCartSelection } from "../store/cartSelection.store";
+import type { CartItemResponse } from "../types";
 
 function invalidateCartRelated(queryClient: any) {
   queryClient.invalidateQueries({ queryKey: ["cart"] });
-  queryClient.invalidateQueries({ queryKey: ["cart-summary"] });
 }
 
-export function useCartQuery(page: number) {
+export function useCart() {
   return useQuery({
-    queryKey: ["cart", page],
-    queryFn: () => getCart({ page: page }),
+    queryKey: ["cart"],
+    queryFn: () => getCart(),
   });
 }
 
@@ -74,41 +71,9 @@ export function useBuyNowMutation() {
 
 export function useUpdateCartItemQuantityMutation() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: updateCartItemQuantity,
-    onMutate: async ({ id, quantity }) => {
-      await queryClient.cancelQueries({ queryKey: ["cart"] });
-
-      const previousQueries = queryClient.getQueriesData({
-        queryKey: ["cart"],
-      });
-
-      queryClient.setQueriesData(
-        { queryKey: ["cart"] },
-        (old: CartItemResponse | undefined) => {
-          if (!old?.data) return old;
-
-          return {
-            ...old,
-            data: old.data.map((item: CartItem) =>
-              item.id === id ? { ...item, quantity } : item,
-            ),
-          };
-        },
-      );
-
-      return { previousQueries };
-    },
-    onError: (_error, _variables, context) => {
-      // rollback
-      context?.previousQueries?.forEach(([key, data]) => {
-        queryClient.setQueryData(key, data);
-      });
-    },
-    onSettled: () => {
-      invalidateCartRelated(queryClient);
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cart"] }),
   });
 }
 
@@ -164,16 +129,5 @@ export function useDeleteCartItemMutation() {
     onSettled() {
       invalidateCartRelated(queryClient);
     },
-  });
-}
-
-export function useCartSummaryQuery() {
-  const selectedIds = useCartSelection((s) => s.selectedIds);
-  const ids = Array.from(selectedIds);
-
-  return useQuery({
-    queryKey: ["cart-summary", ids.sort()],
-    queryFn: () => getSummary(ids),
-    enabled: ids.length > 0,
   });
 }

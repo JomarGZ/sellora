@@ -7,13 +7,8 @@ export async function checkout(payload: CheckoutPayload) {
   return data;
 }
 
-export async function snapshotOrderPreview(ids: number[]) {
-  const { data } = await client.post("/v1/checkout/snapshot", { ids });
-  return data;
-}
-
-export async function getCurrentCheckout(): Promise<CheckoutOrderPreviewResponse> {
-  const { data } = await client.get("/v1/checkout/current");
+export async function preview() {
+  const { data } = await client.get("/v1/checkout/preview");
   return data;
 }
 
@@ -22,7 +17,9 @@ export async function getDefaultShipping() {
   return data;
 }
 
-export async function placeOrder(orderId: number) {
-  const { data } = await client.post("/v1/checkout", { order_id: orderId });
+export async function placeOrder(idempotencyKey: string) {
+  const { data } = await client.post("/v1/checkout/initiate", {
+    idempotency_key: idempotencyKey,
+  });
   return data;
 }

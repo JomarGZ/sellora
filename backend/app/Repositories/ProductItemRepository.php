@@ -6,7 +6,7 @@ namespace App\Repositories;
 
 use App\Models\ProductItem;
 use App\Repositories\Contracts\IProductItemRepository;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 final class ProductItemRepository extends BaseRepository implements IProductItemRepository
 {
@@ -15,25 +15,55 @@ final class ProductItemRepository extends BaseRepository implements IProductItem
         parent::__construct($productItem);
     }
 
-    public function findByIds(array $ids): Collection
+    public function findAvailableById(int $productId): ?ProductItem
     {
         return $this->model->query()
-            ->select([
-                'id',
-                'product_id',
-                'sku',
-                'price',
-                'qty_in_stock',
-            ])
-            ->with(['product:id,name'])
-            ->whereIn('id', $ids)
-            ->get()
-            ->keyBy('id');
+            ->where('id', $productId)
+            ->where('status', ProductItem::STATUS_ACTIVE)
+            ->whereHas('product', fn ($query) => $query->isActive())
+            ->first();
     }
 
-    public function decrementStock(int $productItemId, int $qty): void
+    public function findAndLockById(int $productItemId): ?ProductItem
     {
-        ProductItem::where('id', $productItemId)
-            ->decrement('qty_in_stock', $qty);
+        // lockForUpdate() emits SELECT ... FOR UPDATE
+        // This blocks any other transaction trying to lock the same row.
+        return $this->model->query()
+            ->where('id', $productItemId)
+            ->where('status', ProductItem::STATUS_ACTIVE)
+            ->whereHas('product', fn ($query) => $query->isActive())
+            ->lockForUpdate()
+            ->first();
+    }
+ 
+    public function incrementReservedQty(int $productItemId, int $quantity): void
+    {
+        // Atomic increment — never reads then writes, so safe under concurrency.
+        $this->model->where('id', $productItemId)->increment('reserved_qty', $quantity);
+    }
+ 
+    public function decrementReservedQty(int $productItemId, int $quantity): void
+    {
+        // Guards against negative reserved_qty with the WHERE clause.
+        $this->model->where('id', $productItemId)
+            ->where('reserved_qty', '>=', $quantity)
+            ->decrement('reserved_qty', $quantity);
+    }
+ 
+    public function deductStockAndClearReservation(int $productItemId, int $quantity): void
+    {
+        // One atomic UPDATE that does both operations together.
+        // qty         -= quantity  (real stock leaves the warehouse)
+        // reserved_qty -= quantity  (the soft hold is consumed)
+        // The WHERE qty >= quantity guard is a safety net — this should
+        // never fire because we re-validated with a lock above, but
+        // defensive SQL is always worth the extra characters.
+        DB::table('product_items')
+            ->where('id', $productItemId)
+            ->where('qty', '>=', $quantity)
+            ->update([
+                'qty'          => DB::raw("qty - {$quantity}"),
+                'reserved_qty' => DB::raw("GREATEST(reserved_qty - {$quantity}, 0)"),
+            ]);
     }
 }

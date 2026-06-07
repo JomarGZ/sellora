@@ -22,8 +22,8 @@ final class LowStockProducts extends TableWidget
               ->query(
                     ProductItem::query()
                         ->with(['product', 'attributeValues'])
-                        ->where('qty_in_stock', '<', 10)
-                        ->orderBy('qty_in_stock', 'asc')
+                        ->where('qty', '<', 10)
+                        ->orderBy('qty', 'asc')
                 )
             ->columns([
                 TextColumn::make('product.name')
@@ -41,7 +41,7 @@ final class LowStockProducts extends TableWidget
                 TextColumn::make('price')
                     ->money()
                     ->sortable(),
-                TextColumn::make('qty_in_stock')
+                TextColumn::make('qty')
                     ->label('Stock')
                     ->badge()
                     ->color(fn ($state) => match (true) {

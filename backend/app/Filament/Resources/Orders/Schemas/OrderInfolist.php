@@ -17,13 +17,13 @@ final class OrderInfolist
                     ->label('User'),
                 TextEntry::make('shippingMethod.name')
                     ->label('Shipping method'),
-                TextEntry::make('order_total')
+                TextEntry::make('total')
                     ->numeric(),
                 TextEntry::make('status')
                     ->badge(),
                 TextEntry::make('checkout_type')
                     ->badge(),
-                TextEntry::make('shopping_cart_id')
+                TextEntry::make('cart_id')
                     ->numeric()
                     ->placeholder('-'),
                 TextEntry::make('subtotal')

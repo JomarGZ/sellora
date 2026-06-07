@@ -43,4 +43,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'stripe' => [
+        'secret'          => env('STRIPE_SECRET_KEY'),
+        'webhook_secret'  => env('STRIPE_WEBHOOK_SECRET'),
+        'api_version'     => '2023-10-16',
+    ],
+
 ];

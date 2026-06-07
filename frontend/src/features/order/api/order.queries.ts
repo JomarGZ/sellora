@@ -1,12 +1,11 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-  type UseMutationOptions,
-} from "@tanstack/react-query";
-import { createReviewItem, getOrders } from "./order.api";
+  createOrderItemReview,
+  getOrders,
+  markOrderAsReceived,
+  requestOrderCancellation,
+} from "./order.api";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
-import type { CreateReviewPayload } from "../types";
 
 export function useOrdersList(page?: number) {
   return useQuery({
@@ -15,12 +14,12 @@ export function useOrdersList(page?: number) {
   });
 }
 
-export function useReviewOrderItem() {
+export function useCreateOrderItemReview() {
   const { showToast } = useAppToast();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: createReviewItem,
+    mutationFn: createOrderItemReview,
 
     onSuccess: async (response) => {
       // 1. always run toast
@@ -36,6 +35,53 @@ export function useReviewOrderItem() {
       });
 
       // 3. run component-level onSuccess
+    },
+  });
+}
+
+export function useRequestOrderCancellation() {
+  const { showToast } = useAppToast();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: requestOrderCancellation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+
+      showToast({
+        severity: "success",
+        summary: "Request submitted",
+        detail: "Cancel request submitted successfully.",
+      });
+    },
+    onError: () => {
+      showToast({
+        severity: "error",
+        summary: "Request error",
+        detail: "Cancel request submit failed.",
+      });
+    },
+  });
+}
+
+export function useMarkOrderAsReceived() {
+  const { showToast } = useAppToast();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: markOrderAsReceived,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      showToast({
+        severity: "success",
+        summary: "Mark Received",
+        detail: "Mark order received successfully.",
+      });
+    },
+    onError: () => {
+      showToast({
+        severity: "error",
+        summary: "Received error",
+        detail: "Mark order received failed.",
+      });
     },
   });
 }

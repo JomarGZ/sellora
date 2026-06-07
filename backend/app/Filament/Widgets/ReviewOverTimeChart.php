@@ -15,7 +15,7 @@ final class ReviewOverTimeChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = Order::selectRaw('DATE(created_at) as date, SUM(order_total) as total')
+        $data = Order::selectRaw('DATE(created_at) as date, SUM(total) as total')
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')

@@ -10,11 +10,11 @@ use App\Http\Controllers\Api\V1\ProductFilterController;
 use App\Http\Controllers\Api\V1\ProductItemReviewController;
 use App\Http\Controllers\Api\V1\ProductReviewController;
 use App\Http\Controllers\Api\V1\ShippingOptionController;
-use App\Http\Controllers\Api\V1\ShoppingCartController;
+use App\Http\Controllers\Api\V1\CartController;
 use App\Http\Controllers\Api\V1\SocialAuthController;
-use App\Http\Controllers\Api\V1\StripeWebhookController;
 use App\Http\Controllers\Api\V1\UserAddressController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,6 +36,8 @@ Route::name('api.v1.')->group(function () {
         Route::get('auth/google/callback', [SocialAuthController::class, 'callback'])->name('auth.google.callback');
         Route::get('auth/google/redirect', [SocialAuthController::class, 'redirect'])->name('auth.google.redirect');
     });
+
+    Route::post('webhooks/stripe', [WebhookController::class, 'handle'])->name('webhooks.stripe')->withoutMiddleware(['auth:sanctum', 'throttle']);
 
     /*
     |--------------------------------------------------------------------------
@@ -63,11 +65,13 @@ Route::name('api.v1.')->group(function () {
     | Protected (Authenticated Users)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['auth:sanctum', 'throttle:authenticated', 'customer'])->group(function () {
+    Route::middleware(['auth:sanctum', 'throttle:authenticated'])->group(function () {
         Route::put('me/change-password', [AuthController::class, 'changePassword'])->name('me.password.change');
         Route::get('me', [UserController::class, 'me'])->name('me.show');
         Route::post('me/avatar', [UserController::class, 'updateAvatar'])->name('me.avatar.update');
         Route::put('me/profile', [UserController::class, 'update'])->name('me.update');
+    
+        
         /*
         |--------------------------------------------------------------------------
         | Auth Actions
@@ -110,14 +114,27 @@ Route::name('api.v1.')->group(function () {
         | Shopping Cart
         |--------------------------------------------------------------------------
         */
-        Route::prefix('shopping-cart')->name('cart.')->group(function () {
-            Route::get('/', [ShoppingCartController::class, 'index'])->name('index');
-            Route::post('/', [ShoppingCartController::class, 'store'])->name('store');
-            Route::post('/summary', [ShoppingCartController::class, 'summary'])->name('summary');
-            Route::post('/buy-now', [ShoppingCartController::class, 'buyNow'])->name('buy-now');
-            Route::delete('/clear', [ShoppingCartController::class, 'clear'])->name('clear');
-            Route::put('/{shoppingCartItem}', [ShoppingCartController::class, 'update'])->name('update');
-            Route::delete('/{shoppingCartItem}', [ShoppingCartController::class, 'destroy'])->name('destroy');
+        Route::prefix('cart')->name('cart.')->group(function () {
+            // GET /api/cart
+            // Returns the user's active cart. Creates a new empty one if
+            // none exists. Always 200 — "no cart" is an empty cart.
+            Route::get('/', [CartController::class, 'show']);
+        
+            // POST /api/cart/items
+            // Add a product. Merges quantity if product already in cart.
+            Route::post('/items', [CartController::class, 'addItem']);
+        
+            // PATCH /api/cart/{cart}/items/{item}
+            // Update quantity. Send quantity=0 to remove the item.
+            Route::patch('/{cart}/items/{item}', [CartController::class, 'updateItem']);
+        
+            // DELETE /api/cart/{cart}/items/{item}
+            // Remove a specific item.
+            Route::delete('/{cart}/items/{item}', [CartController::class, 'removeItem']);
+        
+            // DELETE /api/cart/{cart}
+            // Clear all items. Cart record is kept with same ID.
+            Route::delete('/{cart}', [CartController::class, 'clear']);
         });
 
 
@@ -133,6 +150,9 @@ Route::name('api.v1.')->group(function () {
 
         Route::prefix('orders')->name('order.')->group(function () {
             Route::get('/', [OrderController::class, 'index'])->name('index');
+            Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+            Route::patch('/{order}/request-cancel', [OrderController::class, 'cancel'])->name('cancel');
+            Route::patch('/{order}/mark-received', [OrderController::class, 'markAsReceived'])->name('markReceived');
         });
 
 
@@ -142,9 +162,8 @@ Route::name('api.v1.')->group(function () {
         |--------------------------------------------------------------------------
         */
         Route::prefix('checkout')->name('checkout.')->group(function () {
-            Route::post('/', [CheckoutController::class, 'checkout'])->name('store');
-            Route::post('/snapshot', [CheckoutController::class, 'snapshot'])->name('snapshot');
-            Route::get('/current', [CheckoutController::class, 'current'])->name('current');
+            Route::get('/preview',  [CheckoutController::class, 'preview'])->name('preview');
+            Route::post('/initiate', [CheckoutController::class, 'initiate'])->name('initiate');
         });
 
         /*
@@ -156,19 +175,6 @@ Route::name('api.v1.')->group(function () {
             Route::post('/', [ProductItemReviewController::class, 'store'])->name('store');
         });
     });
-
-    /*
-    |--------------------------------------------------------------------------
-    | External / Webhooks / Public Callbacks
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('checkout')->name('checkout.')->group(function () {
-        Route::get('/verify', [CheckoutController::class, 'verifySession'])->name('verify');
-        Route::get('/cancel', [CheckoutController::class, 'cancel'])->name('cancel');
-    });
-
-    Route::post('webhooks/stripe', [StripeWebhookController::class, 'handle'])
-        ->name('webhooks.stripe');
 
     /*
     |--------------------------------------------------------------------------

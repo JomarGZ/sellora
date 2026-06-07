@@ -53,7 +53,7 @@ describe('Product Catalog', function (): void {
                 ->create([
                     'sku' => 'JOMAR-PRODUCT-M-GREEN-712978',
                     'price' => 23.00,
-                    'qty_in_stock' => 1221,
+                    'qty' => 1221,
                 ]);
 
             $productItem->attributeValues()->attach([
@@ -136,7 +136,7 @@ describe('Product Catalog', function (): void {
                             'id',
                             'sku',
                             'price',
-                            'qty_in_stock',
+                            'qty',
                             'in_stock',
                             'attribute_value_ids',
                             'images',

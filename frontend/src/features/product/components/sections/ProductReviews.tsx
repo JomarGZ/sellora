@@ -21,7 +21,6 @@ export function ProductReviews({
   productReviews,
   commentListPage,
 }: ProductReviewsProps) {
-  console.log(productReviews);
   return (
     <div className="space-y-10">
       {/* Summary */}

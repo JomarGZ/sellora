@@ -50,7 +50,6 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
       country_id: "",
       city_id: "",
       street_address: "",
-      is_default: false,
     },
   });
 

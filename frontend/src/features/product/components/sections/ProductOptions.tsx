@@ -72,7 +72,7 @@ export function ProductOptions({
                             av.value === selectedVal,
                         );
                       },
-                    ) && item.qty_in_stock > 0
+                    ) && item.qty > 0
                   );
                 });
 

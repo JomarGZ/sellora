@@ -364,6 +364,7 @@ export default function ProductPage() {
   const { slug } = useParams({ from: "/product/$slug" });
   const { user } = useAuth();
   const { data: product, isLoading } = useProductShow(slug);
+
   const { page = 1 } = productRoute.useSearch();
   const navigate = productRoute.useNavigate();
   const { data: productReviews } = useProductReviews(slug, page);

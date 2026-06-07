@@ -7,7 +7,6 @@ export const addressSchema = z.object({
   country_id: z.coerce.number().min(1, "Country is required"),
   city_id: z.coerce.number().min(1, "City is required"),
   street_address: z.string().min(1, "Street address is required"),
-  is_default: z.boolean().optional(),
 });
 
 export type AddressFormInput = z.input<typeof addressSchema>; // 👈 what form uses

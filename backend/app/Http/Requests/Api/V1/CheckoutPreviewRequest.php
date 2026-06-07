@@ -23,9 +23,6 @@ final class CheckoutPreviewRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'ids' => ['required', 'array'],
-            'ids.*' => ['integer', 'exists:shopping_cart_items,id'],
-        ];
+        return [];
     }
 }

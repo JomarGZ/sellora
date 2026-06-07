@@ -11,6 +11,7 @@ use App\Http\Resources\V1\UserAddressResource;
 use App\Models\UserAddress;
 use App\Repositories\UserAddressRepository;
 use App\Services\UserAddressService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 final class UserAddressController extends ApiController
@@ -20,18 +21,18 @@ final class UserAddressController extends ApiController
         private readonly UserAddressRepository $repository
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
         return $this->success(
-            data: UserAddressResource::collection($this->repository->list(auth()->id())),
+            data: UserAddressResource::collection($this->repository->list($request->user()->id)),
             message: 'User addresses retrieved successfully'
         );
 
     }
 
-    public function default()
+    public function default(Request $request)
     {
-        $address = $this->repository->getDefault(auth()->id());
+        $address = $request->user()->defaultAddress;
 
         return $this->success(
             data: $address
@@ -53,7 +54,7 @@ final class UserAddressController extends ApiController
     public function store(StoreUserAddressRequest $request)
     {
         $address = $this->service->create(
-            auth()->id(),
+            $request->user()->id,
             $request->validated()
         );
 
@@ -68,7 +69,7 @@ final class UserAddressController extends ApiController
     {
         Gate::authorize('update', $userAddress);
         $updatedAddress = $this->service->update(
-            userId: auth()->id(),
+            userId: $request->user()->id,
             addressId: $userAddress->id,
             data: $request->validated()
         );
@@ -89,9 +90,9 @@ final class UserAddressController extends ApiController
 
     public function setDefault(UserAddress $userAddress)
     {
-        Gate::authorize('update', $userAddress);
+        Gate::authorize('setDefault', $userAddress);
         $address = $this->service->setDefault(
-            userId: auth()->id(),
+            userId: request()->user()->id,
             addressId: $userAddress->id
         );
 

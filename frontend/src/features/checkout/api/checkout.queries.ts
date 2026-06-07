@@ -1,16 +1,17 @@
 import {
   useMutation,
   useQuery,
+  useQueryClient,
   type UseMutationOptions,
 } from "@tanstack/react-query";
 import {
   checkout,
-  getCurrentCheckout,
   getDefaultShipping,
   placeOrder,
-  snapshotOrderPreview,
+  preview,
 } from "./checkout.api";
 import { useAppToast } from "@/shared/components/feedback/AppToast";
+import { useNavigate } from "@tanstack/react-router";
 
 export function useCheckout() {
   const { showToast } = useAppToast();
@@ -27,28 +28,25 @@ export function useCheckout() {
   });
 }
 
-export function useCheckoutSnapshot(
-  options?: UseMutationOptions<any, any, number[]>,
-) {
+export function useCheckoutPreview(options?: UseMutationOptions<any, any>) {
   const { showToast } = useAppToast();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
-    mutationFn: snapshotOrderPreview,
-    onError(error: any) {
+    mutationFn: preview,
+    onSuccess: (data) => {
+      queryClient.setQueryData(["checkout-preview"], data);
+      navigate({ to: "/checkout" });
+    },
+    onError: () => {
       showToast({
         severity: "error",
         summary: "Failed",
-        detail: error?.message ?? "Unable to proceed to add to cart",
+        detail: "Unable to proceed to checkout",
       });
     },
     ...options,
-  });
-}
-
-export function useCurrentCheckoutPreview() {
-  return useQuery({
-    queryKey: ["checkout-preview-data"],
-    queryFn: getCurrentCheckout,
   });
 }
 
@@ -59,7 +57,7 @@ export function useShippingOption() {
   });
 }
 
-export function usePlaceOrder(options?: UseMutationOptions<any, any, number>) {
+export function usePlaceOrder(options?: UseMutationOptions<any, any, string>) {
   const { showToast } = useAppToast();
 
   return useMutation({
