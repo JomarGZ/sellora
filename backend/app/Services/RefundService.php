@@ -23,25 +23,29 @@ class RefundService
      * gets all their money back. No partial refunds here —
      * we only refund when the entire order fails stock validation.
      */
-    public function refundPayment(Checkout $checkout, string $paymentIntentId, RefundReasonType $reasonType): void
+    public function refundPayment(Checkout $checkout, string $paymentIntentId, ?RefundReasonType $reasonType = null): void
     {
-        try {
+        $stripeData = [
+            'payment_intent' => $paymentIntentId,
+            'metadata'       => [
+                'checkout_id'    => $checkout->id,
+                'internal_reason' => $reasonType?->value,
+            ],
+        ];
+
+        if ($reasonType) {
             $stripeReason = $this->mapToStripeReason($reasonType);
-            $this->stripe->refunds->create([
-                'payment_intent' => $paymentIntentId,
-                'reason'         => $stripeReason, // closest Stripe enum for "we can't fulfil"
-                'metadata'       => [
-                    'checkout_id'    => $checkout->id,
-                    'internal_reason' => $reasonType->value,
-                ],
-            ]);
+            $stripeData['reason'] = $reasonType;
+        }
+        try {
+            $this->stripe->refunds->create($stripeData);
  
             $this->checkoutRepository->markFailed($checkout, $reasonType->value);
  
             Log::info('Refund issued successfully', [
                 'checkout_id'       => $checkout->id,
                 'payment_intent_id' => $paymentIntentId,
-                'reason'            => $stripeReason,
+                'reason'            => isset($stripeReason) ? $stripeReason : null,
             ]);
         } catch (\Stripe\Exception\ApiErrorException $e) {
             // Log and re-throw. The job will retry, which means Stripe

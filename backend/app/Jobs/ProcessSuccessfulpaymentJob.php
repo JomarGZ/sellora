@@ -174,10 +174,10 @@ class ProcessSuccessfulpaymentJob implements ShouldQueue
                     // availableQty() = qty - reserved_qty.
                     // At this point the reservation should be in place
                     // from checkout initiation, so available = qty - reserved.
-                    if ($productItem->availableQty() < $snapshotItem->quantity) {
+                    if ($productItem->reserved_qty < $snapshotItem->quantity) {
                         throw new InsufficientStockException(
                             $productItem->id,
-                            $productItem->name,
+                            $productItem->product->name,
                             $snapshotItem->quantity,
                             $productItem->availableQty()
                         );
@@ -244,7 +244,6 @@ class ProcessSuccessfulpaymentJob implements ShouldQueue
             $refundService->refundPayment(
                 $checkout,
                 $this->paymentIntentId,
-                RefundReasonType::DUPLICATE
             );
  
             // Release the soft reservation since we're not completing this order.

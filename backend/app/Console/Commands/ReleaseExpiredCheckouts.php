@@ -19,7 +19,6 @@ class ReleaseExpiredCheckouts extends Command
         IProductItemRepository  $productItemRepository,
     ): void {
         $expiredCheckouts = $checkoutRepository->findExpiredPendingCheckouts();
- 
         $this->info("Found {$expiredCheckouts->count()} expired checkouts to process.");
  
         foreach ($expiredCheckouts as $checkout) {
@@ -33,7 +32,6 @@ class ReleaseExpiredCheckouts extends Command
                         $item->quantity
                     );
                 }
- 
                 $checkout->update(['status' => Checkout::STATUS_EXPIRED]);
  
                 Log::info('Released expired checkout reservation', [

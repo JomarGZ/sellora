@@ -86,6 +86,12 @@ class WebhookController extends ApiController
             stripeSessionId: $session->id,
         )->onQueue('payments'); // dedicated queue for payment jobs
  
+        ProcessSuccessfulpaymentJob::dispatch(
+            checkoutId:      $checkoutId,
+            paymentIntentId: $paymentIntentId,
+            stripeSessionId: $session->id,
+        )->onQueue('payments'); // dedicated queue for payment jobs
+ 
         Log::info('Payment job dispatched', [
             'checkout_id'       => $checkoutId,
             'payment_intent_id' => $paymentIntentId,

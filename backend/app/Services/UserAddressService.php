@@ -60,7 +60,13 @@ final class UserAddressService
 
     public function update(int $userId, int $addressId, array $data)
     {
-        return $this->userAddressRepository->update($addressId, $data);
+        return DB::transaction(function () use ($userId, $addressId, $data) {
+            if (array_key_exists('is_default', $data) && $data['is_default'] === true) {
+                $this->userAddressRepository->unsetOtherDefaults($userId, $addressId);
+            }
+
+            return $this->userAddressRepository->update($addressId, $data);
+        });
     }
 
     public function deleteAddress(int $userId, int $addressId)

@@ -60,7 +60,7 @@ class CheckoutRepository extends BaseRepository implements ICheckoutRepository
     public function findExpiredPendingCheckouts(): Collection
     {
         return $this->model->query()
-            ->where('status', Checkout::STATUS_PENDING)
+            ->where('status', Checkout::STATUS_FAILED)
             ->where('expires_at', '<', now())
             ->with('cart')
             ->get();
