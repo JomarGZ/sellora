@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Heart, ShoppingCart, Minus, Plus, ShoppingBag } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
@@ -29,6 +29,7 @@ export function PurchaseActions({
   const buyNow = useBuyNowMutation();
   const navigate = useNavigate();
   const isOutOfStock = selectedItem ? selectedItem.qty === 0 : false;
+
   const isSelectionIncomplete = hasAttributes && !selectedItem;
   const selectItem = useCartSelection((s) => s.selectItem);
 
@@ -91,6 +92,11 @@ export function PurchaseActions({
     // });
   };
 
+  useEffect(() => {
+    if (!selectedItem) return;
+    setQuantity((q) => Math.min(q, selectedItem.qty || 1));
+  }, [selectedItem]);
+
   return (
     <div className="flex flex-col gap-4 mt-4 pt-6 border-t border-border/60">
       <div className="flex flex-col sm:flex-row gap-4">
@@ -98,8 +104,8 @@ export function PurchaseActions({
         <div className="flex items-center h-14 bg-muted/50 rounded-xl border border-border/80 px-2 shrink-0">
           <button
             onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            disabled={quantity <= 1 || isOutOfStock}
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background disabled:opacity-40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            disabled={quantity <= 1 || isOutOfStock || isSelectionIncomplete}
+            className="w-10 h-10 rounded-lg flex items-center cursor-pointer justify-center text-foreground/70 hover:text-foreground hover:bg-background disabled:opacity-40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -114,9 +120,10 @@ export function PurchaseActions({
             }
             disabled={
               isOutOfStock ||
-              (selectedItem !== null && quantity >= selectedItem.qty)
+              (selectedItem !== null && quantity >= selectedItem.qty) ||
+              isSelectionIncomplete
             }
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background disabled:opacity-40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-10 h-10 rounded-lg flex cursor-pointer items-center justify-center text-foreground/70 hover:text-foreground hover:bg-background disabled:opacity-40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -138,7 +145,7 @@ export function PurchaseActions({
               ? "Out of Stock"
               : "Add to Cart"}
         </Button>
-        <Button
+        {/* <Button
           size="lg"
           className="flex-1 h-14 text-base cursor-pointer font-semibold rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
           disabled={isOutOfStock || isSelectionIncomplete || buyNow.isPending}
@@ -150,7 +157,7 @@ export function PurchaseActions({
             : isOutOfStock
               ? "Out of Stock"
               : "Buy Now"}
-        </Button>
+        </Button> */}
 
         {/* Wishlist */}
         <Button
