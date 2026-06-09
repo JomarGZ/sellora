@@ -16,6 +16,7 @@ import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 
 import {
   useCreateUserAddress,
+  useUpdateUserAddress,
   useUserAddress,
 } from "../../api/address.queries";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -38,7 +39,11 @@ const AddressFormModal = ({
   onClose,
   addressId,
 }: AddressFormModalProps) => {
-  const { mutate: createAddress, isPending } = useCreateUserAddress();
+  const { mutate: createAddress, isPending: createAddressLoading } =
+    useCreateUserAddress();
+  const { mutate: updateAddress, isPending: updateAddressLoading } =
+    useUpdateUserAddress();
+  const updateUserAddress = useUpdateUserAddress();
   const isEditMode = !!addressId;
   const { data: addressData } = useUserAddress(
     addressId!, // non-null since enabled guards it
@@ -85,14 +90,36 @@ const AddressFormModal = ({
   }, [isOpen, form]);
 
   const handleSubmit = (data: AddressFormInput) => {
+    console.log(isEditMode);
     const parsed = addressSchema.parse(data);
-    createAddress(parsed, {
-      onSuccess: () => {
-        form.reset();
-        onClose();
-      },
-    });
+    if (isEditMode) {
+      updateAddress(
+        {
+          id: addressId!, // 👈 required for your mutation type
+          ...parsed,
+        },
+        {
+          onSuccess: () => {
+            form.reset();
+            onClose();
+          },
+          onError: () => {
+            // optional fallback UI handling
+            console.error("Failed to update address");
+          },
+        },
+      );
+    } else {
+      createAddress(parsed, {
+        onSuccess: () => {
+          form.reset();
+          onClose();
+        },
+      });
+    }
   };
+
+  const isFormLoading = createAddressLoading || updateAddressLoading;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -120,7 +147,7 @@ const AddressFormModal = ({
                       {...field}
                       className="h-12 pl-10"
                       placeholder="John"
-                      disabled={isPending}
+                      disabled={isFormLoading}
                     />
                   </div>
                   {fieldState.invalid && (
@@ -143,7 +170,7 @@ const AddressFormModal = ({
                       {...field}
                       className="h-12 pl-10"
                       placeholder="Doe"
-                      disabled={isPending}
+                      disabled={isFormLoading}
                     />
                   </div>
                   {fieldState.invalid && (
@@ -166,7 +193,7 @@ const AddressFormModal = ({
                       {...field}
                       className="h-12 pl-10"
                       placeholder="09xxxxxxxxx"
-                      disabled={isPending}
+                      disabled={isFormLoading}
                     />
                   </div>
                   {fieldState.invalid && (
@@ -179,7 +206,7 @@ const AddressFormModal = ({
             <CountryCitySelect
               control={form.control}
               setValue={form.setValue}
-              disabled={isPending}
+              disabled={isFormLoading}
             />
 
             {/* Street Address (FULL WIDTH) */}
@@ -196,7 +223,7 @@ const AddressFormModal = ({
                         {...field}
                         className="h-12 pl-10"
                         placeholder="Street, building, etc."
-                        disabled={isPending}
+                        disabled={isFormLoading}
                       />
                     </div>
                     {fieldState.invalid && (
@@ -212,9 +239,9 @@ const AddressFormModal = ({
             <Button
               type="submit"
               className="w-full cursor-pointer disabled:opacity-70"
-              disabled={isPending}
+              disabled={isFormLoading}
             >
-              {isPending ? "Saving..." : "Save Address"}
+              {isFormLoading ? "Saving..." : "Save Address"}
             </Button>
           </DialogFooter>
         </form>

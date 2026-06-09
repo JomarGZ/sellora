@@ -74,9 +74,6 @@ export function CountryCitySelect<T extends FieldValues>({
         name={"country_id" as Path<T>}
         control={control}
         render={({ field, fieldState }) => {
-          useEffect(() => {
-            console.log("country field value:", field.value);
-          }, [field.value]);
           return (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel required>Country</FieldLabel>
@@ -140,9 +137,6 @@ export function CountryCitySelect<T extends FieldValues>({
         name={"city_id" as Path<T>}
         control={control}
         render={({ field, fieldState }) => {
-          useEffect(() => {
-            console.log("city field value:", field.value);
-          }, [field.value]);
           return (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel required>City</FieldLabel>

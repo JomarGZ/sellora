@@ -69,7 +69,6 @@ final class UserAddressController extends ApiController
     {
         Gate::authorize('update', $userAddress);
         $updatedAddress = $this->service->update(
-            userId: $request->user()->id,
             addressId: $userAddress->id,
             data: $request->validated()
         );
