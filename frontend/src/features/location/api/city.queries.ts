@@ -1,14 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { getCities } from "./city.api";
 
-export function useCities(countryId?: number, search?: string) {
+export function useCities(
+  countryId?: number,
+  search?: string,
+  cityId?: number,
+) {
+  const trimmedSearch = search?.trim();
+  const isSearchMode = !!trimmedSearch && trimmedSearch.length >= 2;
+  const isPrefillMode = !!cityId;
+
   return useQuery({
-    queryKey: ["cities", countryId, search],
+    queryKey: ["cities", countryId, cityId, trimmedSearch],
     queryFn: () =>
       getCities({
         country_id: countryId!,
-        search,
+        search: isSearchMode ? trimmedSearch : undefined,
+        city_id: isPrefillMode ? cityId : undefined,
       }),
-    enabled: !!countryId && !!search?.trim() && search.trim().length >= 2,
+    enabled: !!countryId && (isSearchMode || isPrefillMode),
   });
 }
