@@ -1,4 +1,4 @@
-import { useForm, Controller, useWatch } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { MapPin, Phone, User, UserCircle } from "lucide-react";
 
 import {
@@ -14,22 +14,19 @@ import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 
-import { useCreateUserAddress } from "../../api/address.queries";
+import {
+  useCreateUserAddress,
+  useUpdateUserAddress,
+  useUserAddress,
+} from "../../api/address.queries";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   addressSchema,
   type AddressFormInput,
 } from "../../validation/address.schema";
-import { useCountries } from "@/features/location/api/country.queries";
-import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
-import { CityComboBox } from "../sections/CityComboBox";
+import { useEffect } from "react";
+
+import { CountryCitySelect } from "../form/CountryCitySelect";
 
 interface AddressFormModalProps {
   isOpen: boolean;
@@ -37,10 +34,23 @@ interface AddressFormModalProps {
   addressId?: number | null;
 }
 
-const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
-  const { mutate: createAddress, isPending } = useCreateUserAddress();
-  const [countrySearch, setCountrySearch] = useState("");
+const AddressFormModal = ({
+  isOpen,
+  onClose,
+  addressId,
+}: AddressFormModalProps) => {
+  const { mutate: createAddress, isPending: createAddressLoading } =
+    useCreateUserAddress();
+  const { mutate: updateAddress, isPending: updateAddressLoading } =
+    useUpdateUserAddress();
+  const updateUserAddress = useUpdateUserAddress();
+  const isEditMode = !!addressId;
+  const { data: addressData } = useUserAddress(
+    addressId!, // non-null since enabled guards it
+    { enabled: isEditMode && isOpen },
+  );
 
+  const address = addressData?.data;
   const form = useForm<AddressFormInput>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
@@ -53,25 +63,63 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
     },
   });
 
-  const selectedCountryId = useWatch({
-    control: form.control,
-    name: "country_id",
-  });
+  useEffect(() => {
+    if (address) {
+      form.reset({
+        first_name: address.first_name,
+        last_name: address.last_name,
+        phone: address.phone,
+        country_id: address.country_id,
+        city_id: address.city_id,
+        street_address: address.street_address,
+      });
+    }
+  }, [address, form]);
 
-  const { data: countriesData, isLoading: isLoadingCountries } =
-    useCountries(countrySearch);
-
-  const countries = countriesData?.data ?? [];
+  useEffect(() => {
+    if (!isOpen) {
+      form.reset({
+        first_name: "",
+        last_name: "",
+        phone: "",
+        country_id: "",
+        city_id: "",
+        street_address: "",
+      });
+    }
+  }, [isOpen, form]);
 
   const handleSubmit = (data: AddressFormInput) => {
+    console.log(isEditMode);
     const parsed = addressSchema.parse(data);
-    createAddress(parsed, {
-      onSuccess: () => {
-        form.reset();
-        onClose();
-      },
-    });
+    if (isEditMode) {
+      updateAddress(
+        {
+          id: addressId!, // 👈 required for your mutation type
+          ...parsed,
+        },
+        {
+          onSuccess: () => {
+            form.reset();
+            onClose();
+          },
+          onError: () => {
+            // optional fallback UI handling
+            console.error("Failed to update address");
+          },
+        },
+      );
+    } else {
+      createAddress(parsed, {
+        onSuccess: () => {
+          form.reset();
+          onClose();
+        },
+      });
+    }
   };
+
+  const isFormLoading = createAddressLoading || updateAddressLoading;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -99,7 +147,7 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
                       {...field}
                       className="h-12 pl-10"
                       placeholder="John"
-                      disabled={isPending}
+                      disabled={isFormLoading}
                     />
                   </div>
                   {fieldState.invalid && (
@@ -122,7 +170,7 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
                       {...field}
                       className="h-12 pl-10"
                       placeholder="Doe"
-                      disabled={isPending}
+                      disabled={isFormLoading}
                     />
                   </div>
                   {fieldState.invalid && (
@@ -145,7 +193,7 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
                       {...field}
                       className="h-12 pl-10"
                       placeholder="09xxxxxxxxx"
-                      disabled={isPending}
+                      disabled={isFormLoading}
                     />
                   </div>
                   {fieldState.invalid && (
@@ -155,84 +203,10 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
               )}
             />
 
-            {/* Country */}
-            <Controller
-              name="country_id"
+            <CountryCitySelect
               control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel required>Country</FieldLabel>
-                  <Select
-                    value={field.value as string}
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      form.setValue("city_id", "");
-                    }}
-                    disabled={isPending || isLoadingCountries}
-                  >
-                    <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select a country" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <div className="px-2 py-1.5">
-                        <Input
-                          placeholder="Search country..."
-                          value={countrySearch}
-                          onChange={(e) => setCountrySearch(e.target.value)}
-                          className="h-8"
-                          onKeyDown={(e) => e.stopPropagation()}
-                        />
-                      </div>
-
-                      {isLoadingCountries ? (
-                        <SelectItem value="loading" disabled>
-                          Loading...
-                        </SelectItem>
-                      ) : countries.length === 0 ? (
-                        <SelectItem value="empty" disabled>
-                          No countries found
-                        </SelectItem>
-                      ) : (
-                        countries.map(
-                          (country: { id: number; name: string }) => (
-                            <SelectItem
-                              key={country.id}
-                              value={String(country.id)}
-                            >
-                              {country.name}
-                            </SelectItem>
-                          ),
-                        )
-                      )}
-                    </SelectContent>
-                  </Select>
-
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            {/* City */}
-            <Controller
-              name="city_id"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel required>City</FieldLabel>
-                  <CityComboBox
-                    value={field.value as string}
-                    onChange={field.onChange}
-                    countryId={selectedCountryId as string}
-                    disabled={isPending}
-                    invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
+              setValue={form.setValue}
+              disabled={isFormLoading}
             />
 
             {/* Street Address (FULL WIDTH) */}
@@ -249,7 +223,7 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
                         {...field}
                         className="h-12 pl-10"
                         placeholder="Street, building, etc."
-                        disabled={isPending}
+                        disabled={isFormLoading}
                       />
                     </div>
                     {fieldState.invalid && (
@@ -265,9 +239,9 @@ const AddressFormModal = ({ isOpen, onClose }: AddressFormModalProps) => {
             <Button
               type="submit"
               className="w-full cursor-pointer disabled:opacity-70"
-              disabled={isPending}
+              disabled={isFormLoading}
             >
-              {isPending ? "Saving..." : "Save Address"}
+              {isFormLoading ? "Saving..." : "Save Address"}
             </Button>
           </DialogFooter>
         </form>

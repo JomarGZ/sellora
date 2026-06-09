@@ -5,6 +5,7 @@ import {
   createUserAddress,
   deleteUserAddress,
   getDefaultAddress,
+  getUserAddress,
   getUserAddresses,
   setDefaultUserAddress,
   updateUserAddress,
@@ -43,6 +44,14 @@ export function useUserAddresses(enabled: boolean) {
     queryKey: ["user", "addresses"],
     queryFn: getUserAddresses,
     enabled,
+  });
+}
+
+export function useUserAddress(id: number, options?: { enabled?: boolean }) {
+  return useQuery({
+    queryKey: ["user", "address", id], // ← scope by id, not just ["user", "addresses"]
+    queryFn: () => getUserAddress(id),
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -111,7 +120,6 @@ export function useUpdateUserAddress() {
                     last_name: updatedAddress.last_name,
                     phone: updatedAddress.phone,
                     street_address: updatedAddress.street_address,
-                    is_default: updatedAddress.is_default,
                   }
                 : addr,
             ),
