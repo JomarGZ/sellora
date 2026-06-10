@@ -43,11 +43,12 @@ const AddressFormModal = ({
     useCreateUserAddress();
   const { mutate: updateAddress, isPending: updateAddressLoading } =
     useUpdateUserAddress();
-  const updateUserAddress = useUpdateUserAddress();
   const isEditMode = !!addressId;
-  const { data: addressData } = useUserAddress(
-    addressId!, // non-null since enabled guards it
-    { enabled: isEditMode && isOpen },
+  const { data: addressData, isLoading: isAddressLoading } = useUserAddress(
+    addressId!,
+    {
+      enabled: isEditMode && isOpen,
+    },
   );
 
   const address = addressData?.data;
@@ -64,7 +65,9 @@ const AddressFormModal = ({
   });
 
   useEffect(() => {
-    if (address) {
+    if (!isOpen) return;
+
+    if (isEditMode && address) {
       form.reset({
         first_name: address.first_name,
         last_name: address.last_name,
@@ -73,11 +76,7 @@ const AddressFormModal = ({
         city_id: address.city_id,
         street_address: address.street_address,
       });
-    }
-  }, [address, form]);
-
-  useEffect(() => {
-    if (!isOpen) {
+    } else {
       form.reset({
         first_name: "",
         last_name: "",
@@ -87,15 +86,14 @@ const AddressFormModal = ({
         street_address: "",
       });
     }
-  }, [isOpen, form]);
+  }, [isOpen, isEditMode, address]);
 
   const handleSubmit = (data: AddressFormInput) => {
-    console.log(isEditMode);
     const parsed = addressSchema.parse(data);
     if (isEditMode) {
       updateAddress(
         {
-          id: addressId!, // 👈 required for your mutation type
+          id: addressId!,
           ...parsed,
         },
         {
@@ -130,99 +128,32 @@ const AddressFormModal = ({
             Share your experience with this product.
           </DialogDescription>
         </DialogHeader>
-
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
-          {/* GRID LAYOUT */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* First Name */}
-            <Controller
-              name="first_name"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel required>First name</FieldLabel>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      {...field}
-                      className="h-12 pl-10"
-                      placeholder="John"
-                      disabled={isFormLoading}
-                    />
-                  </div>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            {/* Last Name */}
-            <Controller
-              name="last_name"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel required>Last name</FieldLabel>
-                  <div className="relative">
-                    <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      {...field}
-                      className="h-12 pl-10"
-                      placeholder="Doe"
-                      disabled={isFormLoading}
-                    />
-                  </div>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            {/* Phone */}
-            <Controller
-              name="phone"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel required>Phone</FieldLabel>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      {...field}
-                      className="h-12 pl-10"
-                      placeholder="09xxxxxxxxx"
-                      disabled={isFormLoading}
-                    />
-                  </div>
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <CountryCitySelect
-              control={form.control}
-              setValue={form.setValue}
-              disabled={isFormLoading}
-            />
-
-            {/* Street Address (FULL WIDTH) */}
-            <div className="md:col-span-2">
+        {isEditMode && isAddressLoading ? (
+          <div className="space-y-3 py-6">
+            <div className="h-10 bg-muted animate-pulse rounded" />
+            <div className="h-10 bg-muted animate-pulse rounded" />
+            <div className="h-10 bg-muted animate-pulse rounded" />
+          </div>
+        ) : (
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-5"
+          >
+            {/* GRID LAYOUT */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* First Name */}
               <Controller
-                name="street_address"
+                name="first_name"
                 control={form.control}
                 render={({ field, fieldState }) => (
                   <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel required>Street address</FieldLabel>
+                    <FieldLabel required>First name</FieldLabel>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         {...field}
                         className="h-12 pl-10"
-                        placeholder="Street, building, etc."
+                        placeholder="John"
                         disabled={isFormLoading}
                       />
                     </div>
@@ -232,19 +163,98 @@ const AddressFormModal = ({
                   </Field>
                 )}
               />
-            </div>
-          </div>
 
-          <DialogFooter>
-            <Button
-              type="submit"
-              className="w-full cursor-pointer disabled:opacity-70"
-              disabled={isFormLoading}
-            >
-              {isFormLoading ? "Saving..." : "Save Address"}
-            </Button>
-          </DialogFooter>
-        </form>
+              {/* Last Name */}
+              <Controller
+                name="last_name"
+                control={form.control}
+                render={({ field, fieldState }) => (
+                  <Field data-invalid={fieldState.invalid}>
+                    <FieldLabel required>Last name</FieldLabel>
+                    <div className="relative">
+                      <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        {...field}
+                        className="h-12 pl-10"
+                        placeholder="Doe"
+                        disabled={isFormLoading}
+                      />
+                    </div>
+                    {fieldState.invalid && (
+                      <FieldError errors={[fieldState.error]} />
+                    )}
+                  </Field>
+                )}
+              />
+
+              {/* Phone */}
+              <Controller
+                name="phone"
+                control={form.control}
+                render={({ field, fieldState }) => {
+                  return (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel required>Phone</FieldLabel>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          {...field}
+                          className="h-12 pl-10"
+                          placeholder="09xxxxxxxxx"
+                          disabled={isFormLoading}
+                        />
+                      </div>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+
+              <CountryCitySelect
+                control={form.control}
+                setValue={form.setValue}
+                disabled={isFormLoading}
+              />
+
+              {/* Street Address (FULL WIDTH) */}
+              <div className="md:col-span-2">
+                <Controller
+                  name="street_address"
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel required>Street address</FieldLabel>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          {...field}
+                          className="h-12 pl-10"
+                          placeholder="Street, building, etc."
+                          disabled={isFormLoading}
+                        />
+                      </div>
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="submit"
+                className="w-full cursor-pointer disabled:opacity-70"
+                disabled={isFormLoading}
+              >
+                {isFormLoading ? "Saving..." : "Save Address"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
