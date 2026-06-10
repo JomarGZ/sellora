@@ -20,11 +20,23 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { useDebouncedCallback } from "use-debounce";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/shared/components/ui/combobox";
 
 type Props<T extends FieldValues> = {
   control: Control<T>;
   setValue: UseFormSetValue<T>;
   disabled?: boolean;
+};
+type Country = {
+  label: string;
+  value: string;
 };
 
 export function CountryCitySelect<T extends FieldValues>({
@@ -32,7 +44,6 @@ export function CountryCitySelect<T extends FieldValues>({
   setValue,
   disabled,
 }: Props<T>) {
-  const [countrySearch, setCountrySearch] = useState("");
   const [citySearch, setCitySearch] = useState("");
   const selectedCountryId = useWatch({
     control,
@@ -50,8 +61,7 @@ export function CountryCitySelect<T extends FieldValues>({
     setDebouncedCitySearch(value);
   }, 400);
 
-  const { data: countriesData, isLoading: isLoadingCountries } =
-    useCountries(countrySearch);
+  const { data: countriesData, isLoading: isLoadingCountries } = useCountries();
 
   const { data: citiesData, isLoading: isLoadingCities } = useCities(
     selectedCountryId,
@@ -59,7 +69,11 @@ export function CountryCitySelect<T extends FieldValues>({
     cityId,
   );
 
-  const countries = countriesData?.data ?? [];
+  const countries: Country[] = (countriesData?.data ?? []).map((c) => ({
+    label: c.name,
+    value: c.id,
+  }));
+
   const cities = citiesData?.data ?? [];
 
   const citySearchTrimmed = citySearch.trim();
@@ -77,55 +91,25 @@ export function CountryCitySelect<T extends FieldValues>({
           return (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel required>Country</FieldLabel>
-
-              <Select
-                value={field.value ? String(field.value) : ""}
-                onValueChange={(value) => {
-                  const countryId = value ? Number(value) : undefined;
-
-                  field.onChange(countryId);
-
-                  // ONLY clear if it's a user interaction (not initial render)
-                  if (countryId !== selectedCountryId) {
-                    setValue("city_id" as Path<T>, undefined as any);
-                    setCitySearch("");
-                  }
-                }}
-                disabled={disabled || isLoadingCountries}
+              <Combobox<Country>
+                items={countries}
+                itemToStringValue={(country) => country.label}
+                onValueChange={(country) =>
+                  field.onChange(country?.value ?? null)
+                }
               >
-                <SelectTrigger className="h-12">
-                  <SelectValue placeholder="Select a country" />
-                </SelectTrigger>
-
-                <SelectContent position="popper">
-                  <div className="px-2 py-1.5">
-                    <Input
-                      placeholder="Search country..."
-                      value={countrySearch}
-                      onChange={(e) => setCountrySearch(e.target.value)}
-                      className="h-8"
-                      onKeyDown={(e) => e.stopPropagation()}
-                    />
-                  </div>
-
-                  {isLoadingCountries ? (
-                    <SelectItem value="loading" disabled>
-                      Loading...
-                    </SelectItem>
-                  ) : countries.length === 0 ? (
-                    <SelectItem value="empty" disabled>
-                      No countries found
-                    </SelectItem>
-                  ) : (
-                    countries.map((country: { id: number; name: string }) => (
-                      <SelectItem key={country.id} value={String(country.id)}>
-                        {country.name}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-
+                <ComboboxInput placeholder="Select a framework" showClear />
+                <ComboboxContent>
+                  <ComboboxEmpty>No items found.</ComboboxEmpty>
+                  <ComboboxList>
+                    {(item) => (
+                      <ComboboxItem key={item.value} value={item}>
+                        {item.label}
+                      </ComboboxItem>
+                    )}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           );
