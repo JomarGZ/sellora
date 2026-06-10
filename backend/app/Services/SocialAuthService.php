@@ -21,8 +21,7 @@ class SocialAuthService
 
         if (!$user) {
             $user = User::create([
-            'first_name' => $socialUser->user['given_name'] ?? 'google_user',
-            'last_name' => $socialUser->user['family_name'] ?? 'google_user',
+            'first_name' => $socialUser->getName() ? $socialUser->getName() : $socialUser->user['given_name'] ?? 'google User',
                 'email' => $socialUser->getEmail(),
                 'avatar' => $socialUser->getAvatar(),
                 'email_verified_at' => now(),

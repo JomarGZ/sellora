@@ -11,6 +11,7 @@ use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -87,9 +88,9 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
         return $this->hasMany(Order::class);
     }
 
-    public function shoppingCart(): HasOne
+    public function cart(): HasMany
     {
-        return $this->hasOne(Cart::class);
+        return $this->hasMany(Cart::class);
     }
 
     public function productItemReviews()
@@ -107,6 +108,11 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
         return Attribute::make(
             get: fn () => "{$this->first_name} {$this->last_name}",
         );
+    }
+
+    public function canChangePassword(): bool
+    {
+        return ! empty($this->password);
     }
 
     /**

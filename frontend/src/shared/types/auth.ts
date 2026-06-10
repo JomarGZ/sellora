@@ -7,8 +7,10 @@ export interface AuthPayload {
 
 export interface User {
   id: number;
+  name: string;
   first_name: string;
   last_name: string;
+  can_change_password: boolean;
   email: string;
   email_verified_at: string | null;
   avatar?: string | null;

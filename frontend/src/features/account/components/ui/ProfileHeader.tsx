@@ -29,9 +29,7 @@ export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
       },
     });
   };
-  const fullName = user
-    ? `${user.first_name} ${user.last_name}`
-    : "Customer Name";
+
   if (!user) {
     return (
       <div className="bg-destructive/10 text-destructive p-6 rounded-2xl flex items-center justify-center">
@@ -73,7 +71,7 @@ export function ProfileHeader({ user, isLoading }: ProfileHeaderProps) {
         ) : (
           <>
             <h1 className="text-2xl capitalize md:text-3xl font-bold text-foreground mb-1">
-              {fullName}
+              {user?.name}
             </h1>
 
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-6 mt-3 text-sm text-muted-foreground">
