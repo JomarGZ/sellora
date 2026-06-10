@@ -21,11 +21,13 @@ final class UserResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'name' => str($this->first_name)->append(' ' . $this->last_name)->trim()->toString(),
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,
             'avatar' => $this->avatar ? (str_starts_with($this->avatar, 'http') ? $this->avatar : asset(Storage::url($this->avatar)))  : null,
             'email' => $this->email,
             'email_verified_at' => $this->email_verified_at?->toIso8601String(),
+            'can_change_password' => $this->canChangePassword(),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

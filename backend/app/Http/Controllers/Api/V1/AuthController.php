@@ -175,7 +175,12 @@ final class AuthController extends ApiController
     public function changePassword(ChangePasswordRequest $request)
     {
         $user = $request->user();
-
+        if (! $user->canChangePassword()) {
+            return $this->error(
+                message: 'Password changes are not available for accounts signed in through a social provider.',
+                code: 422
+            );
+        }
         if (!Hash::check($request->current_password, $user->password)) {
             return $this->error('Current password is incorrect', 422);
         }
