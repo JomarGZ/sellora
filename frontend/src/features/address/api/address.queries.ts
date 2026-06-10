@@ -39,11 +39,10 @@ export function useCreateUserAddress() {
   });
 }
 
-export function useUserAddresses(enabled: boolean) {
+export function useUserAddresses() {
   return useQuery({
     queryKey: ["user", "addresses"],
     queryFn: getUserAddresses,
-    enabled,
   });
 }
 
