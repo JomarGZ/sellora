@@ -44,7 +44,6 @@ export function CountryCitySelect<T extends FieldValues>({
   setValue,
   disabled,
 }: Props<T>) {
-  const [countrySearch, setCountrySearch] = useState("");
   const [citySearch, setCitySearch] = useState("");
   const selectedCountryId = useWatch({
     control,
@@ -62,8 +61,7 @@ export function CountryCitySelect<T extends FieldValues>({
     setDebouncedCitySearch(value);
   }, 400);
 
-  const { data: countriesData, isLoading: isLoadingCountries } =
-    useCountries(countrySearch);
+  const { data: countriesData, isLoading: isLoadingCountries } = useCountries();
 
   const { data: citiesData, isLoading: isLoadingCities } = useCities(
     selectedCountryId,
