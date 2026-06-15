@@ -32,7 +32,10 @@ final class UserAddressController extends ApiController
 
     public function default(Request $request)
     {
-        $address = $request->user()->defaultAddress;
+        $address = $request->user()->defaultAddress?->load([
+            'country',
+            'city'
+        ]);
 
         return $this->success(
             data: $address

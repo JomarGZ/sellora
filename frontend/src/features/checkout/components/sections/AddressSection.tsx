@@ -13,7 +13,7 @@ export function AddressSection({ onChange }: { onChange: () => void }) {
   } = useUserDefaultAddress();
 
   const address = defaultAddress?.data;
-
+  console.log(address);
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
