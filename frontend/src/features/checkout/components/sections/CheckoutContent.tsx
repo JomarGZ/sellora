@@ -36,7 +36,7 @@ export function CheckoutContent({
       <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
         {/* Left column */}
         <div className="flex-1 space-y-6 lg:space-y-8">
-          {/* <AddressSection onChange={onChangeAddress} /> */}
+          <AddressSection onChange={onChangeAddress} />
           <OrderItemsSection items={items} />
         </div>
 

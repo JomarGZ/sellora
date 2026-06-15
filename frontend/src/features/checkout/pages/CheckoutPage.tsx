@@ -2,7 +2,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import { CheckoutContent } from "@/features/checkout/components/sections/CheckoutContent";
 import { ErrorFallback } from "@/features/checkout/components/states/ErrorFallback";
 import { usePlaceOrder } from "../api/checkout.queries";
-import type { OrderSummary } from "../types";
 import { AddressListModal } from "../components/modals/AddressListModal";
 import { useState } from "react";
 import {
