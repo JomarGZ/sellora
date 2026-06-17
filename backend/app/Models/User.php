@@ -9,6 +9,8 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -98,6 +100,11 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
         return $this->hasMany(ProductItemReview::class);
     }
 
+    #[Scope]
+    protected function isAdmin(Builder $query): void
+    {
+        $query->where('is_admin', true);
+    }
     public function socialAccounts()
     {
         return $this->hasMany(SocialAccount::class);
