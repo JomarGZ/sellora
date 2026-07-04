@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\V1\ProductItemReviewController;
 use App\Http\Controllers\Api\V1\ProductReviewController;
 use App\Http\Controllers\Api\V1\ShippingOptionController;
 use App\Http\Controllers\Api\V1\CartController;
-use App\Http\Controllers\Api\v1\InvoiceController;
+use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\SocialAuthController;
 use App\Http\Controllers\Api\V1\UserAddressController;
 use App\Http\Controllers\Api\V1\UserController;

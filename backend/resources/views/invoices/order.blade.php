@@ -132,6 +132,7 @@
             <div class="tagline">Style. Quality. Confidence.</div>
 
             <div class="title">INVOICE</div>
+            <p>{{$invoice_number}}</p>
         </div>
 
         <div class="company">

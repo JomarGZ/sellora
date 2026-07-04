@@ -20,7 +20,7 @@ final class OrdersTable
         return $table
             ->defaultSort('created_at', 'desc')
             ->columns([
-                TextColumn::make('user.fullName')
+                TextColumn::make('user.first_name')
                     ->label('Customer')
                     ->searchable(),
                  TextColumn::make('status')
@@ -36,6 +36,10 @@ final class OrdersTable
                         Order::STATUS_CANCELLED => 'danger',
                         default => 'gray',
                     }),
+                TextColumn::make('invoice.invoice_number')
+                    ->label('Invoice Number')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('subtotal')
                     ->money()
                     ->sortable(),
@@ -59,6 +63,7 @@ final class OrdersTable
             ->filters([
                 SelectFilter::make('status')
                     ->options(Order::STATUS_OPTIONS),
+                
             ])
             ->recordActions([
                 ViewAction::make(),
