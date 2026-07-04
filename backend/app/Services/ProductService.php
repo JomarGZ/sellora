@@ -7,7 +7,7 @@ namespace App\Services;
 use App\DTOs\V1\AttributeGroupDTO;
 use App\DTOs\V1\ProductFilterDTO;
 use App\Models\Product;
-use App\Repositories\ProductRepository;
+use App\Repositories\Contracts\IProductRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection as SupportCollection;
@@ -15,7 +15,7 @@ use Illuminate\Support\Collection as SupportCollection;
 final readonly class ProductService
 {
     public function __construct(
-        private ProductRepository $repository
+        private IProductRepository $repository
     ) {}
 
     /**
