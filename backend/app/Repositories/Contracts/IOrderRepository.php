@@ -26,4 +26,5 @@ interface IOrderRepository
     public function findForUserWithItems(string $orderId, string $userId): ?Order;
 
     public function findWithItems(string $orderId): ?Order;
+
 }

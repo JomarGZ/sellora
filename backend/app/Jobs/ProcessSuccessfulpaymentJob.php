@@ -11,6 +11,7 @@ use App\Repositories\Contracts\ICartRepository;
 use App\Repositories\Contracts\ICheckoutRepository;
 use App\Repositories\Contracts\IOrderRepository;
 use App\Repositories\Contracts\IProductItemRepository;
+use App\Services\OrderService;
 use App\Services\RefundService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Bus\Queueable;
@@ -73,7 +74,8 @@ class ProcessSuccessfulpaymentJob implements ShouldQueue
         IOrderRepository    $orderRepository,
         IProductItemRepository  $productItemRepository,
         ICartRepository     $cartRepository,
-        RefundService               $refundService,
+        RefundService       $refundService,
+        OrderService $orderService
     ): void {
         Log::info('Processing successful payment', [
             'checkout_id'       => $this->checkoutId,
@@ -151,6 +153,7 @@ class ProcessSuccessfulpaymentJob implements ShouldQueue
                 $checkout,
                 $snapshot,
                 $checkoutRepository,
+                $orderService,
                 $orderRepository,
                 $productItemRepository,
             $cartRepository,
@@ -214,9 +217,13 @@ class ProcessSuccessfulpaymentJob implements ShouldQueue
                 if ($cart) {
                     $cartRepository->markAsOrdered($cart);
                 }
- 
+
+                $orderService->generateInvoice($order);
                 return $order;
             });
+
+            
+
  
             // ── Post-commit: fire events outside the transaction ─
             // Emails, analytics, inventory sync webhooks — these

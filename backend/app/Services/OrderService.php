@@ -10,9 +10,11 @@ use App\Exceptions\OrderNotFoundException;
 use App\Models\Checkout;
 use App\Models\Order;
 use App\Repositories\Contracts\IOrderRepository;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class OrderService
 {
@@ -151,5 +153,48 @@ class OrderService
 
             return $order->fresh();
         });
+    }
+
+    public function generateInvoice(Order $order): string
+    {
+        $order->loadMissing(['user', 'items']);
+
+        $filename = "invoices/{$order->id}/invoice.pdf";
+        
+        return DB::transaction(function () use ($order, $filename) {
+            $invoice = $order->invoice()->create([
+                'file_path' => $filename
+            ]);
+
+            $invoice->update([
+                'invoice_number' => sprintf(
+                    'INV-%s-%06d',
+                    now()->year,
+                    $invoice->id
+                )
+            ]);
+
+            if (!Storage::disk('public')->exists($filename)) {
+                $pdf = Pdf::loadView('invoices.order', [
+                    'order' => $order,
+                    'user' => $order->user,
+                    'items' => $order->items,
+                    'invoice_number' => $invoice->invoice_number
+                ]);
+
+                Storage::disk('public')->put($filename,$pdf->output());
+            }
+            return $filename;
+        });
+    }
+
+    public function getInvoice(Order $order)
+    {
+        $order->loadMissing('invoice');
+
+        if (!$order->invoice || !Storage::disk('public')->exists($order->invoice->file_path)) {
+            return $this->generateInvoice($order);
+        }
+        return $order->invoice;
     }
 }

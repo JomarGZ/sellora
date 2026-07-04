@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\ProductItemReviewController;
 use App\Http\Controllers\Api\V1\ProductReviewController;
 use App\Http\Controllers\Api\V1\ShippingOptionController;
 use App\Http\Controllers\Api\V1\CartController;
+use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\SocialAuthController;
 use App\Http\Controllers\Api\V1\UserAddressController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -153,6 +154,7 @@ Route::name('api.v1.')->group(function () {
             Route::get('/{order}', [OrderController::class, 'show'])->name('show');
             Route::patch('/{order}/request-cancel', [OrderController::class, 'cancel'])->name('cancel');
             Route::patch('/{order}/mark-received', [OrderController::class, 'markAsReceived'])->name('markReceived');
+            Route::get('/{order}/invoice', [InvoiceController::class, 'download'])->name('order.invoice.download');
         });
 
 
