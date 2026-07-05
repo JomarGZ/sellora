@@ -27,13 +27,13 @@ final class ProductRepository extends BaseRepository implements IProductReposito
      * @param  int  $limit  Number of results to return
      * @return Collection<int, Product>
      */
-    public function getNewArrivals(array $columns = ['*'], int $limit = 10): Collection
+    public function getNewArrivals(int $limit = 10): Collection
     {
          $days = config('store.new_product_days', 14);
         return $this->model->query()
-            ->select($columns)
+            ->select(['id', 'brand_id', 'product_category_id' , 'name', 'slug', 'description', 'created_at'])
             ->isActive()
-            ->with(['primaryImage', 'brand', 'category'])
+             ->with(['primaryImage:id,product_id,image_path', 'brand:id,name', 'category:id,name'])
             ->withAvg('productItemReviews as avg_rating', 'rating')
             ->withCount('productItemReviews as reviews_count')
             ->where('created_at', '>=',  now()->subDays($days))
@@ -56,12 +56,12 @@ final class ProductRepository extends BaseRepository implements IProductReposito
      * @param  int  $limit  Number of results to return
      * @return Collection<int, Product>
      */
-    public function getBestSellers(array $columns = ['*'], int $limit = 10): Collection
+    public function getBestSellers(int $limit = 10): Collection
     {
         return $this->model->query()
-            ->select($columns)
+            ->select(['id', 'brand_id', 'product_category_id' , 'name', 'slug', 'description', 'created_at'])
             ->isActive()
-            ->with(['primaryImage', 'brand', 'category'])
+            ->with(['primaryImage:id,product_id,image_path', 'brand:id,name', 'category:id,name'])
             ->withAvg('productItemReviews as avg_rating', 'rating')
             ->withCount('productItemReviews as reviews_count')
             ->withCount([
@@ -93,7 +93,7 @@ final class ProductRepository extends BaseRepository implements IProductReposito
                 'description',
                 'created_at',
             ])
-            ->with(['brand', 'category', 'primaryImage'])
+            ->with(['brand:id,name', 'category:id,name', 'primaryImage:id,product_id,image_path'])
             ->isActive()
             ->search($filters->search)
             ->filterByCategory($filters->categories)

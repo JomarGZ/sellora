@@ -8,9 +8,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 interface IProductRepository extends IRepository
 {
-    public function getNewArrivals(array $columns = ['*'], int $limit = 10): Collection;
+    public function getNewArrivals(int $limit = 10): Collection;
 
-    public function getBestSellers(array $columns = ['*'], int $limit = 10): Collection;
+    public function getBestSellers(int $limit = 10): Collection;
 
     public function catalog(ProductFilterDTO $filters): LengthAwarePaginator;
 }

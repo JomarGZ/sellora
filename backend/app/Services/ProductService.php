@@ -23,9 +23,9 @@ final readonly class ProductService
      * @param  array<int, string>|string  $relations
      * @return Collection<int, Product>
      */
-    public function getNewArrivals(array $columns = ['*'], int $limit = 10): Collection
+    public function getNewArrivals(int $limit = 10): Collection
     {
-        return $this->repository->getNewArrivals(columns: $columns, limit: $limit);
+        return $this->repository->getNewArrivals(limit: $limit);
     }
 
     /**
@@ -33,9 +33,9 @@ final readonly class ProductService
      * @param  array<int, string>|string  $relations
      * @return Collection<int, Product>
      */
-    public function getBestSellers(array $columns = ['*'], int $limit = 10): Collection
+    public function getBestSellers(int $limit = 10): Collection
     {
-        return $this->repository->getBestSellers(columns: $columns, limit: $limit);
+        return $this->repository->getBestSellers(limit: $limit);
     }
 
     /**

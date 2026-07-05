@@ -83,7 +83,6 @@ final class ProductController extends ApiController
     {
         $limit = (int) $request->query('limit', 10);
         $result = $this->service->getNewArrivals(limit: $limit);
-        logger('data', ['result' => $result]);
         return $this->success(
             data: ProductResource::collection($result),
             message: 'New arrivals retrieved successfully.'
