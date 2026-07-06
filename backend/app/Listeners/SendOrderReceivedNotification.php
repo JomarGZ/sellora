@@ -2,32 +2,31 @@
 
 namespace App\Listeners;
 
-use App\Events\OrderPlaced;
+use App\Events\OrderMarkedAsReceived;
 use App\Models\User;
-use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class NotifyAdminsNewOrder implements ShouldQueue
+class SendOrderReceivedNotification implements ShouldQueue
 {
     use InteractsWithQueue, SerializesModels;
     /**
      * Handle the event.
      */
-    public function handle(OrderPlaced $event): void
+    public function handle(OrderMarkedAsReceived $event): void
     {
-        $order = $event->order->load(['user', 'invoice']);
-
         $admins = User::where('is_admin', true)->get();
 
-        if($admins->isNotEmpty()) {
+        if ($admins->isNotEmpty()) {
+            $order = $event->order->load('user');
+
             Notification::make()
-                ->title('🛒 New Order Received')
-                ->icon('heroicon-o-shopping-cart')
+                ->title('📦 Order Marked as Received')
+                ->icon('heroicon-o-check-circle')
                 ->body(
-                    "Invoice {$order->invoice->invoice_number} was placed by {$order->user->first_name} ({$order->user->email})."
+                    "Invoice {$order->invoice->invoice_number} for {$order->customer->first_name} has been marked as received."
                 )
                 ->sendToDatabase($admins);
         }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\RefundReasonType;
+use App\Events\OrderMarkedAsReceived;
 use App\Exceptions\InvalidOrderTransitionException;
 use App\Exceptions\OrderCannotRequestCancellationException;
 use App\Exceptions\OrderCannotBeMarkAsReceivedException;
@@ -106,7 +107,11 @@ class OrderService
                 'received_at' => now()
             ]);
 
-            return $order->fresh();
+            $order->fresh();
+
+            OrderMarkedAsReceived::dispatch($order);
+            
+            return $order;
         });
     }
     
