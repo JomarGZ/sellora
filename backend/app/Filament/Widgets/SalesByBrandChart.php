@@ -6,16 +6,25 @@ namespace App\Filament\Widgets;
 
 use App\Models\OrderItem;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 final class SalesByBrandChart extends ChartWidget
 {
+    use InteractsWithPageFilters;
+    
     protected static ?int $sort = 2;
 
     protected ?string $heading = 'Brand Sales Performance';
 
     protected function getData(): array
     {
-        $data = OrderItem::query()
+        $startDate = ($this->pageFilters['startDate'] ?: now()->subDays(6)->toDateString());
+        $endDate = ($this->pageFilters['endDate'] ?: now()->toDateString());
+        $query = OrderItem::query()
+            ->when($startDate, fn ($query) => $query->whereDate('order_items.created_at', '>=', $startDate))
+            ->when($endDate, fn ($query) => $query->whereDate('order_items.created_at', '<=', $endDate));
+
+        $data = $query
             ->selectRaw('brands.name as brand_name, SUM(order_items.quantity * order_items.unit_price) as total_sales')
             ->join('product_items', 'order_items.product_item_id', '=', 'product_items.id')
             ->join('products', 'product_items.product_id', '=', 'products.id')

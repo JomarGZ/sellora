@@ -23,6 +23,7 @@ final class EcommerceStatsOverview extends StatsOverviewWidget
         $query = Order::query()
             ->when($startDate, fn ($query) => $query->whereDate('created_at', '>=', $startDate))
             ->when($endDate, fn ($query) => $query->whereDate('created_at', '<=', $endDate));
+            
         $revenueDescription = match(true) {
             $startDate && $endDate => 'Revenue from ' . Carbon::parse($startDate)->format('M j, Y') . ' to ' . Carbon::parse($endDate)->format('M j, Y'),
             $startDate => 'Revenue since ' . Carbon::parse($startDate)->format('M j, Y'),

@@ -6,15 +6,24 @@ namespace App\Filament\Widgets;
 
 use App\Models\OrderItem;
 use Filament\Widgets\ChartWidget;
+use Filament\Widgets\Concerns\InteractsWithPageFilters;
 
 final class TopSellingProductsChart extends ChartWidget
 {
+    use InteractsWithPageFilters;
+    
     protected static ?int $sort = 3;
     protected ?string $heading = 'Top Selling Products';
 
     protected function getData(): array
     {
-        $data = OrderItem::query()
+        $startDate = ($this->pageFilters['startDate'] ?: now()->subDays(6)->toDateString());
+        $endDate = ($this->pageFilters['endDate'] ?: now()->toDateString());
+        $query = OrderItem::query()
+            ->when($startDate, fn ($query) => $query->whereDate('order_items.created_at', '>=', $startDate))
+            ->when($endDate, fn ($query) => $query->whereDate('order_items.created_at', '<=', $endDate));
+
+        $data = $query
             ->selectRaw('
                 products.id as product_id,
                 products.name as product_name,
