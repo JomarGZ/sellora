@@ -82,30 +82,30 @@ export function useDeleteCartItemMutation() {
   const { showToast } = useAppToast();
   return useMutation({
     mutationFn: deleteCartItem,
-    onMutate: async (id: number) => {
+    onMutate: async ({ cartId, itemId }) => {
       await queryClient.cancelQueries({ queryKey: ["cart"] });
 
       const previousQueries = queryClient.getQueriesData({
         queryKey: ["cart"],
       });
 
-      queryClient.setQueriesData(
-        { queryKey: ["cart"] },
-        (old: CartItemResponse | undefined) => {
-          if (!old?.data) return old;
-
-          return {
-            ...old,
-            data: old.data.filter((item: any) => item.id !== id),
-            meta: old.meta
-              ? {
-                  ...old.meta,
-                  total: Math.max(0, old.meta.total - 1),
-                }
-              : old.meta,
-          };
-        },
-      );
+      // queryClient.setQueriesData(
+      //   { queryKey: ["cart"] },
+      //   (old: CartItemResponse | undefined) => {
+      //     if (!old?.data) return old;
+      //     console.log("triggered", old.data);
+      //     return {
+      //       ...old,
+      //       data: old.data.filter((item: any) => item.id !== id),
+      //       meta: old.meta
+      //         ? {
+      //             ...old.meta,
+      //             total: Math.max(0, old.meta.total - 1),
+      //           }
+      //         : old.meta,
+      //     };
+      //   },
+      // );
 
       return { previousQueries };
     },

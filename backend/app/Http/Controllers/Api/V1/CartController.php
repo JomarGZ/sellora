@@ -150,4 +150,30 @@ final class CartController extends ApiController
             );
         }
     }
+
+    public function removeItem(int $cartId, int $itemId, Request $request)
+    {
+        try {
+            $cart = $this->cartService->removeItem(
+                userId: $request->user()->id,
+                cartId: $cartId,
+                itemId: $itemId
+            );
+
+            return $this->success(
+                message: 'Cart item removed.',
+                data: new CartResource($cart)
+            );
+        } catch (CartNotFoundException | CartItemNotFoundException $e) {
+            return $this->notFound(message: $e->getMessage());
+        } catch (CartNotModifiableException $e) {
+            return $this->error(
+                message: $e->getMessage(),
+                code: 409,
+                errors: [
+                    'code' => 'CART_NOT_MODIFIABLE'
+                ]
+            );
+        }
+    }
 }

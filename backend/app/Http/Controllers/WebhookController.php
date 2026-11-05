@@ -80,6 +80,7 @@ class WebhookController extends ApiController
         // transaction management, and error handling.
         // ShouldBeUnique on the job means if this exact payment intent
         // is already queued or running, this dispatch is a no-op.
+        info('trigger');
         ProcessSuccessfulpaymentJob::dispatch(
             checkoutId:      $checkoutId,
             paymentIntentId: $paymentIntentId,
