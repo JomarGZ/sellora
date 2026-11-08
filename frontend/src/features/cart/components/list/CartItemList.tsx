@@ -47,10 +47,13 @@ export function CartItemList({
                 quantity,
               });
             }}
-            onRemove={(id) => deleteCartItem.mutate(id)}
-            isRemoving={
-              deleteCartItem.isPending && deleteCartItem.variables === item.id
+            onRemove={(id) =>
+              deleteCartItem.mutate({
+                cartId: cart.data.id,
+                itemId: id,
+              })
             }
+            isRemoving={deleteCartItem.isPending}
           />
         ))
       )}

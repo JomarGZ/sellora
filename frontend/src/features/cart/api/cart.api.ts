@@ -34,7 +34,13 @@ export async function updateCartItemQuantity({
   return data;
 }
 
-export async function deleteCartItem(id: number) {
-  const { data } = await client.delete(`/v1/shopping-cart/${id}`);
+export async function deleteCartItem({
+  cartId,
+  itemId,
+}: {
+  cartId: number;
+  itemId: number;
+}) {
+  const { data } = await client.delete(`/v1/cart/${cartId}/items/${itemId}`);
   return data;
 }
