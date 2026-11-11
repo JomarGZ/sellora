@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\V1\InvoiceController;
 use App\Http\Controllers\Api\V1\SocialAuthController;
 use App\Http\Controllers\Api\V1\UserAddressController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\WishlistController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -175,6 +176,11 @@ Route::name('api.v1.')->group(function () {
         */
         Route::prefix('reviews')->name('reviews.')->group(function () {
             Route::post('/', [ProductItemReviewController::class, 'store'])->name('store');
+        });
+
+        Route::prefix('wishlist')->name('wishlist.')->group(function () {
+            Route::post('/', [WishlistController::class, 'store'])->name('store');
+            Route::delete('/{productId}', [WishlistController::class, 'destroy'])->name('destroy');
         });
     });
 

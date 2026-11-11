@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -59,6 +60,14 @@ final class Product extends Model
             'id',                // products.id
             'id'                 // product_items.id
         );
+    }
+
+    public function wishlistedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'wishlists'
+        )->withTimestamps();
     }
 
     public function isNew(): bool

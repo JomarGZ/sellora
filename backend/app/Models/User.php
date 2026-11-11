@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -93,6 +94,14 @@ final class User extends Authenticatable implements FilamentUser, HasName, MustV
     public function cart(): HasMany
     {
         return $this->hasMany(Cart::class);
+    }
+
+    public function wishlistItems(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'wishlists'
+        )->withTimestamps();
     }
 
     public function productItemReviews()
